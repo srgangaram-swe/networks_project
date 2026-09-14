@@ -1,0 +1,46 @@
+name: Work item
+description: A bounded change with reviewable acceptance criteria
+title: ""
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome and scope
+      description: What will work when this is done? State non-goals too.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Link prerequisite issues and shared decisions.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use checkable criteria, including failure cases.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Tests and evidence
+      description: Include unit, integration, hardware, or analysis checks as appropriate.
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk and rollback
+      description: Address privileges, data safety, compatibility, and cleanup.
+    validations:
+      required: true
+  - type: textarea
+    id: milestone
+    attributes:
+      label: Milestone
+      description: Select exactly one repository milestone before starting work.
+    validations:
+      required: true

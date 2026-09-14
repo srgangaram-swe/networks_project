@@ -1,0 +1,35 @@
+# Local notes and machine-specific files
+ai.md
+AI.md
+/private/
+.local/
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
+.vscode/
+
+# Python and test output
+.venv/
+__pycache__/
+*.py[cod]
+.coverage
+coverage.xml
+htmlcov/
+.ruff_cache/
+.pytest_cache/
+
+# Compilers, documentation, and experiments
+/target/
+/build/
+/dist/
+/runs/
+/data/raw/
+/artifacts/
+*.aux
+*.log
+*.out
+*.toc
+*.pcap
+*.pcapng
