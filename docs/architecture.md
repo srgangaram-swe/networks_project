@@ -30,6 +30,13 @@ Shared configuration validation is implemented in `src/experiment_config.py`.
 The remaining components are planned. Add a decision record before changing
 their interfaces or the measurement definition.
 
+The [candidate v1 decision](decisions/0001-measurement-contract.md) defines
+the proposed traffic direction, delay placement, framing, and measurement
+semantics. RequestRecord.from_mapping in src/measurement_contract.py checks
+individual request records. Whole-run validation remains issue #10.
+The read-only scripts/inspect_testbed.py command supports the equipment
+inventory without configuring the machine or claiming it is ready.
+
 ## Data flow
 
 A versioned configuration becomes a recorded schedule, then a run bundle.
