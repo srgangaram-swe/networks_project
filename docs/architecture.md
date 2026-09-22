@@ -26,9 +26,11 @@ and the placement of delay and shaping before it becomes an executable topology.
   per-run summaries and uncertainty, and generate figures.
 - Report and demo: reference frozen evidence and distinguish measurements from fixtures.
 
-Shared configuration validation is implemented in `src/experiment_config.py`.
-The remaining components are planned. Add a decision record before changing
-their interfaces or the measurement definition.
+Shared configuration validation is implemented in src/experiment_config.py.
+The provisional [foreground workload](foreground-workload.md) separates wire
+validation, scheduling and accounting, and socket I/O. Its record validator
+matches the proposed v1 contract in MR #24. The other runtime components remain
+planned. Protocol acceptance is still required before primary collection.
 
 The [candidate v1 decision](decisions/0001-measurement-contract.md) defines
 the proposed traffic direction, delay placement, framing, and measurement
