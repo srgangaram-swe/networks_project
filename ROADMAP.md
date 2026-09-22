@@ -4,6 +4,10 @@ Dates below are planning targets based on the proposal's semester sequence, not
 confirmed course deadlines. Issue #4 records the rubric and official dates.
 Do not compress verification to meet a target; revise the plan with the team.
 
+The [requirements checklist](docs/course-requirements.md) holds placeholders
+until the instructor provides the final rubric and deadlines. The
+[related-work comparison](docs/related-work.md) supports the report's rationale.
+
 | Milestone | Planning target | Completion outcome |
 |---|---|---|
 | [M0: Repository foundation](https://github.com/srgangaram-swe/networks_project/milestone/1) | 2026-09-14 | Establish the shared repository, tested configuration contract, CI, protected branches, and semester work plan. |
