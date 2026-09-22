@@ -17,9 +17,11 @@ for the full matrix and the decisions we still need to make.
 ## Current state
 
 This repository contains the project plan, a validated configuration format,
-unit and CLI integration tests, and the contribution workflow. The traffic
-generators, privileged testbed setup, trial runner, and analysis are scheduled
-work. There are no experimental results yet.
+and a provisional [foreground UDP workload](docs/foreground-workload.md) with
+unit and real-socket tests. The workload follows the protocol proposed in
+MR #24 and still needs team review and Linux pilot validation. Bulk traffic,
+privileged testbed setup, the trial runner, and analysis remain scheduled work.
+There are no queue-policy results yet.
 
 The proposal's target is a 50% reduction in foreground p99 added latency under
 saturating load while retaining at least 90% of FIFO's bulk goodput. These are
