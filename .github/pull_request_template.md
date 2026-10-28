@@ -23,7 +23,7 @@ Describe affected interfaces, privileges, data, and how to undo the change safel
 - [ ] Unit and integration tests cover changed behavior and failure paths.
 - [ ] Evidence, units, and limitations match the claims.
 - [ ] No secrets, private notes, caches, or unreviewed output are included.
-- [ ] A teammate has reviewed the latest changes.
+- [ ] Required checks and any branch-specific review requirements are satisfied.
 
 For a promotion, include the milestone completion checklist, candidate SHA, and
 reproduction evidence. Do not add implementation changes to a promotion.
