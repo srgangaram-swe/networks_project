@@ -12,32 +12,34 @@ check; their history remains in dev.
 | #2: Protocol and contracts | Candidate transport, framing, timing, queue profiles, metric definitions, block design, and strict request contract | Scientific protocol acceptance, calibrated load tolerances, and final Linux version pins |
 | #3: Equipment and access | Read-only inventory command, Linux prerequisites, isolated namespace fallback, and hardware handoff procedure | Equipment arrival, owner permission, NIC and kernel checks, booking, and inventory review |
 | #4: Course requirements and related work | Four published references, comparison, workload rationale, and a requirements-to-evidence checklist | Official final rubric and dates, plus the second-reader source check |
-| #5: Topology | Namespace-only plans, private ownership journal, inode checks, rollback after partial setup, inspection, and idempotent cleanup | Execution on the authorized Linux host and independent route/offload inspection |
-| #6: Queue profiles | Four fixed candidate profiles, matched nominal rate, endpoint receive delay, DS-field sanitation, and bounded-priority filter plan | Linux attachment and effective-setting checks, traffic/counter verification, rate calibration, and forged-mark tests |
+| #5: Topology | Namespace-only plans, private ownership journal, inode checks, rollback after partial setup, inspection, and cleanup; all four profiles executed on hosted Linux | Execution on the experiment hardware, real failure-path checks, and independent route/offload inspection |
+| #6: Queue profiles | Four fixed candidate profiles, matched nominal rate, endpoint receive delay, DS-field sanitation, and bounded-priority filter plan; Linux attachment checks passed | Effective-setting and traffic/counter verification, rate calibration, and forged-mark tests |
 | #7: Foreground workload | Paced UDP client and responder, complete slot accounting, bounded framing, deadlines, and real-socket regression tests | Closed after its implementation and tests reached dev; full-system pilot checks remain in #11 |
 | #8: Bulk workload | One/eight reverse TCP streams, exact aggregate rate allocation, checked receiver reports, bounded child lifetime, and real loopback integration | Intended-bottleneck and above-capacity demand evidence on Linux |
 | #9: Trial runner | Portable and namespace adapters, explicit phases, failure preservation, source/configuration hashes, CPU scope, queue snapshots, and saved randomized schedules | Exact bulk/foreground window alignment, primary matrix execution, replacement reconciliation, and Linux lifecycle evidence |
 | #10: Bundle validation | Independent schema, hash, timestamp, event/count, phase, load, flow-set, and topology-mode checks with corruption tests | Acceptance of the final primary-run schema after #2 and #9 are settled |
 | #11: Pilot readiness | Local diagnostic workflow, per-run summaries, reproducible plots, and an explicit refusal to admit diagnostic runs as primary evidence | Cross-policy Linux pilot, bottleneck and overhead calibration, cleanup inspection, and recorded scientific go/no-go decision |
 
-No approved Linux testbed or official final rubric was available on October 27,
-2026. The code merge does not fill those gaps. The hardware is expected later;
-the same checkout can run the namespace workflow once Linux prerequisites and
-permission are in place.
+The experiment hardware and official final rubric were unavailable on October
+27, 2026. A disposable GitHub-hosted Linux runner was available for the separate
+manual namespace integration check. That check does not calibrate the eventual
+hardware; repeat it there before collecting experiment data.
 
 ## What the checks establish
 
 Unit tests cover parsing, arithmetic, scheduling, state transitions, ownership,
 and failure mapping. Integration tests use real UDP sockets, real TCP streams,
 real child processes, CLI boundaries, cancellation, and atomic artifact
-publication. Linux tests are a separate explicit group and remain unrun here.
-Mocked Linux commands test the adapter's decisions; they do not validate kernel
-behavior.
+publication. Ordinary checks skip privileged Linux tests. The separate manual
+Linux group passed on Ubuntu 24.04, exercising all four profiles, inspecting
+attachment and observed delay, validating each bundle, and checking cleanup.
+The [readiness report](pilot-readiness.md) links the run. Mocked failure tests
+still establish only the adapter's decisions, not every kernel failure mode.
 
 The [local diagnostic report](pilot-readiness.md) records all selected
 observations, including missed send slots. It is evidence that the development
-workflow runs and preserves failure information. It is not evidence for any queue policy's latency or
-goodput benefit.
+workflow runs and preserves failure information. It is not evidence for any
+queue policy's latency or goodput benefit.
 
 ## Before primary collection
 
