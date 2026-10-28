@@ -1,8 +1,11 @@
 """Small deterministic examples for corruption and arithmetic tests."""
 
+import argparse
+import sys
 from dataclasses import asdict
 from pathlib import Path
 
+from src.artifacts import atomic_json, digest, read_json
 from src.foreground import Workload
 from src.run_bundle import TRANSITIONS, RunBundle
 from src.trial import TrialConfig
@@ -57,11 +60,16 @@ def capture(plan: Workload | None = None) -> dict:
     }
 
 
-def valid_bundle(directory: Path) -> RunBundle:
+def valid_bundle(directory: Path, *, measurement_kind: str = "synthetic_fixture") -> RunBundle:
     config = TrialConfig(measurement_seconds=1)
     bundle = RunBundle(
         directory, asdict(config), {"commit": "a" * 40, "tree_sha256": "b" * 64, "dirty": False}
     )
+    environment = read_json(directory / "environment.json")
+    environment["measurement_kind"] = measurement_kind
+    atomic_json(directory / "environment.json", environment)
+    bundle.manifest["artifacts"]["environment.json"] = digest(directory / "environment.json")
+    bundle.save()
     foreground = capture()
     bundle.artifact("foreground.json", foreground)
     bulk = {
@@ -94,3 +102,32 @@ def valid_bundle(directory: Path) -> RunBundle:
         state = next(iter(TRANSITIONS[state]))
         bundle.transition(state)
     return bundle
+
+
+def write_examples(directory: Path) -> None:
+    """Create complete invented bundles, including a semantically corrupt example."""
+    directory.mkdir()
+    valid_bundle(directory / "valid-synthetic")
+    invalid = valid_bundle(directory / "invalid-duplicate")
+    path = invalid.directory / "foreground.json"
+    data = read_json(path)
+    data["records"][1]["request_id"] = 0
+    atomic_json(path, data)
+    invalid.manifest["artifacts"]["foreground.json"] = digest(path)
+    invalid.save()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Write invented valid and invalid test bundles.")
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args()
+    try:
+        write_examples(args.output)
+    except (OSError, ValueError) as exc:
+        print(f"Fixture generation failed: {exc}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -9,6 +9,17 @@ from tests.fixtures import capture, valid_bundle
 
 
 class CaptureValidationTests(unittest.TestCase):
+    def test_late_and_unanswered_requests_remain_separate_outcomes(self):
+        data = capture()
+        data["records"][0]["received_ns"] = data["records"][0]["sent_ns"] + 1_000_000_001
+        data["records"][1]["received_ns"] = None
+        data["counts"]["measurement"].update(on_time=498, late=1, timeout=1)
+        records = validate_capture(data)
+        self.assertEqual([row.outcome for row in records[:2]], ["late", "timeout"])
+        data["counts"]["measurement"].update(late=0, timeout=2)
+        with self.assertRaisesRegex(ValueError, "reconcile"):
+            validate_capture(data)
+
     def test_documented_capture_fixtures(self):
         directory = Path(__file__).resolve().parents[1] / "fixtures"
         records = validate_capture(read_json(directory / "foreground-valid.json"))
@@ -90,6 +101,14 @@ class BundleTests(unittest.TestCase):
         atomic_json(self.root / name, value)
         self.bundle.manifest["artifacts"][name] = digest(self.root / name)
         self.bundle.save()
+
+    def test_consistent_receiver_totals_cannot_hide_a_wrong_measurement_duration(self):
+        bulk = read_json(self.root / "bulk.json")
+        bulk.update(receiver_seconds=10, goodput_mbps=0.8)
+        bulk["intervals"][0]["end_seconds"] = 10
+        self.replace_artifact("bulk.json", bulk)
+        with self.assertRaisesRegex(ValueError, "duration differs"):
+            validate_bundle(self.root)
 
     def test_complete_fixture_and_exclusive_creation(self):
         result = validate_bundle(self.root)
