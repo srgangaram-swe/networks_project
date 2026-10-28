@@ -21,7 +21,9 @@ class DiagnosticTests(unittest.TestCase):
     def test_per_run_summary_and_checked_export(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            bundle = valid_bundle(root / "synthetic-input")
+            # Exercise the observed-data path with invented input only in this
+            # temporary test. Public examples always retain the fixture label.
+            bundle = valid_bundle(root / "synthetic-input", measurement_kind="loopback_diagnostic")
             summary, rows = summarize(bundle.directory)
             self.assertEqual(summary["p99_ms"], 1)
             self.assertEqual(summary["jitter_ms"], 0)

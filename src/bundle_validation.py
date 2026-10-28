@@ -294,6 +294,8 @@ def _cross_checks(artifacts: dict, manifest: dict) -> None:
     ):
         raise ValueError("bulk flow set or requested load differs from the trial")
     _bulk_numbers(bulk)
+    if abs(bulk["receiver_seconds"] - plan.measurement_seconds) > 0.25:
+        raise ValueError("bulk receiver duration differs from the configured measurement")
     bounded_integer(bulk["actual_flows"], "actual flow count", plan.flows, plan.flows)
     bounded_integer(bulk["exit_status"], "bulk exit status", 0, 0)
     bounded_integer(
