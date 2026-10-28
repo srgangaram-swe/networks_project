@@ -95,3 +95,8 @@ kernel. It does not establish equivalent effective shaping, forged-mark
 resistance, independent failure recovery, or readiness for primary collection.
 The Linux integration observations are separate from the six Mac loopback runs
 plotted above and are not part of that reference dataset.
+
+The subsequent [acceptance audit](acceptance-audit.md) adds verified Linux
+failure recovery, bidirectional routing/delay checks, and above-capacity TCP
+demand. It identifies completed software components while retaining the no-go
+decision for primary collection.
