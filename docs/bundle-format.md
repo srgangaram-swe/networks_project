@@ -53,3 +53,9 @@ remain prerequisites for primary collection.
 Use the [operating guide](running-experiments.md) to collect, validate, export,
 and plot a run. The invented captures in tests/fixtures are validator examples,
 not network measurements.
+
+The fixture instructions also generate complete valid and invalid bundle
+examples. Their environment record uses synthetic_fixture, which prevents
+publication through the diagnostic exporter. Receiver byte totals, duration,
+intervals, and configured duration must all reconcile; internally consistent
+goodput alone does not establish a valid measurement window.
