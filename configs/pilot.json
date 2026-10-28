@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "policies": ["fifo", "fq_codel", "cake_best_effort", "cake_bounded"],
+  "link_rate_mbps": 100,
+  "base_rtt_ms": 20,
+  "foreground_message_bytes": 512,
+  "foreground_requests_per_second": 500,
+  "background_load_fractions": [1.1],
+  "background_flow_counts": [1],
+  "repetitions": 2,
+  "measurement_seconds": 10,
+  "unloaded_repetitions_per_policy": 2,
+  "random_seed": 561
+}

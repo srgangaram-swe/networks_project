@@ -1,0 +1,30 @@
+{
+  "goodput_mbps": 96.6181014172025,
+  "iperf_version": "iperf 3.16",
+  "offered_mbps": 200,
+  "policy": "fq_codel",
+  "receiver_bytes": 96606000,
+  "receiver_seconds": 7.998998,
+  "repetition": 2,
+  "root_counters": {
+    "backlog": 0,
+    "bytes": 113673147,
+    "dev": "to-client",
+    "drops": 96392,
+    "handle": "1:",
+    "kind": "htb",
+    "options": {
+      "default": "0x10",
+      "direct_packets_stat": 0,
+      "direct_qlen": 1000,
+      "r2q": 10
+    },
+    "overlimits": 91353,
+    "packets": 91543,
+    "qlen": 0,
+    "refcnt": 5,
+    "requeues": 0,
+    "root": true
+  },
+  "udp_payload_bytes": 1200
+}

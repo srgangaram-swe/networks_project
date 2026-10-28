@@ -11,6 +11,7 @@ from threading import Event
 from src.artifacts import parse_json, read_json
 from src.bulk import BulkPlan, client_command, server_command, summarize_bulk
 from src.cpu import cpu_usage, snapshot_cpu
+from src.experiment_config import bounded_integer
 from src.foreground import Workload
 from src.foreground_io import endpoint
 from src.processes import CommandError, run_command
@@ -33,7 +34,12 @@ class TrialConfig:
     bulk_port: int = 5201
 
     def __post_init__(self) -> None:
-        self.bulk_plan()
+        bounded_integer(self.measurement_seconds, "measurement_seconds", 1, 120)
+        bounded_integer(self.warmup_seconds, "warmup_seconds", 0, 60)
+        if (self.flows, self.aggregate_bps) != (0, 0):
+            self.bulk_plan()
+        elif type(self.flows) is not int or type(self.aggregate_bps) is not int:
+            raise ValueError("unloaded trials require integer zero flows and demand")
         self.foreground_plan()
         if self.mode not in {"loopback", "namespace"}:
             raise ValueError("mode must be loopback or namespace")
@@ -105,10 +111,12 @@ def _start_services(stack: ExitStack, config: TrialConfig, backend: Backend) -> 
     responder = stack.enter_context(
         Service(backend.command("server", responder_args), b'"ready":', timeout=duration + 3)
     )
-    server = backend.command(
-        "server", server_command(backend.server_address, config.bulk_port, allow_isolated=isolated)
-    )
-    stack.enter_context(Service(server, b"Server listening on", timeout=duration + 3))
+    if config.flows:
+        server = backend.command(
+            "server",
+            server_command(backend.server_address, config.bulk_port, allow_isolated=isolated),
+        )
+        stack.enter_context(Service(server, b"Server listening on", timeout=duration + 3))
     return responder
 
 
@@ -140,18 +148,6 @@ def _collect_workloads(
             "end_ns": end,
         }
         bundle.save()
-        isolated = config.mode == "namespace"
-        bulk = backend.command(
-            "client",
-            client_command(
-                config.bulk_plan(),
-                backend.client_address,
-                backend.server_address,
-                config.bulk_port,
-                linux=isolated,
-                allow_isolated=isolated,
-            ),
-        )
         deadline = config.warmup_seconds + config.measurement_seconds + 10
         foreground_future = pool.submit(
             run_command,
@@ -159,8 +155,8 @@ def _collect_workloads(
             timeout=deadline,
             stop=cancel,
         )
-        bulk_future = pool.submit(run_command, bulk, timeout=deadline, stop=cancel)
-        futures = [foreground_future, bulk_future]
+        bulk_future = _submit_bulk(pool, config, backend, deadline, cancel)
+        futures = [foreground_future] + ([bulk_future] if bulk_future is not None else [])
         try:
             _phase(bundle, "warmup", measurement, cancel, futures)
             before = snapshot_cpu()
@@ -168,18 +164,62 @@ def _collect_workloads(
             after = snapshot_cpu()
             _phase(bundle, "drain", end, cancel, futures)
             foreground_future.result(timeout=3)
-            bulk_result = bulk_future.result(timeout=3)
+            bulk_result = bulk_future.result(timeout=3) if bulk_future is not None else None
             responder.check_running()
             bundle.transition("collection")
             bundle.register("foreground.json")
             bundle.artifact(
-                "bulk.json", summarize_bulk(parse_json(bulk_result.stdout), config.bulk_plan())
+                "bulk.json",
+                summarize_bulk(parse_json(bulk_result.stdout), config.bulk_plan())
+                if bulk_result is not None
+                else unloaded_summary(config),
             )
             bundle.artifact("cpu.json", cpu_usage(before, after))
         finally:
             # Stop both owned children before leaving the executor or removing
             # namespaces, even when another child failed first.
-            cancel.set()
+            if any(not future.done() for future in futures):
+                cancel.set()
+
+
+def _submit_bulk(pool, config: TrialConfig, backend: Backend, deadline: int, cancel: Event):
+    if not config.flows:
+        return None
+    isolated = config.mode == "namespace"
+    command = backend.command(
+        "client",
+        client_command(
+            config.bulk_plan(),
+            backend.client_address,
+            backend.server_address,
+            config.bulk_port,
+            linux=isolated,
+            allow_isolated=isolated,
+        ),
+    )
+    return pool.submit(run_command, command, timeout=deadline, stop=cancel)
+
+
+def unloaded_summary(config: TrialConfig) -> dict:
+    """A planned absence of bulk traffic, rather than a missing receiver report."""
+    return {
+        "requested": {
+            "aggregate_bps": 0,
+            "flows": 0,
+            "measurement_seconds": config.measurement_seconds,
+            "warmup_seconds": config.warmup_seconds,
+        },
+        "per_flow_bps": 0,
+        "actual_flows": 0,
+        "receiver_bytes": 0,
+        "receiver_seconds": config.measurement_seconds,
+        "goodput_mbps": 0,
+        "intervals": [],
+        "tool_version": "not_started",
+        "exit_status": 0,
+        "window": "foreground",
+        "foreground_window_aligned": True,
+    }
 
 
 def run_trial(directory: Path, config: TrialConfig, cancel: Event | None = None) -> dict:
@@ -192,7 +232,8 @@ def run_trial(directory: Path, config: TrialConfig, cancel: Event | None = None)
     primary_error = None
     try:
         bundle.transition("preflight")
-        run_command(("iperf3", "--version"), limit=16384)
+        if config.flows:
+            run_command(("iperf3", "--version"), limit=16384)
         bundle.transition("setup")
         backend.setup()
         bundle.artifact("queues-before.json", backend.snapshot())
@@ -200,9 +241,9 @@ def run_trial(directory: Path, config: TrialConfig, cancel: Event | None = None)
         bundle.artifact("queues-after.json", backend.snapshot())
         bundle.transition("validation")
         validate_contents(bundle.directory, bundle.manifest)
-        bundle.manifest["validity"]["reasons"].extend(
-            ["bulk_window_alignment_pending", "hardware_calibration_pending"]
-        )
+        bundle.manifest["validity"]["reasons"].append("hardware_calibration_pending")
+        if config.flows:
+            bundle.manifest["validity"]["reasons"].append("bulk_window_alignment_pending")
         if config.mode == "loopback":
             bundle.manifest["validity"]["reasons"].append("loopback_diagnostic")
         bundle.transition("teardown")
