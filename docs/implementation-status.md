@@ -34,9 +34,9 @@ publication. Linux tests are a separate explicit group and remain unrun here.
 Mocked Linux commands test the adapter's decisions; they do not validate kernel
 behavior.
 
-The local diagnostic report records all selected observations, including missed
-send slots. It is evidence that the development workflow runs and preserves
-failure information. It is not evidence for any queue policy's latency or
+The [local diagnostic report](pilot-readiness.md) records all selected
+observations, including missed send slots. It is evidence that the development
+workflow runs and preserves failure information. It is not evidence for any queue policy's latency or
 goodput benefit.
 
 ## Before primary collection
