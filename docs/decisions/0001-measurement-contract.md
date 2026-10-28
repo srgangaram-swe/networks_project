@@ -1,9 +1,11 @@
 # 0001: Foreground measurement and testbed contract
 
 Status: proposed for team review. Related issue: #2. Contract version: 1.
-The constants and record validator are implemented; the workload, topology,
-runner, and analysis are not. Acceptance of this decision, equipment checks,
-and a successful pilot are required before primary collection.
+The foreground workload, namespace command plans, ownership checks, diagnostic
+runner, and bundle validator are implemented. Linux calibration and scientific
+acceptance remain pending. The diagnostic runner records separate foreground
+and iperf3 windows and refuses to call those runs eligible for primary collection.
+See [the operating guide](../running-experiments.md) for the executable scope.
 
 ## Workload and timing
 
@@ -140,14 +142,22 @@ Verify effective settings and unloaded behavior in issue #6 before accepting
 these profiles. Raw accounting omits Ethernet wire overhead in this primary
 model; do not describe the configured rate as physical wire capacity.
 
-At router ingress, clear endpoint-supplied DSCP. Only responses matching the
-controlled foreground source, destination, protocol, and port may be marked
+At router ingress, clear the endpoint-supplied DS field and repair the IPv4
+header checksum. ECN is disabled in this candidate protocol. Only responses matching the
+controlled foreground source and destination addresses, UDP source port 42000,
+and destination port 42001 may be marked
 EF for the bounded profile. Police that eligible traffic to 5 Mb/s with a
 16 KiB burst; reclassify excess to Best Effort rather than giving it priority.
 Bulk traffic remains Best Effort even when it forges EF. This bounds priority
 eligibility, not total foreground throughput. CAKE's own tin threshold is
 not a hard bandwidth cap. Verify counter changes and forged-mark behavior
 in issues #6 and #16 before calling the treatment bounded.
+
+The executable candidate uses a 5 Mb/s policer. Excess traffic continues to
+the next filter, which selects Best Effort; conforming traffic continues to
+the EF mark and Voice-tin override. This is not a drop policer. The tc command
+plans are reviewable on macOS, but the filter path still needs Linux counter
+and forged-mark tests before acceptance.
 
 The [CAKE manual](https://man7.org/linux/man-pages/man8/tc-cake.8.html) describes
 its shaper, isolation modes, and tin thresholds. The

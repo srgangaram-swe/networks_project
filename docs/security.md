@@ -22,3 +22,9 @@ Incomplete evidence must fail validation rather than produce a success plot.
 CI uses hosted runners with read-only repository permissions. It does not
 deploy or reconfigure hardware. Privileged tests run separately on an isolated
 Linux testbed with recorded permission, configuration, and cleanup evidence.
+
+The optional linux_namespaces input enables a separate manual job on a
+disposable GitHub-hosted Ubuntu runner. Dispatch it only for a trusted source
+revision. It has read-only repository access and no deployment credentials.
+Its privileged commands create project-owned namespaces and leave host NICs,
+routes, and firewall rules alone. Pull-request events cannot enable this job.
