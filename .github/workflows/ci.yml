@@ -28,6 +28,10 @@ jobs:
           python-version: "3.12"
       - run: python -m venv .venv
       - run: .venv/bin/python -m pip install -r requirements-dev.txt
+      - name: Install the TCP workload tool
+        run: |
+          sudo apt-get update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3
       - run: sh scripts/check.sh
       - run: shellcheck scripts/check.sh
   branch-policy:

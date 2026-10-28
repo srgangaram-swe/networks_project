@@ -132,9 +132,10 @@ with fewer than the planned requests sent is not sufficient. Completed status,
 zero incomplete deadlines, and a complete event log are necessary but do not
 replace the full run validator in issue #10.
 
-Issue #9 still needs to coordinate the foreground and bulk phase boundaries
-and attach source hashes, topology, tool versions, and other run provenance.
-This JSON file is a component capture, not a complete experimental run bundle.
+The trial runner attaches source hashes, topology snapshots, tool versions,
+configuration, and phase boundaries. Exact alignment with the iperf3 receiver
+window remains in issue #9. This JSON file is a component capture; see the
+[bundle format](bundle-format.md) for the enclosing experimental record.
 
 ## Tests
 

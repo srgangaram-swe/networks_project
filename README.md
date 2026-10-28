@@ -16,12 +16,16 @@ for the full matrix and the decisions we still need to make.
 
 ## Current state
 
-This repository contains the project plan, a validated configuration format,
-and a provisional [foreground UDP workload](docs/foreground-workload.md) with
-unit and real-socket tests. The workload follows the protocol proposed in
-MR #24 and still needs team review and Linux pilot validation. Bulk traffic,
-privileged testbed setup, the trial runner, and analysis remain scheduled work.
-There are no queue-policy results yet.
+The repository runs bounded UDP/TCP diagnostics on macOS and Linux. It includes
+an independent run-bundle validator, randomized schedule generation, per-run
+summaries, and plotting. A separate Linux adapter creates and cleans up owned
+network namespaces and applies the four candidate queue profiles.
+
+Start with [the operating guide](docs/running-experiments.md). The
+[work-item status](docs/implementation-status.md) lists what is implemented and
+what still needs equipment, calibration, or scientific review. Linux queue
+behavior has not been validated on this Mac. Diagnostic runs are explicitly
+ineligible for the primary experiment, and there are no queue-policy results yet.
 
 The [candidate measurement contract](docs/decisions/0001-measurement-contract.md)
 is ready for team review, with tests for request records and deadline handling.
@@ -48,6 +52,11 @@ python3 -m venv .venv
 sh scripts/check.sh
 .venv/bin/python scripts/validate_config.py configs/primary.json
 ```
+
+Install iperf3 before running the TCP integration tests. The operating guide has
+macOS and Linux commands, a short local trial, recovery steps, and the hardware
+handoff procedure. Optional plotting dependencies are pinned separately in
+requirements-plots.txt.
 
 The validator checks the planned experiment inputs. It does not configure
 interfaces or run traffic. Test fixtures are synthetic and are never evidence

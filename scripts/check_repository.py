@@ -9,6 +9,15 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
     problems = []
+    ignored = (
+        subprocess.check_output(
+            ["git", "ls-files", "--cached", "--ignored", "--exclude-standard", "-z"], cwd=ROOT
+        )
+        .decode()
+        .split("\0")
+    )
+    for name in filter(None, ignored):
+        problems.append(f"An excluded local file is tracked: {name}")
     for name in filter(None, tracked):
         path = Path(name)
         if (
@@ -21,6 +30,8 @@ def main() -> int:
             text = (ROOT / path).read_text(encoding="utf-8")
             if not text.isascii():
                 problems.append(f"Use ordinary ASCII in prose: {name}")
+            if chr(96) in text:
+                problems.append(f"Use indented command blocks and plain inline text: {name}")
     if problems:
         print("\n".join(problems))
         return 1
