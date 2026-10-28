@@ -13,4 +13,6 @@ prove that traffic crosses the intended bottleneck.
 
 Read [the operating guide](../docs/running-experiments.md) and
 [security rules](../docs/security.md) before running privileged commands.
-Kernel execution and calibration remain pending until the Linux host is ready.
+All four profiles passed the manual namespace integration check on a disposable
+Ubuntu runner. Calibration and verification on the experiment hardware remain
+pending. The [readiness report](../docs/pilot-readiness.md) links the evidence.

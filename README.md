@@ -23,8 +23,9 @@ network namespaces and applies the four candidate queue profiles.
 
 Start with [the operating guide](docs/running-experiments.md). The
 [work-item status](docs/implementation-status.md) lists what is implemented and
-what still needs equipment, calibration, or scientific review. Linux queue
-behavior has not been validated on this Mac. Diagnostic runs are explicitly
+what still needs equipment, calibration, or scientific review. A separate manual
+check passed all four namespace profiles on a disposable Ubuntu runner.
+Diagnostic runs are explicitly
 ineligible for the primary experiment, and there are no queue-policy results yet.
 
 The [local diagnostic report](docs/pilot-readiness.md) includes six real loopback

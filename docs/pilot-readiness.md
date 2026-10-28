@@ -1,8 +1,8 @@
 # Local diagnostic evidence and pilot readiness
 
 Decision on October 27, 2026: do not begin primary collection. The local workflow
-runs, but the Linux testbed, calibrated queue behavior, aligned receiver windows,
-and accepted protocol are still missing.
+runs, but calibrated queue behavior on the experiment host, aligned receiver
+windows, and an accepted protocol are still missing.
 
 ## What ran
 
@@ -64,7 +64,7 @@ attempts and will not reproduce the exact timing values in this table.
 
 1. Confirm the Linux hardware, kernel and tool versions, permissions, and course
    requirements. Review and accept the candidate protocol.
-2. Run the privileged namespace tests for all four policies. Inspect routes,
+2. Repeat the privileged namespace tests on the experiment hardware. Inspect routes,
    delay placement, offloads, CUBIC, ECN, queue parameters, and cleanup.
 3. Calibrate the 100 Mb/s bottleneck and confirm the configured load below
    capacity and continuously backlogged senders above capacity. Verify that
@@ -76,3 +76,22 @@ attempts and will not reproduce the exact timing values in this table.
 
 These are the remaining acceptance criteria in issues #2 through #11. A code
 merge does not satisfy them or turn loopback measurements into Linux results.
+
+## Separate Linux integration check
+
+The manual [hosted Linux check](https://github.com/srgangaram-swe/networks_project/actions/runs/40626936122)
+passed at source revision 46c1953fc974d16582db6fd5592d48930ea0e724. The
+linux-namespaces job ran with explicit permission on a disposable Ubuntu 24.04
+runner and Python 3.12; it was not the skipped group in ordinary CI.
+
+The test executed FIFO, FQ-CoDel, CAKE best effort, and bounded CAKE in fresh
+client-router-server namespaces. For each profile, it ran real UDP/TCP traffic,
+checked qdisc attachment, validated the completed bundle, required an observed
+minimum reply RTT above 18 ms for the proposed 20 ms path, and verified an empty
+ownership journal after teardown. The four-profile test passed in 23.832 seconds.
+
+This establishes that the commands and lifecycle work with that runner's Linux
+kernel. It does not establish equivalent effective shaping, forged-mark
+resistance, independent failure recovery, or readiness for primary collection.
+The Linux integration observations are separate from the six Mac loopback runs
+plotted above and are not part of that reference dataset.
