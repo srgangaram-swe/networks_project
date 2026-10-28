@@ -116,6 +116,15 @@ and verifies the cleanup journal is empty afterward. Unsupported qdiscs or
 failed commands fail the test. The group does not establish rate calibration,
 bounded-priority abuse resistance, or primary collection readiness by itself.
 
+The same group can run on a disposable GitHub-hosted Ubuntu machine through
+an explicit manual CI dispatch. Select a trusted branch; this job is never
+enabled by a pull-request event and has no repository write permission:
+
+    gh workflow run ci.yml --ref YOUR_TRUSTED_BRANCH -f linux_namespaces=true
+
+This checks the virtual topology against the runner's kernel. It does not
+calibrate the eventual hardware or authorize the primary experiment.
+
 ## Inspect and recover
 
 The testbed command can manage a standalone topology for inspection:
