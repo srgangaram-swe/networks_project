@@ -1,8 +1,10 @@
 # Equipment and local readiness
 
-Related issue: #3. Status: local inspection tooling is available; equipment,
-access, funding, and booking are unconfirmed. The team has not supplied an
-approved Linux machine or interface list. This is not a purchase request.
+Related issue: #3. Physical equipment, funding, and booking remain unconfirmed
+as of October 27, 2026. A disposable hosted Ubuntu runner supports the namespace
+fallback and has executed all four queue profiles. The owner authorized those
+isolated checks. The team has not supplied a physical Linux machine or interface
+list. This is not a purchase request.
 
 ## Run after cloning
 
@@ -31,7 +33,7 @@ Version values and capability evidence must be reviewed separately below.
 | Client endpoint | Not supplied | Approved isolated interface, NIC driver, MTU/offloads, Linux and tool versions | Unconfirmed |
 | Router | Not supplied | Two isolated links, traffic-control support, CPU capacity, owner permission | Unconfirmed |
 | Server endpoint | Not supplied | Approved isolated interface, NIC driver, MTU/offloads, Linux and tool versions | Unconfirmed |
-| Single-host namespace fallback | Not supplied | Linux host with permission for project-owned namespaces, veth, IFB, and qdiscs | Unconfirmed |
+| Single-host namespace fallback | Disposable GitHub-hosted Ubuntu runner; available for bounded manual checks | Owner-authorized project namespaces, veth, IFB, and all four qdiscs | Executed in the linked Linux acceptance run; no primary-run booking |
 
 Record an owner-approved alias instead of serial numbers, MAC addresses,
 private IP addresses, employer details, or credentials. Keep any access
@@ -69,6 +71,8 @@ measurements cannot establish physical NIC performance.
 Unit tests cover tool discovery, command failures, timeouts, missing tools,
 and the unsupported-platform path. The integration test runs the actual CLI
 and checks the JSON report. These tests validate the inspection code, not
-Linux queue behavior. No privileged setup or hardware test has run as part
-of this work. Issue #5 owns executable setup and cleanup; its tests require
-an authorized Linux environment.
+Linux queue behavior. Separate privileged checks verified namespace setup,
+routes, offloads, delay, all four queue attachments, traffic, interruption, and
+cleanup in [the Linux acceptance run](https://github.com/srgangaram-swe/networks_project/actions/runs/40630299245).
+The [namespace pilot instructions](namespace-pilot.md) add capacity and packet
+checks. A physical NIC test and another teammate's inventory review remain open.

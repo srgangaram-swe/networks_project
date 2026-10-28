@@ -19,7 +19,7 @@ def main() -> int:
     parser.add_argument("--policy", default="none")
     parser.add_argument("--seconds", type=int, default=2)
     parser.add_argument("--warmup-seconds", type=int, default=0)
-    parser.add_argument("--flows", type=int, choices=(1, 8), default=1)
+    parser.add_argument("--flows", type=int, choices=(0, 1, 8), default=1)
     parser.add_argument("--aggregate-bps", type=int, default=8_000_000)
     parser.add_argument("--foreground-port", type=int, default=42000)
     parser.add_argument("--bulk-port", type=int, default=5201)

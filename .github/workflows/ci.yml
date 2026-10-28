@@ -52,7 +52,7 @@ jobs:
     name: linux-namespaces
     if: github.event_name == 'workflow_dispatch' && inputs.linux_namespaces
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -64,6 +64,25 @@ jobs:
       - name: Install isolated testbed tools
         run: |
           sudo apt-get update
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3 iproute2 ethtool iputils-ping
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3 iproute2 ethtool iputils-ping tcpdump
       - name: Exercise all four namespace profiles
-        run: sudo env NETWORKS_RUN_PRIVILEGED=1 .venv/bin/python -m unittest discover -s tests/linux -v
+        run: sudo env NETWORKS_RUN_PRIVILEGED=1 NETWORKS_EVIDENCE_DIR=.local/evidence/policy-checks .venv/bin/python -m unittest discover -s tests/linux -v
+      - name: Run the fixed randomized pilot
+        run: sudo .venv/bin/python scripts/campaign.py --config configs/pilot.json --output .local/campaign --authorized-isolated-host
+      - name: Export all completed observations and attempt accounting
+        if: always()
+        run: |
+          if test -f .local/campaign/plan.json; then
+            sudo .venv/bin/python scripts/export_pilot.py .local/campaign --output .local/evidence/pilot
+          fi
+          if test -d .local/evidence; then
+            sudo chmod -R a+rX .local/evidence
+          fi
+      - name: Retain the synthetic reference evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: namespace-pilot-evidence
+          path: .local/evidence
+          if-no-files-found: warn
+          retention-days: 30

@@ -249,7 +249,7 @@ def _load_artifacts(directory: Path, manifest: dict) -> dict:
 
 
 def _cross_checks(artifacts: dict, manifest: dict) -> None:
-    from src.trial import TrialConfig
+    from src.trial import TrialConfig, unloaded_summary
 
     config = artifacts["configuration.json"]
     exact_fields(config, {field.name for field in fields(TrialConfig)}, "trial configuration")
@@ -267,8 +267,16 @@ def _cross_checks(artifacts: dict, manifest: dict) -> None:
     phases["end_ns"] = foreground["planned_end_ns"]
     if manifest["phases"] != phases:
         raise ValueError("manifest phase boundaries differ from the capture")
+    if not plan.flows:
+        if artifacts["bulk.json"] != unloaded_summary(plan):
+            raise ValueError("unloaded trial must explicitly record no bulk workload")
+        return
+    _check_bulk(artifacts["bulk.json"], plan)
+
+
+def _check_bulk(raw: dict, plan) -> None:
     bulk = exact_fields(
-        artifacts["bulk.json"],
+        raw,
         {
             "requested",
             "per_flow_bps",
