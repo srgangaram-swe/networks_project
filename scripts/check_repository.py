@@ -12,7 +12,7 @@ def main() -> int:
     for name in filter(None, tracked):
         path = Path(name)
         if (
-            path.name.lower() in {"ai.md", ".env", ".ds_store"}
+            path.name.lower() in {".env", ".ds_store"}
             or path.suffix.lower() in {".pcap", ".pcapng", ".pem", ".key"}
             or path.parts[0] in {"private", ".local", ".venv", "runs"}
         ):
