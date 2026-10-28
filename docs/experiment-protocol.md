@@ -4,6 +4,12 @@ Status: planning baseline transcribed from the team's September 10 proposal.
 Freeze the unresolved choices in the architecture issue before collecting
 primary evidence. Changing the frozen protocol requires a decision record.
 
+The [candidate v1 contract](decisions/0001-measurement-contract.md) supplies
+concrete workload, metric, queue, and scheduling choices for team review.
+It is not yet accepted. Equipment and access remain unconfirmed in the
+[inventory](equipment-inventory.md); do not start collection from the planning
+configuration alone.
+
 ## Research question and treatments
 
 How does Linux queue management affect foreground tail latency and background

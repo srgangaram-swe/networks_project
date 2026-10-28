@@ -17,9 +17,17 @@ for the full matrix and the decisions we still need to make.
 ## Current state
 
 This repository contains the project plan, a validated configuration format,
-unit and CLI integration tests, and the contribution workflow. The traffic
-generators, privileged testbed setup, trial runner, and analysis are scheduled
-work. There are no experimental results yet.
+and a provisional [foreground UDP workload](docs/foreground-workload.md) with
+unit and real-socket tests. The workload follows the protocol proposed in
+MR #24 and still needs team review and Linux pilot validation. Bulk traffic,
+privileged testbed setup, the trial runner, and analysis remain scheduled work.
+There are no queue-policy results yet.
+
+The [candidate measurement contract](docs/decisions/0001-measurement-contract.md)
+is ready for team review, with tests for request records and deadline handling.
+The [equipment checklist](docs/equipment-inventory.md) explains the read-only
+local inspection command. Hardware availability and permissions are still
+unconfirmed; neither the contract tests nor inspection certify a testbed.
 
 The proposal's target is a 50% reduction in foreground p99 added latency under
 saturating load while retaining at least 90% of FIFO's bulk goodput. These are
@@ -31,15 +39,13 @@ results that meet them.
 Use Python 3.12 or newer. Development checks run on macOS or Linux; the actual
 queue-management experiments need an isolated Linux testbed.
 
-```sh
-git clone https://github.com/srgangaram-swe/networks_project.git
-cd networks_project
-git switch dev
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-dev.txt
-sh scripts/check.sh
-.venv/bin/python scripts/validate_config.py configs/primary.json
-```
+    git clone https://github.com/srgangaram-swe/networks_project.git
+    cd networks_project
+    git switch dev
+    python3 -m venv .venv
+    .venv/bin/python -m pip install -r requirements-dev.txt
+    sh scripts/check.sh
+    .venv/bin/python scripts/validate_config.py configs/primary.json
 
 The validator checks the planned experiment inputs. It does not configure
 interfaces or run traffic. Test fixtures are synthetic and are never evidence
@@ -50,14 +56,14 @@ of network performance.
 Start with the [milestones](https://github.com/srgangaram-swe/networks_project/milestones)
 and [open issues](https://github.com/srgangaram-swe/networks_project/issues).
 Assign an unclaimed issue to yourself before starting, check its dependencies,
-and make a short work branch from the latest `dev`.
+and make a short work branch from the latest dev.
 
-Open one pull request (MR) per work item back to `dev`. Include the issue
+Open one pull request (MR) per work item back to dev. Include the issue
 number, tests, and anything the reviewer needs to reproduce. We can resolve
-merge conflicts in that MR. Do not branch from `prod` or `main`.
+merge conflicts in that MR. Do not branch from prod or main.
 
-Once every required item in a milestone is complete, we promote `dev` to
-`prod`, validate the release candidate, and then promote `prod` to `main`.
+Once every required item in a milestone is complete, we promote dev to
+prod, validate the release candidate, and then promote prod to main.
 Neither promotion is part of the everyday feature workflow.
 [CONTRIBUTING.md](CONTRIBUTING.md) has the commands and review checklist.
 
@@ -65,18 +71,18 @@ Neither promotion is part of the everyday feature workflow.
 
 | Directory | Purpose |
 |---|---|
-| `configs/` | Versioned experiment inputs |
-| `src/` | Shared contracts and application code |
-| `testbed/` | Linux topology and queue setup |
-| `experiments/` | Trial scheduling and run collection |
-| `analysis/` | Data checks, intervals, and plots |
-| `tests/` | Unit, integration, and synthetic fixtures |
-| `scripts/` | Development and validation commands |
-| `docs/` | Protocol, architecture, safety, and decisions |
-| `report/` | Methods, results, and final write-up |
-| `presentation/` | Slides, demo instructions, and rehearsal notes |
-| `data/reference/` | Reviewed evidence with provenance |
-| `runs/` | Ignored local experiment output |
+| configs/ | Versioned experiment inputs |
+| src/ | Shared contracts and application code |
+| testbed/ | Linux topology and queue setup |
+| experiments/ | Trial scheduling and run collection |
+| analysis/ | Data checks, intervals, and plots |
+| tests/ | Unit, integration, and synthetic fixtures |
+| scripts/ | Development and validation commands |
+| docs/ | Protocol, architecture, safety, and decisions |
+| report/ | Methods, results, and final write-up |
+| presentation/ | Slides, demo instructions, and rehearsal notes |
+| data/reference/ | Reviewed evidence with provenance |
+| runs/ | Ignored local experiment output |
 
 Python, C++, Rust, and Bash are all reasonable choices. Use the language that
 fits the component, and discuss additional toolchains before adding them.
