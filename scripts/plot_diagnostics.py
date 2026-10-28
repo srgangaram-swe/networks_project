@@ -40,20 +40,20 @@ def plot(directory: Path, output: Path) -> None:
         ("goodput_mbps", "Receiver TCP goodput (Mb/s)"),
     )
     for axis, (metric, label) in zip(axes.flat, panels, strict=True):
-        sns.stripplot(
+        sns.swarmplot(
             data=data,
             x="TCP streams",
             y=metric,
             hue="TCP streams",
             palette="colorblind",
-            jitter=False,
             size=9,
             alpha=0.75,
             legend=False,
             ax=axis,
         )
         axis.set_ylabel(label)
-        axis.set_ylim(bottom=0)
+        ceiling = max(float(data[metric].max()), 0.001)
+        axis.set_ylim(-0.035 * ceiling, 1.12 * ceiling)
         axis.grid(axis="x", visible=False)
         sns.despine(ax=axis)
     for target in sorted(data["requested_mbps"].unique()):
@@ -68,7 +68,8 @@ def plot(directory: Path, output: Path) -> None:
     )
     figure.supxlabel(
         f"Each dot is one run. {len(data)} runs, "
-        f"{int(data['scheduled'].sum()):,} scheduled requests, {timeouts} deadline misses.\n"
+        f"{int(data['scheduled'].sum()):,} scheduled, {int(data['not_sent'].sum())} not sent, "
+        f"{timeouts} reply deadline misses.\n"
         "Receiver and foreground windows are not aligned; primary collection remains blocked.",
         fontsize=10,
     )

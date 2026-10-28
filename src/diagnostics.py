@@ -93,7 +93,7 @@ def _median_ms(values: list[int]) -> float | None:
 
 def _write_csv(path: Path, rows: list[dict]) -> None:
     with path.open("x", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

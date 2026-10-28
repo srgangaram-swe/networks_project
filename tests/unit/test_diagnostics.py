@@ -32,6 +32,10 @@ class DiagnosticTests(unittest.TestCase):
             destination = root / "synthetic-export"
             result = export_diagnostics([bundle.directory], destination)
             self.assertEqual(result["request_count"], 500)
+            for name in ("summary.csv", "requests.csv"):
+                payload = (destination / name).read_bytes()
+                self.assertNotIn(b"\r", payload)
+                self.assertTrue(payload.endswith(b"\n"))
             with (destination / "summary.csv").open() as stream:
                 self.assertEqual(len(list(csv.DictReader(stream))), 1)
             with self.assertRaises(FileExistsError):

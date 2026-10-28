@@ -27,6 +27,9 @@ what still needs equipment, calibration, or scientific review. Linux queue
 behavior has not been validated on this Mac. Diagnostic runs are explicitly
 ineligible for the primary experiment, and there are no queue-policy results yet.
 
+The [local diagnostic report](docs/pilot-readiness.md) includes six real loopback
+runs, their plot, and the remaining criteria for starting the Linux pilot.
+
 The [candidate measurement contract](docs/decisions/0001-measurement-contract.md)
 is ready for team review, with tests for request records and deadline handling.
 The [equipment checklist](docs/equipment-inventory.md) explains the read-only
