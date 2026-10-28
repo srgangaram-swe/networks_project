@@ -3,6 +3,7 @@
 import fcntl
 import os
 import stat
+from dataclasses import asdict
 from pathlib import Path
 from threading import Event
 
@@ -78,6 +79,7 @@ def _load(directory: Path) -> tuple[dict, dict, list[TrialConfig]]:
         not isinstance(plan, dict)
         or plan.keys()
         != {"schema_version", "kind", "configuration", "warmup_seconds", "source", "schedule"}
+        or type(plan["schema_version"]) is not int
         or plan["schema_version"] != 1
         or plan["kind"] != "virtual_testbed_pilot"
     ):
@@ -90,6 +92,7 @@ def _load(directory: Path) -> tuple[dict, dict, list[TrialConfig]]:
     if (
         not isinstance(progress, dict)
         or progress.keys() != {"schema_version", "plan_sha256", "state", "attempts"}
+        or type(progress["schema_version"]) is not int
         or progress["schema_version"] != 1
     ):
         raise ValueError("unsupported campaign progress")
@@ -98,6 +101,14 @@ def _load(directory: Path) -> tuple[dict, dict, list[TrialConfig]]:
     if progress["state"] not in {"ready", "running", "stopped", "completed"}:
         raise ValueError("unsupported campaign state")
     _check_attempts(directory, progress["attempts"], schedule["cells"])
+    planned = {
+        cell["cell_id"]: trial for cell, trial in zip(schedule["cells"], trials, strict=True)
+    }
+    for attempt in progress["attempts"]:
+        if attempt["status"] == "completed":
+            _check_completed(
+                directory / attempt["directory"], planned[attempt["cell_id"]], plan["source"]
+            )
     return plan, progress, trials
 
 
@@ -149,7 +160,14 @@ def _check_attempt_evidence(directory: Path, attempt: dict) -> None:
     if attempt["status"] == "completed":
         if checksum is None:
             raise ValueError("completed attempt has no manifest digest")
-        validate_bundle(run)
+
+
+def _check_completed(directory: Path, trial: TrialConfig, source: dict) -> None:
+    validate_bundle(directory)
+    if read_json(directory / "configuration.json") != asdict(trial):
+        raise ValueError("completed bundle does not match its planned cell")
+    if read_json(directory / "manifest.json", 65536)["source"] != source:
+        raise ValueError("completed bundle source differs from the campaign")
 
 
 def _next_attempt(progress: dict, cell: dict, reason: str) -> dict | None:
@@ -177,22 +195,31 @@ def _next_attempt(progress: dict, cell: dict, reason: str) -> dict | None:
     return attempt
 
 
-def _execute(directory: Path, trial: TrialConfig, attempt: dict, cancel: Event) -> None:
+def _execute(
+    directory: Path, trial: TrialConfig, attempt: dict, cancel: Event, source: dict
+) -> None:
     run = directory / attempt["directory"]
+    primary_error = None
     try:
         # Successful teardown leaves the campaign's cancellation event clear.
         # A failure stops execution before another cell can start.
         run_trial(run, trial, cancel)
-        validate_bundle(run)
+        _check_completed(run, trial, source)
         attempt["status"] = "completed"
     except (OSError, ValueError, RuntimeError, TimeoutError, KeyboardInterrupt) as exc:
         attempt["status"] = "failed"
         attempt["error"] = f"{type(exc).__name__}: {exc}"[:1024]
+        primary_error = exc
         raise
     finally:
-        manifest = run / "manifest.json"
-        if manifest.exists():
-            attempt["manifest_sha256"] = digest(manifest)
+        try:
+            manifest = run / "manifest.json"
+            if manifest.exists():
+                attempt["manifest_sha256"] = digest(manifest)
+        except (OSError, ValueError) as exc:
+            if primary_error is None:
+                raise
+            primary_error.add_note(f"Retaining the attempt digest also failed: {exc}")
 
 
 def execute_campaign(
@@ -229,12 +256,15 @@ def _execute_schedule(directory, plan, progress, trials, reason, cancel):
             if attempt is None:
                 continue
             atomic_json(directory / "progress.json", progress)
-            _execute(directory, trial, attempt, cancel)
+            _execute(directory, trial, attempt, cancel, plan["source"])
             atomic_json(directory / "progress.json", progress)
         progress["state"] = "completed"
-    except (OSError, ValueError, RuntimeError, TimeoutError, KeyboardInterrupt):
+    except (OSError, ValueError, RuntimeError, TimeoutError, KeyboardInterrupt) as exc:
         progress["state"] = "stopped"
+        try:
+            atomic_json(directory / "progress.json", progress)
+        except (OSError, ValueError) as persistence_error:
+            exc.add_note(f"Saving the stopped campaign also failed: {persistence_error}")
         raise
-    finally:
-        atomic_json(directory / "progress.json", progress)
+    atomic_json(directory / "progress.json", progress)
     return progress

@@ -1,0 +1,84 @@
+{
+  "interval_summaries": [
+    {
+      "bytes": 1048576,
+      "end": 1.005028,
+      "omitted": true,
+      "sender": false,
+      "start": 0
+    },
+    {
+      "bytes": 1048576,
+      "end": 2.00278,
+      "omitted": true,
+      "sender": false,
+      "start": 1.005028
+    },
+    {
+      "bytes": 917504,
+      "end": 3.005011,
+      "omitted": true,
+      "sender": false,
+      "start": 2.00278
+    },
+    {
+      "bytes": 1048576,
+      "end": 4.003781,
+      "omitted": true,
+      "sender": false,
+      "start": 3.005011
+    },
+    {
+      "bytes": 1048576,
+      "end": 5.004732,
+      "omitted": true,
+      "sender": false,
+      "start": 4.003781
+    },
+    {
+      "bytes": 917504,
+      "end": 6.000405,
+      "omitted": true,
+      "sender": false,
+      "start": 5.004732
+    },
+    {
+      "bytes": 1048576,
+      "end": 7.004645,
+      "omitted": true,
+      "sender": false,
+      "start": 6.000405
+    },
+    {
+      "bytes": 1048576,
+      "end": 8.003964,
+      "omitted": true,
+      "sender": false,
+      "start": 7.004645
+    },
+    {
+      "bytes": 917504,
+      "end": 9.003749,
+      "omitted": true,
+      "sender": false,
+      "start": 8.003964
+    },
+    {
+      "bytes": 917504,
+      "end": 1.006888,
+      "omitted": false,
+      "sender": false,
+      "start": 1.002072
+    },
+    {
+      "bytes": 1048576,
+      "end": 2.000992,
+      "omitted": false,
+      "sender": false,
+      "start": 1.006888
+    }
+  ],
+  "measurement_seconds": 2,
+  "tool_version": "iperf 3.22",
+  "warmup_seconds": 10
+}

@@ -6,7 +6,7 @@ from dataclasses import fields
 from datetime import datetime
 from pathlib import Path
 
-from src.artifacts import digest, read_json
+from src.artifacts import digest, json_bytes, read_json
 from src.experiment_config import POLICIES, bounded_integer, bounded_number
 from src.foreground import MAX_EVENTS, Workload
 from src.foreground_io import endpoint
@@ -268,7 +268,7 @@ def _cross_checks(artifacts: dict, manifest: dict) -> None:
     if manifest["phases"] != phases:
         raise ValueError("manifest phase boundaries differ from the capture")
     if not plan.flows:
-        if artifacts["bulk.json"] != unloaded_summary(plan):
+        if json_bytes(artifacts["bulk.json"]) != json_bytes(unloaded_summary(plan)):
             raise ValueError("unloaded trial must explicitly record no bulk workload")
         return
     _check_bulk(artifacts["bulk.json"], plan)

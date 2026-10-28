@@ -164,7 +164,10 @@ def _intervals(rows: list, flows: int) -> list[dict]:
         start = bounded_number(summary["start"], "interval start", last, 181)
         end = bounded_number(summary["end"], "interval end", start, 181)
         if end <= start or abs(start - last) > 0.01:
-            raise ValueError("receiver intervals have a gap or no duration")
+            raise ValueError(
+                f"receiver intervals have a gap or no duration: previous end {last}, "
+                f"current interval {start} to {end} seconds"
+            )
         count = bounded_integer(summary["bytes"], "interval bytes", 0, 2**53)
         result.append({"start_seconds": start, "end_seconds": end, "bytes": count})
         last = end

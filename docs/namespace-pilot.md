@@ -88,3 +88,19 @@ are resolved. A successful CI run establishes the mechanics it actually tests.
 The traffic options follow the [iperf3 documentation](https://software.es.net/iperf/invoking.html).
 The queue profiles follow the [CAKE manual](https://man7.org/linux/man-pages/man8/tc-cake.8.html)
 and the [iproute2 policing interface](https://kernel.googlesource.com/pub/scm/linux/kernel/git/leon/iproute2/+/refs/tags/v4.9.0/man/man8/tc-police.8).
+
+## Current verification result
+
+The [first manual run](https://github.com/srgangaram-swe/networks_project/actions/runs/40634717534)
+passed all seven privileged tests, including the capacity and packet checks.
+Its 16-cell campaign stopped at the first attempted cell: the iperf receiver
+intervals had a gap after warmup. A separate local run with ten seconds of
+warmup reproduced inconsistent interval boundaries. The parser correctly
+rejected that report. Investigation of the workload tool and its timing is
+still pending; do not relax interval validation to make this campaign pass.
+
+The [retained policy observations](../data/reference/namespace-policy-checks/README.md)
+include the successful checks and identify the failed campaign. The plotting
+entry point is present, but no complete pilot dataset or rendered pilot figure
+has been produced. MR #32 remains a draft until the workload defect is resolved
+and the Linux campaign and export are verified.

@@ -1,7 +1,9 @@
 import copy
 import unittest
+from pathlib import Path
 
-from src.bulk import BulkPlan, client_command, server_command, summarize_bulk
+from src.artifacts import read_json
+from src.bulk import BulkPlan, _intervals, client_command, server_command, summarize_bulk
 
 
 def report(flows=1):
@@ -35,6 +37,13 @@ def report(flows=1):
 
 
 class BulkTests(unittest.TestCase):
+    def test_observed_long_warmup_interval_gap_is_rejected(self):
+        path = Path(__file__).resolve().parents[1] / "fixtures/iperf-warmup-interval-anomaly.json"
+        observation = read_json(path)
+        rows = [{"sum": row, "streams": [{}]} for row in observation["interval_summaries"]]
+        with self.assertRaisesRegex(ValueError, "previous end 0.0"):
+            _intervals(rows, 1)
+
     def test_aggregate_rate_is_split_without_multiplication(self):
         for rate in (50_000_000, 90_000_000, 110_000_000):
             plan = BulkPlan(rate, 8, 60, 10)

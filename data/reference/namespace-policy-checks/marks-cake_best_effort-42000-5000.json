@@ -1,0 +1,35 @@
+{
+  "packet_sample": "04:54:24.008107 IP (tos 0x0, ttl 63, id 1326, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n04:54:24.008241 IP (tos 0x0, ttl 63, id 1327, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n04:54:24.008436 IP (tos 0x0, ttl 63, id 1328, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n04:54:24.008635 IP (tos 0x0, ttl 63, id 1329, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n04:54:24.008835 IP (tos 0x0, ttl 63, id 1330, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n04:54:24.009035 IP (tos 0x0, ttl 63, id 1331, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n04:54:24.009235 IP (tos 0x0, ttl 63, id 1332, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n04:54:24.009435 IP (tos 0x0, ttl 63, id 1333, offset 0, flags [DF], proto UDP (17), length 540)\n    10.203.0.6.42000 > 10.203.0.2.42001: UDP, length 512\n",
+  "received": {
+    "packet_samples": [
+      {
+        "payload_bytes": 512,
+        "sequence": 0,
+        "tos": 0
+      },
+      {
+        "payload_bytes": 512,
+        "sequence": 1,
+        "tos": 0
+      },
+      {
+        "payload_bytes": 512,
+        "sequence": 2,
+        "tos": 0
+      },
+      {
+        "payload_bytes": 512,
+        "sequence": 3,
+        "tos": 0
+      }
+    ],
+    "received": 5000,
+    "tos_counts": {
+      "0": 5000
+    }
+  },
+  "sent": {
+    "elapsed_ns": 999873779,
+    "sent": 5000
+  }
+}

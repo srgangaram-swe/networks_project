@@ -72,10 +72,10 @@ jobs:
       - name: Export all completed observations and attempt accounting
         if: always()
         run: |
-          if test -f .local/campaign/plan.json; then
+          if sudo test -f .local/campaign/plan.json; then
             sudo .venv/bin/python scripts/export_pilot.py .local/campaign --output .local/evidence/pilot
           fi
-          if test -d .local/evidence; then
+          if sudo test -d .local/evidence; then
             sudo chmod -R a+rX .local/evidence
           fi
       - name: Retain the synthetic reference evidence

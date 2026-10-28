@@ -3,6 +3,7 @@ import fcntl
 import os
 import tempfile
 import unittest
+from dataclasses import asdict
 from pathlib import Path
 from threading import Event
 from unittest.mock import patch
@@ -28,7 +29,8 @@ class CampaignTests(unittest.TestCase):
     def fake_trial(self, directory, config, _cancel):
         self.observed.append(config)
         directory.mkdir()
-        atomic_json(directory / "manifest.json", {"state": "completed"})
+        atomic_json(directory / "manifest.json", {"state": "completed", "source": SOURCE})
+        atomic_json(directory / "configuration.json", asdict(config))
 
     def run_campaign(self, **kwargs):
         with (
@@ -186,6 +188,53 @@ class CampaignTests(unittest.TestCase):
             self.run_campaign()
         atomic_json(run / "topology/ownership.json", {"owned": {}})
         self.assertEqual(self.run_campaign()["state"], "completed")
+
+    def test_a_valid_bundle_must_match_its_cell_and_source(self):
+        create_campaign(self.directory, self.raw)
+        result = self.run_campaign()
+        run = self.directory / result["attempts"][0]["directory"]
+        config = read_json(run / "configuration.json")
+        atomic_json(run / "configuration.json", dict(config, aggregate_bps=1))
+        with self.assertRaisesRegex(ValueError, "planned cell"):
+            self.run_campaign()
+        atomic_json(run / "configuration.json", config)
+        manifest = read_json(run / "manifest.json")
+        atomic_json(run / "manifest.json", dict(manifest, source={}))
+        result["attempts"][0]["manifest_sha256"] = digest(run / "manifest.json")
+        atomic_json(self.directory / "progress.json", result)
+        with self.assertRaisesRegex(ValueError, "source differs"):
+            self.run_campaign()
+
+    def test_digest_and_persistence_errors_preserve_the_workload_error(self):
+        create_campaign(self.directory, self.raw)
+        original = OSError("workload failed first")
+
+        def fail(directory, *_):
+            directory.mkdir()
+            atomic_json(directory / "manifest.json", {"state": "failed"})
+            raise original
+
+        def save(path, value):
+            if value.get("state") == "stopped":
+                raise OSError("cannot save ledger")
+            atomic_json(path, value)
+
+        def checksum(path):
+            if path.name == "manifest.json":
+                raise OSError("cannot read attempt")
+            return digest(path)
+
+        with (
+            patch("src.campaign.run_trial", side_effect=fail),
+            patch("src.campaign.atomic_json", side_effect=save),
+            patch("src.campaign.digest", side_effect=checksum),
+        ):
+            with self.assertRaises(OSError) as caught:
+                execute_campaign(self.directory)
+        self.assertIs(caught.exception, original)
+        self.assertEqual(len(original.__notes__), 2)
+        self.assertIn("digest also failed", original.__notes__[0])
+        self.assertIn("Saving the stopped campaign", original.__notes__[1])
 
     def test_unsupported_execution_settings_fail_before_output_creation(self):
         for key, value in (
