@@ -6,10 +6,13 @@ run in Linux namespaces on one machine.
 
     client endpoint <-> controlled Linux router <-> server endpoint
     foreground RTT       shaping and queues        foreground responder
-    bulk TCP sender      delay and counters        bulk TCP receiver
+    bulk TCP receiver    delay and counters        bulk TCP sender
 
-The diagram is logical. The architecture issue must pin both traffic directions
-and the placement of delay and shaping before it becomes an executable topology.
+This diagram shows logical roles. The candidate protocol sends foreground
+requests from client to server and responses and bulk TCP data from server to
+client. The Linux adapter shapes router egress toward the client and places
+receive delay at both endpoints. The command plan is executable but still
+requires Linux calibration before scientific acceptance.
 
 ## Component boundaries
 
@@ -27,15 +30,23 @@ and the placement of delay and shaping before it becomes an executable topology.
 Shared configuration validation is implemented in src/experiment_config.py.
 The provisional [foreground workload](foreground-workload.md) separates wire
 validation, scheduling and accounting, and socket I/O. Its record validator
-matches the proposed v1 contract in MR #24. The other runtime components remain
-planned. Protocol acceptance is still required before primary collection.
+matches the proposed v1 contract. Portable trial orchestration calls an explicit
+testbed adapter; neither validation nor plotting changes network state.
+Protocol acceptance is still required before primary collection.
 
 The [candidate v1 decision](decisions/0001-measurement-contract.md) defines
 the proposed traffic direction, delay placement, framing, and measurement
 semantics. RequestRecord.from_mapping in src/measurement_contract.py checks
-individual request records. Whole-run validation remains issue #10.
+individual request records. src/bundle_validation.py independently checks whole
+diagnostic bundles, including hashes, phases, counts, flow sets, and units.
 The read-only scripts/inspect_testbed.py command supports the equipment
 inventory without configuring the machine or claiming it is ready.
+
+The foreground client and iperf3 run as separate, bounded child processes.
+Service readiness comes from their output, and shutdown joins the owned child
+sessions before topology cleanup. The two measurement windows remain distinct
+in the data contract. The runner cannot certify primary evidence until their
+alignment and the remaining pilot criteria are resolved.
 
 ## Data flow
 

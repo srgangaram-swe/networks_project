@@ -45,6 +45,7 @@ def main() -> int:
     parser.add_argument("--rate", type=int, default=500)
     parser.add_argument("--duration-ms", type=int, default=90000)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--start-ns", type=int)
     args = parser.parse_args()
     stop = Event()
     previous = {}
@@ -79,6 +80,7 @@ def main() -> int:
                 (args.peer, args.peer_port),
                 allow_isolated=args.allow_isolated,
                 stop=stop,
+                start_ns=args.start_ns,
             )
             save_result(args.output, result)
         print(json.dumps({key: result[key] for key in ("status", "counts", "bind")}))

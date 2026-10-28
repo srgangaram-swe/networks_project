@@ -51,6 +51,31 @@ def endpoint(address: str, port: int, allow_isolated: bool = False) -> tuple[str
     return str(ip), port
 
 
+def _receive_batch(sock: socket.socket, peer: tuple[str, int], collector: Collector) -> None:
+    # A bounded batch leaves time for send deadlines and cancellation even if
+    # unsolicited datagrams arrive continuously.
+    for _ in range(RECEIVE_BATCH):
+        try:
+            payload, source = sock.recvfrom(MESSAGE_BYTES + 1)
+        except BlockingIOError:
+            return
+        received_ns = time.monotonic_ns()
+        if received_ns >= collector.end_ns:
+            return
+        if source != peer:
+            collector.event("wrong_peer", received_ns)
+        else:
+            collector.receive(payload, received_ns)
+
+
+def _poll_timeout(collector: Collector) -> float:
+    timeout = max(0, (collector.next_due_ns - time.monotonic_ns()) / 1e9)
+    if len(collector.records) < collector.plan.total_count:
+        # Short waits near a slot reduce timer coalescing without busy-spinning.
+        timeout = min(PACING_POLL_SECONDS, timeout) if timeout <= 0.005 else timeout - 0.005
+    return min(POLL_SECONDS, timeout)
+
+
 def run_client(
     plan: Workload,
     bind: tuple[str, int],
@@ -58,6 +83,7 @@ def run_client(
     *,
     allow_isolated: bool = False,
     stop: Event | None = None,
+    start_ns: int | None = None,
 ) -> dict:
     bind = endpoint(*bind, allow_isolated)
     peer = endpoint(*peer, allow_isolated)
@@ -73,7 +99,8 @@ def run_client(
         sock.bind(bind)
         sock.setblocking(False)
         poll.register(sock, selectors.EVENT_READ)
-        collector = Collector(plan, time.monotonic_ns() + 20_000_000)
+        start = time.monotonic_ns() + 20_000_000 if start_ns is None else start_ns
+        collector = Collector(plan, start)
         cpu_start = time.process_time_ns()
 
         def send(payload: bytes) -> int:
@@ -89,29 +116,8 @@ def run_client(
                     status = "cancelled"
                     break
                 collector.advance(time.monotonic_ns(), send)
-                timeout = max(0, (collector.next_due_ns - time.monotonic_ns()) / 1e9)
-                if len(collector.records) < plan.total_count:
-                    # Short waits near a send slot reduce timer coalescing on
-                    # general-purpose kernels without a busy-spin loop.
-                    timeout = (
-                        min(PACING_POLL_SECONDS, timeout) if timeout <= 0.005 else timeout - 0.005
-                    )
-                if not poll.select(min(POLL_SECONDS, timeout)):
-                    continue
-                # A bounded batch prevents unsolicited traffic from starving
-                # the next send deadline or the cancellation check.
-                for _ in range(RECEIVE_BATCH):
-                    try:
-                        payload, source = sock.recvfrom(MESSAGE_BYTES + 1)
-                    except BlockingIOError:
-                        break
-                    received_ns = time.monotonic_ns()
-                    if received_ns >= collector.end_ns:
-                        break
-                    if source != peer:
-                        collector.event("wrong_peer", received_ns)
-                    else:
-                        collector.receive(payload, received_ns)
+                if poll.select(_poll_timeout(collector)):
+                    _receive_batch(sock, peer, collector)
         except OSError as exc:
             status = "io_error"
             failure_errno = exc.errno
@@ -124,6 +130,43 @@ def run_client(
         result["peer"] = peer
         result["clock_resolution_seconds"] = time.get_clock_info("monotonic").resolution
         return result
+
+
+def _echo_packet(
+    sock: socket.socket,
+    peer_address: str,
+    budget: ReplyBudget,
+    counts: Counter,
+    end: int,
+) -> None:
+    try:
+        payload, source = sock.recvfrom(MESSAGE_BYTES + 1)
+    except BlockingIOError:
+        return
+    now = time.monotonic_ns()
+    if now >= end:
+        return
+    counts["received"] += 1
+    if source[0] != peer_address:
+        counts["wrong_peer"] += 1
+        return
+    if not budget.allow(now):
+        counts["rate_limited"] += 1
+        return
+    try:
+        decode(payload)
+    except PayloadMismatch:
+        counts["payload_mismatch"] += 1
+        return
+    except ValueError:
+        counts["malformed_request"] += 1
+        return
+    try:
+        if sock.sendto(payload, source) != MESSAGE_BYTES:
+            raise OSError("incomplete datagram send")
+        counts["echoed"] += 1
+    except BlockingIOError:
+        counts["send_would_block"] += 1
 
 
 def run_responder(
@@ -159,34 +202,7 @@ def run_responder(
             while time.monotonic_ns() < end and not stop.is_set():
                 if not poll.select(min(POLL_SECONDS, max(0, (end - time.monotonic_ns()) / 1e9))):
                     continue
-                try:
-                    payload, source = sock.recvfrom(MESSAGE_BYTES + 1)
-                except BlockingIOError:
-                    continue
-                now = time.monotonic_ns()
-                if now >= end:
-                    break
-                counts["received"] += 1
-                if source[0] != peer_address:
-                    counts["wrong_peer"] += 1
-                    continue
-                if not budget.allow(now):
-                    counts["rate_limited"] += 1
-                    continue
-                try:
-                    decode(payload)
-                except PayloadMismatch:
-                    counts["payload_mismatch"] += 1
-                    continue
-                except ValueError:
-                    counts["malformed_request"] += 1
-                    continue
-                try:
-                    if sock.sendto(payload, source) != MESSAGE_BYTES:
-                        raise OSError("incomplete datagram send")
-                    counts["echoed"] += 1
-                except BlockingIOError:
-                    counts["send_would_block"] += 1
+                _echo_packet(sock, peer_address, budget, counts, end)
         except OSError as exc:
             status = "io_error"
             failure_errno = exc.errno

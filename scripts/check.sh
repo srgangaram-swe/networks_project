@@ -7,7 +7,11 @@ PYTHON="${PYTHON:-.venv/bin/python}"
 "$PYTHON" -m coverage erase
 "$PYTHON" -m coverage run -m unittest discover -s tests/unit -v
 "$PYTHON" -m coverage run --append -m unittest discover -s tests/integration -v
+"$PYTHON" -m coverage run --append -m unittest discover -s tests/linux -v
 "$PYTHON" -m coverage report
+mkdir -p .local
+"$PYTHON" -m coverage json -o .local/coverage.json
+"$PYTHON" scripts/check_branch_coverage.py .local/coverage.json
 "$PYTHON" scripts/validate_config.py configs/primary.json
 "$PYTHON" scripts/check_repository.py
 sh -n scripts/check.sh
