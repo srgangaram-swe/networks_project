@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "protocol_status": "proposed",
+  "status": "completed",
+  "config": {
+    "warmup_ms": 0,
+    "measurement_ms": 1000,
+    "drain_ms": 2000,
+    "requests_per_second": 2,
+    "max_in_flight": 1024
+  },
+  "start_ns": 1000000000,
+  "measurement_start_ns": 1000000000,
+  "measurement_end_ns": 2000000000,
+  "planned_end_ns": 4000000000,
+  "finished_ns": 4000001000,
+  "incomplete_deadlines": 0,
+  "counts": {
+    "warmup": {
+      "on_time": 0,
+      "late": 0,
+      "timeout": 0,
+      "not_sent": 0
+    },
+    "measurement": {
+      "on_time": 2,
+      "late": 0,
+      "timeout": 0,
+      "not_sent": 0
+    }
+  },
+  "event_counts": {},
+  "events_dropped": 0,
+  "events": [],
+  "records": [
+    {
+      "schema_version": 1,
+      "request_id": 0,
+      "scheduled_ns": 1000000000,
+      "sent_ns": 1000001000,
+      "received_ns": 1001001000
+    },
+    {
+      "schema_version": 1,
+      "request_id": 0,
+      "scheduled_ns": 1500000000,
+      "sent_ns": 1500001000,
+      "received_ns": 1501001000
+    }
+  ],
+  "client_process_cpu_ns": 1000000,
+  "socket_error_errno": null,
+  "bind": [
+    "127.0.0.1",
+    42001
+  ],
+  "peer": [
+    "127.0.0.1",
+    42000
+  ],
+  "clock_resolution_seconds": 1e-09
+}

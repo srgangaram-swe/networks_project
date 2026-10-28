@@ -1,0 +1,9 @@
+{
+  "eligible_for_primary": false,
+  "purpose": "development_diagnostics",
+  "request_count": 6000,
+  "requests_sha256": "de2d91179a66c42ac036669f8778895c365f1002b5a60c8cde2de24bfaa165d9",
+  "run_count": 6,
+  "schema_version": 1,
+  "summary_sha256": "7ac99a289a6b22d51346a23eed855abfafaf122ed47570d05c335a431cd7ede9"
+}
