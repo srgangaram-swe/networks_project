@@ -33,9 +33,12 @@ runs, their plot, and the remaining criteria for starting the Linux pilot.
 
 The [candidate measurement contract](docs/decisions/0001-measurement-contract.md)
 is ready for team review, with tests for request records and deadline handling.
-The [equipment checklist](docs/equipment-inventory.md) explains the read-only
-local inspection command. Hardware availability and permissions are still
-unconfirmed; neither the contract tests nor inspection certify a testbed.
+The [equipment checklist](docs/equipment-inventory.md) records the received
+mini PC, two adapters, and two cables. The two Linux endpoint computers are
+not available yet. Follow the [NucBox setup guide](docs/nucbox-setup.md) to use
+the mini PC as a single Linux namespace host and the Mac for development.
+Linux installation, device compatibility, and permission checks remain open.
+The read-only inspection and portable plans do not certify a testbed.
 
 The proposal's target is a 50% reduction in foreground p99 added latency under
 saturating load while retaining at least 90% of FIFO's bulk goodput. These are

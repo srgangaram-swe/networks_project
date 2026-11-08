@@ -13,6 +13,7 @@ mkdir -p .local
 "$PYTHON" -m coverage json -o .local/coverage.json
 "$PYTHON" scripts/check_branch_coverage.py .local/coverage.json
 "$PYTHON" scripts/validate_config.py configs/primary.json
+"$PYTHON" scripts/verify_testbed_contract.py
 "$PYTHON" scripts/check_repository.py
 sh -n scripts/check.sh
 git diff --check

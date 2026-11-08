@@ -13,8 +13,8 @@ six items retain unmet criteria; promoting this source does not complete them.
 
 | Item | Implemented or preserved | Remaining acceptance evidence |
 |---|---|---|
-| #2: Protocol and contracts | Candidate transport, framing, timing, queue profiles, metric definitions, block design, and strict request contract | Scientific protocol acceptance, calibrated load tolerances, and final Linux version pins |
-| #3: Equipment and access | Read-only inventory command, Linux prerequisites, isolated namespace fallback, and hardware handoff procedure | Equipment arrival, owner permission, NIC and kernel checks, booking, and inventory review |
+| #2: Protocol and contracts | Candidate transport, framing, timing, queue profiles, metric definitions, block design, strict request contract, and a versioned command snapshot checked before namespace setup | Scientific protocol acceptance, calibrated load tolerances, and final Linux version pins |
+| #3: Equipment and access | Received mini PC, two adapters and two cables; bounded read-only hardware inspection; first-boot guide; four-policy unloaded namespace setup check | Linux setup and device checks on the received unit, two Linux endpoint computers, owner permission, booking, and inventory review |
 | #4: Course requirements and related work | Four published references, comparison, workload rationale, and a requirements-to-evidence checklist | Official final rubric and dates, plus the second-reader source check |
 | #5: Topology | Complete namespace implementation with real Linux checks for both routes and RTT directions, endpoint offloads, cancellation, partial setup rollback, repeated cleanup, and preservation of unrelated namespaces | Physical hardware inventory and experiment calibration remain in #3 and #11 |
 | #6: Queue profiles | Four fixed candidate profiles, matched nominal rate, endpoint receive delay, DS-field sanitation, and bounded-priority filter plan; Linux attachment checks passed | Effective-setting and traffic/counter verification, rate calibration, and forged-mark tests |
@@ -24,10 +24,13 @@ six items retain unmet criteria; promoting this source does not complete them.
 | #10: Bundle validation | Complete schema-v1 integrity validator with hash and semantic checks, receiver-duration cross-checks, complete labeled fixtures, and corrupt/incomplete CLI regressions | Primary eligibility stays disabled; future collector schema changes must update the validator with #9 |
 | #11: Pilot readiness | Local diagnostic workflow, per-run summaries, reproducible plots, and an explicit refusal to admit diagnostic runs as primary evidence | Cross-policy Linux pilot, bottleneck and overhead calibration, cleanup inspection, and recorded scientific go/no-go decision |
 
-The experiment hardware and official final rubric were unavailable on October
-27, 2026. A disposable GitHub-hosted Linux runner was available for the separate
-manual namespace integration check. That check does not calibrate the eventual
-hardware; repeat it there before collecting experiment data.
+On November 7, 2026, Saif reported that the mini PC, adapters, and two cables
+had arrived. Linux has not been installed or configured by the team on the
+newly unboxed unit. The two Linux endpoint computers are unavailable, and the
+official final rubric remains unconfirmed. The single-host namespace path
+can use the NucBox after Linux setup, with the Mac handling development.
+Hosted Linux checks do not calibrate that hardware; repeat them on the unit
+before collecting experiment data.
 
 ## What the checks establish
 

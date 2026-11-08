@@ -74,8 +74,8 @@ eligibility remain separate; every current bundle is ineligible for primary use.
 
 | Item | Evidence already present | Missing criterion |
 |---|---|---|
-| #2 | Candidate protocol, metric definitions, request contract, worked examples, randomization and estimator choices | Team protocol review, acceptance of the remaining choices, calibrated tolerances and final tool pins |
-| #3 | Inventory checklist, read-only inspection, supported hosted namespace fallback | Actual equipment owners and availability, NIC compatibility, booking, capture tooling, and reviewed permission/inventory |
+| #2 | Candidate protocol, metric definitions, request contract, worked examples, randomization, estimator choices, and recorded command plans checked before namespace setup | Team protocol review, acceptance of the remaining choices, calibrated tolerances and final tool pins |
+| #3 | Received mini PC, two adapters and two cables; updated inventory, bounded hardware inspection, first-boot instructions and unloaded namespace setup command | Linux setup and physical verification on the received unit, two endpoint computers, NIC compatibility, booking, and reviewed permission/inventory |
 | #4 | Four checked primary references, related-work comparison, workload rationale, deliverable checklist | Official rubric and dates, followed by the required second-reader check |
 | #6 | Executable profiles, recorded queue snapshots, positive traffic counters, fresh-topology reset | Effective shaping equivalence, packet/counter cross-checks, and verification of the accepted bounded-priority rule |
 | #9 | Explicit lifecycle, source/configuration provenance, saved randomized schedule, real trials for every policy | Integrated matrix execution and replacement tracking, exact window alignment, and final primary-run evidence collection |

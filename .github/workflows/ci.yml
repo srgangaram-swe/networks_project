@@ -11,6 +11,10 @@ on:
         description: Run privileged namespace checks on this disposable hosted runner
         type: boolean
         default: false
+      nucbox_setup:
+        description: Run only the unloaded namespace setup check on a disposable Linux runner
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -84,5 +88,46 @@ jobs:
         with:
           name: namespace-pilot-evidence
           path: .local/evidence
+          if-no-files-found: warn
+          retention-days: 30
+  nucbox-setup:
+    name: nucbox-setup
+    if: github.event_name == 'workflow_dispatch' && inputs.nucbox_setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: python -m venv .venv
+      - run: .venv/bin/python -m pip install -r requirements-dev.txt
+      - name: Install isolated setup tools
+        run: |
+          sudo apt-get update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iproute2 iperf3 ethtool iputils-ping tcpdump kmod
+      - name: Check the candidate and collect local inspection evidence
+        run: |
+          mkdir -p .local
+          .venv/bin/python scripts/verify_testbed_contract.py
+          .venv/bin/python scripts/inspect_hardware.py > .local/hardware-inventory.json
+      - name: Exercise unloaded setup and cleanup for all four policies
+        run: sudo .venv/bin/python scripts/nucbox_smoke.py run --output .local/nucbox-smoke --authorized-isolated-host
+      - name: Make retained setup evidence readable
+        if: always()
+        run: |
+          if sudo test -d .local/nucbox-smoke; then
+            sudo chmod -R a+rX .local/nucbox-smoke
+          fi
+      - name: Retain setup evidence separately from pilot measurements
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unloaded-namespace-setup-evidence
+          path: |
+            .local/hardware-inventory.json
+            .local/nucbox-smoke
           if-no-files-found: warn
           retention-days: 30

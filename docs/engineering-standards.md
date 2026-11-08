@@ -54,6 +54,9 @@ scheduling and cleanup, so they are not real-time guarantees.
 | Command output | O(B) for B output bytes | O(B), with a 1 MiB default combined-output cap and 32 MiB absolute cap; every command has a deadline |
 | Topology and policy planning | O(1) for the fixed three-role topology | Fixed commands and resources; no arbitrary host-interface input |
 | Trial schedule | O(C) for C cells | O(C), at most 10,000 configured cells |
+| Candidate command verification | O(C + B) for C fixed planned command bytes and B recorded bytes | O(C + B), with a 64 KiB contract file limit; runs before namespace mutation |
+| Hardware inspection | O(N log N) for deterministic ordering of N interfaces, with O(N) reads and 13 bounded command probes | At most 32 interfaces, 256 bytes per sysfs attribute, and 16 KiB per command; each command has a three-second deadline |
+| Unloaded hardware setup check | Four sequential bounded namespace trials | Four summary entries; existing workload and subprocess limits apply; no automatic retries |
 | Bundle validation | O(N + E + B) for records, events, and artifact bytes | O(N + E + B); each JSON artifact is at most 32 MiB, with smaller manifest and configuration limits |
 | Per-run diagnostic statistics | O(N log N) | O(N); each metric is sorted once within a run |
 | Diagnostic export | Sum of per-run validation and summary costs | At most 20 runs and 200,000 exported request rows |
