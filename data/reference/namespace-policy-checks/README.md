@@ -22,5 +22,7 @@ Other profiles cleared incoming marks. Each record includes received DS-field
 counts and an eight-packet tcpdump sample from the synthetic testbed.
 
 Reproduce with the privileged policy tests in docs/namespace-pilot.md. The
-first complete cross-policy pilot and its figure are still pending. Primary
-collection remains a no-go, and no team review is implied by these checks.
+later complete cross-policy pilot and its inspected figure are described in
+[the pilot report](../../../docs/namespace-pilot.md). These records still refer
+to the earlier run. Primary collection remains a no-go, and no team review is
+implied by these checks.

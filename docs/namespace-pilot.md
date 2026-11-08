@@ -106,8 +106,56 @@ one-flow and eight-flow regressions with ten seconds of warmup passed. See
 and limits. A new campaign is required because the source has changed.
 
 The [retained policy observations](../data/reference/namespace-policy-checks/README.md)
-include the successful checks and identify the failed campaign. The plotting
-entry point is present, but no complete pilot dataset or rendered pilot figure
-has been produced. Hosted execution of the complete campaign and export is
-the next verification step. MR #32 remains a draft while measurement-window
-alignment, calibration, and scientific acceptance remain unresolved.
+include the earlier successful checks and identify that failed campaign.
+
+## Complete hosted pilot, November 7, 2026
+
+[Run 42433714699](https://github.com/srgangaram-swe/networks_project/actions/runs/42433714699)
+passed at 3e27a2792df3ed180d2e7adac7c4181a4da1d915. The job exercised the
+NucBox installer on Ubuntu 24.04, then passed 114 unit tests, 51 integration
+tests, and all seven explicitly privileged Linux tests. Branch coverage in
+the portable group was 92.79%. The ordinary group skipped privileged tests;
+the separate Linux group actually ran them.
+
+All 16 campaign attempts completed without replacement, and no planned cell
+was left unattempted. The downloaded export has matching digests and source
+revision, 16 run summaries, and 80,000 distinct measurement request rows. Those
+rows reconcile to 76,973 on-time replies and 3,027 unsent slots, with no timeout
+or late replies. The exported data and attempt ledger were checked locally,
+and the complete pilot figure was rendered and visually inspected.
+
+Each loaded condition has only two ten-second observations:
+
+| Policy | Loaded on-time p99 RTT range (ms) | Bulk receiver goodput range (Mb/s) |
+|---|---:|---:|
+| FIFO | 39.104 to 39.208 | 93.552 to 93.617 |
+| FQ-CoDel | 20.303 to 20.337 | 93.033 to 93.110 |
+| CAKE best effort | 20.172 to 20.181 | 79.141 to 81.605 |
+| CAKE bounded | 20.171 to 20.182 | 83.524 to 83.540 |
+
+These are diagnostic observations, not accepted treatment-effect estimates.
+In particular, lower CAKE TCP goodput must remain visible alongside latency;
+it is not evidence that the goodput-retention target was met. The shared-host
+generator missed 3.78% of measurement slots overall. Investigate calibration,
+generator overhead, and measurement-window alignment on the actual testbed.
+Do not tune policy parameters merely to obtain a favorable outcome.
+
+The run used Python 3.12.16 and iperf 3.16; the local warmup regressions also
+passed with iperf 3.22. This verifies two observed environments, not every
+kernel or tool version. Physical NIC performance and NucBox readiness remain
+unverified. Every bundle is still ineligible for primary collection.
+
+The namespace-pilot-evidence artifact retains the export for 30 days. Download
+it while available and redraw into a fresh path after installing the plotting
+dependencies:
+
+    gh run download 42433714699 --repo srgangaram-swe/networks_project \
+      -n namespace-pilot-evidence -D runs/hosted-pilot-42433714699
+    .venv/bin/python -m pip install -r requirements-plots.txt
+    .venv/bin/python scripts/plot_pilot.py runs/hosted-pilot-42433714699/pilot \
+      --output runs/hosted-pilot-42433714699.png
+
+Archive observations locally before artifact expiration. A new execution is
+an additional observation and will not reproduce identical timing values.
+MR #32 remains a draft while measurement-window alignment, calibration, and
+scientific acceptance remain unresolved.

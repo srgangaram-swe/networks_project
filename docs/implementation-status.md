@@ -20,9 +20,9 @@ six items retain unmet criteria; promoting this source does not complete them.
 | #6: Queue profiles | Four fixed candidate profiles, matched nominal rate, endpoint receive delay, DS-field sanitation, and bounded-priority filter plan; Linux attachment checks passed | Effective-setting and traffic/counter verification, rate calibration, and forged-mark tests |
 | #7: Foreground workload | Paced UDP client and responder, complete slot accounting, bounded framing, deadlines, and real-socket regression tests | Closed after its implementation and tests reached dev; full-system pilot checks remain in #11 |
 | #8: Bulk workload | Complete rate allocation, receiver parsing, bounded lifecycle, one/eight-flow integration, startup-failure rejection, and above-capacity Linux demand checks through the shaped queue | Full-duration calibrated collection remains in #11 |
-| #9: Trial runner | Portable and namespace adapters, explicit phases, failure preservation, source/configuration hashes, CPU scope, queue snapshots, and saved randomized schedules | Exact bulk/foreground window alignment, primary matrix execution, replacement reconciliation, and Linux lifecycle evidence |
+| #9: Trial runner | Portable and namespace adapters, explicit phases, failure preservation, source/configuration hashes, CPU scope, queue snapshots, recorded randomized schedules, and a completed 16-trial Linux pilot with an attempt ledger | Exact bulk/foreground window alignment, primary matrix execution, and final primary-run evidence |
 | #10: Bundle validation | Complete schema-v1 integrity validator with hash and semantic checks, receiver-duration cross-checks, complete labeled fixtures, and corrupt/incomplete CLI regressions | Primary eligibility stays disabled; future collector schema changes must update the validator with #9 |
-| #11: Pilot readiness | Local diagnostic workflow, per-run summaries, reproducible plots, and an explicit refusal to admit diagnostic runs as primary evidence | Cross-policy Linux pilot, bottleneck and overhead calibration, cleanup inspection, and recorded scientific go/no-go decision |
+| #11: Pilot readiness | Local diagnostic workflow, complete cross-policy Linux mechanics pilot, checked export and rendered figure, per-run summaries, and explicit refusal to admit diagnostic runs as primary evidence | Full-duration bottleneck and generator-overhead calibration, independent data review, and recorded scientific go/no-go decision |
 
 On November 7, 2026, Saif reported that the mini PC, adapters, and two cables
 had arrived. Linux has not been installed or configured by the team on the
@@ -31,6 +31,12 @@ official final rubric remains unconfirmed. The single-host namespace path
 can use the NucBox after Linux setup, with the Mac handling development.
 Hosted Linux checks do not calibrate that hardware; repeat them on the unit
 before collecting experiment data.
+
+The [complete hosted pilot](namespace-pilot.md#complete-hosted-pilot-november-7-2026)
+also exercised the Ubuntu installer and the final-receiver-report workaround
+for iperf's warmup boundary. All 16 cells completed and exported. The retained
+unsent slots and lower CAKE goodput remain reasons to investigate calibration;
+successful execution is not acceptance of those performance characteristics.
 
 ## What the checks establish
 

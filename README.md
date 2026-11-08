@@ -23,13 +23,15 @@ network namespaces and applies the four candidate queue profiles.
 
 Start with [the operating guide](docs/running-experiments.md). The
 [work-item status](docs/implementation-status.md) lists what is implemented and
-what still needs equipment, calibration, or scientific review. A separate manual
-check passed all four namespace profiles on a disposable Ubuntu runner.
-Diagnostic runs are explicitly
-ineligible for the primary experiment, and there are no queue-policy results yet.
+what still needs equipment, calibration, or scientific review. The
+[hosted namespace pilot](docs/namespace-pilot.md) passed all seven privileged
+checks and completed 16 randomized trials on a disposable Ubuntu runner.
+Diagnostic observations remain ineligible for the primary experiment; the
+report retains missed send slots and the lower CAKE TCP goodput.
 
 The [local diagnostic report](docs/pilot-readiness.md) includes six real loopback
-runs, their plot, and the remaining criteria for starting the Linux pilot.
+runs and their plot. The namespace report records the later Linux verification
+and the remaining criteria for primary collection.
 
 The [candidate measurement contract](docs/decisions/0001-measurement-contract.md)
 is ready for team review, with tests for request records and deadline handling.

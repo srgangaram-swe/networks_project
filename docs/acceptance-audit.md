@@ -78,8 +78,8 @@ eligibility remain separate; every current bundle is ineligible for primary use.
 | #3 | Received mini PC, two adapters and two cables; updated inventory, bounded hardware inspection, first-boot instructions and unloaded namespace setup command | Linux setup and physical verification on the received unit, two endpoint computers, NIC compatibility, booking, and reviewed permission/inventory |
 | #4 | Four checked primary references, related-work comparison, workload rationale, deliverable checklist | Official rubric and dates, followed by the required second-reader check |
 | #6 | Executable profiles, recorded queue snapshots, positive traffic counters, fresh-topology reset | Effective shaping equivalence, packet/counter cross-checks, and verification of the accepted bounded-priority rule |
-| #9 | Explicit lifecycle, source/configuration provenance, saved randomized schedule, real trials for every policy | Integrated matrix execution and replacement tracking, exact window alignment, and final primary-run evidence collection |
-| #11 | Six preserved local diagnostics, reproducible figure, Linux lifecycle checks, documented no-go | Calibrated cross-policy pilot, repeated full-duration measurements, independent packet/data review, and a team readiness decision |
+| #9 | Explicit lifecycle, source/configuration provenance, saved randomized schedule, bounded attempt/replacement ledger, and a completed 16-trial Linux diagnostic campaign | Exact window alignment, primary-matrix execution, and final primary-run evidence collection |
+| #11 | Six preserved local diagnostics, completed cross-policy Linux mechanics pilot, checked export and figure, Linux lifecycle tests, documented no-go | Calibrated full-duration measurements, generator overhead assessment, independent packet/data review, and a team readiness decision |
 
 ## Verification evidence
 
@@ -96,3 +96,12 @@ with maximum McCabe complexity 10, repository hygiene, and ShellCheck passed.
 The [fixture instructions](../tests/fixtures/README.md),
 [operating guide](running-experiments.md), and
 [pilot report](pilot-readiness.md) provide reproduction commands and limits.
+
+The later [NucBox software verification](namespace-pilot.md#complete-hosted-pilot-november-7-2026)
+passed 114 unit, 51 integration, and seven privileged tests at 3e27a27. The
+Ubuntu installation path and all 16 diagnostic pilot cells completed. The
+downloaded export reconciles all 80,000 measurement slots and retains 3,027
+unsent slots. The figure was rendered and inspected. This resolves the earlier
+iperf reporting obstacle for the tested environments while preserving strict
+validation. Exact workload-window alignment, actual equipment checks, and
+scientific acceptance remain pending; no additional issue is closed here.
