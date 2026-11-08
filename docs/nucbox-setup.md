@@ -46,6 +46,45 @@ variants put additional modules in linux-modules-extra for that exact kernel.
 Do not assume that a successful package install or modinfo lookup proves that
 a qdisc can attach; the isolated setup check below tests actual attachment.
 
+## Control the NucBox from the Mac
+
+Borrow a monitor or TV with HDMI and a USB keyboard for the first boot. Power
+the NucBox with its supplied adapter. A normal HDMI or USB cable between the
+two computers does not turn the Mac into a display or establish a terminal.
+Once remote access works, the monitor and keyboard can be disconnected.
+
+For the initial management connection, connect one NucBox Ethernet port to
+your home router and keep the Mac on the same local network. This connection
+is for setup and SSH; the namespace experiment does not send its workload
+through that physical port. Guest Wi-Fi or client isolation may prevent the
+computers from reaching each other.
+
+After logging into Ubuntu at the NucBox console, follow the
+[Ubuntu OpenSSH instructions](https://ubuntu.com/server/docs/how-to/security/openssh-server/):
+
+    sudo apt-get install --yes openssh-server
+    sudo systemctl enable --now ssh
+    whoami
+    ip -4 -brief address show scope global
+    sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+
+Keep the username, local Ethernet address, and host-key fingerprint at hand.
+In Terminal on the Mac, replace both placeholders below with those actual
+values. Omit the slash and prefix length shown after the address.
+
+    ssh LINUX_USERNAME@NUCBOX_LAN_IP
+
+Compare the displayed ED25519 fingerprint with the console before accepting
+the first connection. Enter the Linux account password when prompted; Terminal
+does not display password characters. Run the project commands in that SSH
+session. Keep the local console available until a second connection succeeds.
+Use local access only; no router port forwarding is needed.
+
+A direct link is also possible using Mac -> USB Ethernet adapter -> Cat6 ->
+NucBox, but it needs compatible addresses on both ends and an already running
+SSH server. Merely plugging that cable in does not configure a newly unboxed
+computer. The home-router connection avoids that extra initial configuration.
+
 ## Obtain the working code
 
 Run these commands on the NucBox after Linux is ready:
