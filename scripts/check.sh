@@ -16,4 +16,5 @@ mkdir -p .local
 "$PYTHON" scripts/verify_testbed_contract.py
 "$PYTHON" scripts/check_repository.py
 sh -n scripts/check.sh
+sh -n scripts/setup_nucbox.sh
 git diff --check

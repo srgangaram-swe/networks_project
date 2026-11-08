@@ -31,8 +31,15 @@ routes, and firewall rules alone. Pull-request events cannot enable this job.
 
 The separate nucbox_setup manual input runs the four unloaded namespace setup
 checks on another disposable hosted Linux job. It has no hardware credentials,
-does not deploy to the NucBox, and does not run the blocked randomized pilot.
+does not deploy to the NucBox, and does not run the randomized loaded pilot.
 Its source/configuration checks and ownership rules match the local setup path.
 The hardware inspection command only reads local tool and sysfs evidence.
 Default-route discovery is informational; no reported interface becomes
 authorized for mutation, including when route discovery fails.
+
+The NucBox installer is a separate, explicit --install action for Ubuntu 24.04.
+It uses sudo only for distribution packages, then prepares the local Python
+environment and runs checks as the calling account. It requires a non-root
+caller and never starts traffic or modifies physical network configuration.
+The manual Linux campaign job tests this installation path on a disposable
+host. Installing packages is not a vulnerability audit or device certification.

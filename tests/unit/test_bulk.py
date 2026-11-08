@@ -29,6 +29,7 @@ def report(flows=1):
                     "sender": False,
                     "start": 0,
                     "end": 1,
+                    "seconds": 1,
                     "bytes": 1_000_000,
                 },
             }
@@ -51,6 +52,8 @@ class BulkTests(unittest.TestCase):
             args = client_command(plan, "127.0.0.1", "127.0.0.1", 5201, linux=True)
             self.assertEqual(args[args.index("-b") + 1], str(rate // 8))
             self.assertEqual(args[-2:], ("-C", "cubic"))
+            self.assertEqual(args[args.index("-i") + 1], "0")
+            self.assertEqual(args[args.index("-O") + 1], "10")
         self.assertIn("--forceflush", server_command("127.0.0.1", 5201))
 
     def test_receiver_bytes_are_the_source_of_goodput(self):
@@ -93,6 +96,17 @@ class BulkTests(unittest.TestCase):
         data["start"]["connected"][-1]["socket"] = 0
         with self.assertRaises(ValueError):
             summarize_bulk(data, BulkPlan(8_000_000, 8, 1))
+
+    def test_interval_duration_and_end_totals_must_agree(self):
+        for field, value in (("seconds", 2), ("seconds", False), ("bytes", 999_999)):
+            data = report()
+            data["intervals"][0]["sum"][field] = value
+            with self.assertRaises(ValueError):
+                summarize_bulk(data, BulkPlan(8_000_000, 1, 1))
+        data = report()
+        data["end"]["sum_received"]["seconds"] = 1.1
+        with self.assertRaisesRegex(ValueError, "end summary"):
+            summarize_bulk(data, BulkPlan(8_000_000, 1, 1))
 
     def test_bounds_and_destinations(self):
         for args in ((10, 8, 1), (8, True, 1), (8, 2, 1), (8, 1, 0)):

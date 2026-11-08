@@ -42,7 +42,7 @@ jobs:
           sudo apt-get update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3
       - run: sh scripts/check.sh
-      - run: shellcheck scripts/check.sh
+      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh
   branch-policy:
     name: branch-policy
     runs-on: ubuntu-24.04
@@ -65,10 +65,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m venv .venv
-      - name: Install isolated testbed tools
-        run: |
-          sudo apt-get update
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3 iproute2 ethtool iputils-ping tcpdump
+      - name: Install and check the NucBox software path
+        run: sh scripts/setup_nucbox.sh --install
       - name: Exercise all four namespace profiles
         run: sudo env NETWORKS_RUN_PRIVILEGED=1 NETWORKS_EVIDENCE_DIR=.local/evidence/policy-checks .venv/bin/python -m unittest discover -s tests/linux -v
       - name: Run the fixed randomized pilot

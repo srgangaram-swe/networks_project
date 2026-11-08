@@ -96,11 +96,18 @@ passed all seven privileged tests, including the capacity and packet checks.
 Its 16-cell campaign stopped at the first attempted cell: the iperf receiver
 intervals had a gap after warmup. A separate local run with ten seconds of
 warmup reproduced inconsistent interval boundaries. The parser correctly
-rejected that report. Investigation of the workload tool and its timing is
-still pending; do not relax interval validation to make this campaign pass.
+rejected that report, and its regression fixture remains rejected.
+
+The collector now disables periodic reports with -i 0 while retaining warmup,
+measurement duration, pacing, and stream count. It requires the final receiver
+interval to agree with its declared duration and the end summary. Real local
+one-flow and eight-flow regressions with ten seconds of warmup passed. See
+[the reporting decision](decisions/0002-bulk-final-report.md) for the evidence
+and limits. A new campaign is required because the source has changed.
 
 The [retained policy observations](../data/reference/namespace-policy-checks/README.md)
 include the successful checks and identify the failed campaign. The plotting
 entry point is present, but no complete pilot dataset or rendered pilot figure
-has been produced. MR #32 remains a draft until the workload defect is resolved
-and the Linux campaign and export are verified.
+has been produced. Hosted execution of the complete campaign and export is
+the next verification step. MR #32 remains a draft while measurement-window
+alignment, calibration, and scientific acceptance remain unresolved.

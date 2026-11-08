@@ -92,9 +92,17 @@ Run these commands on the NucBox after Linux is ready:
     git clone https://github.com/srgangaram-swe/networks_project.git
     cd networks_project
     git switch feat/6-9-11-pilot-evidence
-    python3 -m venv .venv
-    .venv/bin/python -m pip install -r requirements-dev.txt
-    sh scripts/check.sh
+    sh scripts/setup_nucbox.sh --plan
+    sh scripts/setup_nucbox.sh --install
+
+Run the installer as your ordinary Linux account. It requests sudo for the
+distribution packages, prepares this checkout's .venv, and runs the portable
+checks. Package update, installation, and pip each have a five-minute deadline;
+a failed step stops the script. Apt may retain installed packages after an
+interruption; inspect the error before rerunning the same idempotent setup.
+The script supports Ubuntu 24.04 LTS and Python 3.12 or newer. Other releases
+need manual preparation and verification. Use --plan on the Mac. Installation
+never starts experiment traffic, modifies physical NICs, or installs an OS.
 
 Record git rev-parse HEAD before running a test. This branch contains the
 unmerged pilot work and the equipment setup additions. After it is merged,
@@ -140,7 +148,9 @@ On the NucBox, after confirming permission to create isolated namespaces:
 This executes four two-second foreground measurements, one per queue policy,
 with a two-second drain per trial. Each trial uses fresh owned namespaces.
 There is no bulk traffic and no warmup. This is an unloaded setup and cleanup
-check; it does not exercise or resolve the known iperf warmup-reporting defect.
+check. The separate loaded pilot exercises the
+[final-report workaround](decisions/0002-bulk-final-report.md) for iperf's
+warmup-reporting defect.
 It changes no physical NIC, host route, or host-wide forwarding setting.
 
 The output directory must not exist, and its parent must already exist.
@@ -168,8 +178,8 @@ and use the existing cleanup command for that exact directory:
 Replace fifo with the actual failed policy. Never delete namespaces by name
 pattern. Correct the cause, retain the failed output, and choose a fresh
 directory for a new smoke check. Consult [the operating guide](running-experiments.md)
-for recovery details. The full randomized pilot still has the documented
-timing blocker in [the pilot notes](namespace-pilot.md).
+for recovery details. See [the pilot notes](namespace-pilot.md) for the loaded
+campaign and its remaining measurement limits.
 
 ## When two Linux endpoint computers become available
 
