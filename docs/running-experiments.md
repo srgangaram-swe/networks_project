@@ -168,3 +168,10 @@ and explicit acknowledgement of the authorized host. Commands have bounded
 runtime and output, and subprocesses use argument arrays without a shell.
 The complete resource and complexity bounds are in
 [engineering standards](engineering-standards.md).
+
+## Comparing Queing Policies
+
+After experiments are performed, policies can be compared using analyis module from main project directory:
+
+python -m analysis.analysis_policy_comparison path/to/data --output /path/to/results
+
