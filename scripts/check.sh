@@ -4,6 +4,8 @@ cd "$(dirname "$0")/.."
 PYTHON="${PYTHON:-.venv/bin/python}"
 "$PYTHON" -m ruff check src scripts tests analysis
 "$PYTHON" -m ruff format --check src scripts tests analysis
+"$PYTHON" -m ruff check experiments/cpp_network_testing
+"$PYTHON" -m ruff format --check experiments/cpp_network_testing
 "$PYTHON" -m coverage erase
 "$PYTHON" -m coverage run -m unittest discover -s tests/unit -v
 "$PYTHON" -m coverage run --append -m unittest discover -s tests/integration -v

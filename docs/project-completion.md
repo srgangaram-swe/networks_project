@@ -8,6 +8,10 @@ still needed to finish the experiment, report, and demonstration.
 
 The integration branch for this work preserves the pilot implementation and
 Jonathan Lloyd's original analysis commit. Neither teammate's branch is rewritten.
+Chris Ong's C++ TCP prototype is also retained with its original history. Its
+build, exact-frame validation, loopback binding, bounded harness, sanitizer
+checks, and real-socket regressions are documented in
+[the prototype guide](../experiments/cpp_network_testing/README.md).
 
 | Stage | Code and current scope |
 |---|---|

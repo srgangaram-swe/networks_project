@@ -14,6 +14,7 @@ from analysis.utils.compare_policies import compare_policies
 from analysis.utils.load_data import load_data
 from analysis.utils.match_baselines import match_baselines
 from analysis.utils.summarize_runs import summarize_runs
+from analysis.writeup import write_summary
 from src.artifacts import atomic_json, digest
 from src.run_bundle import source_identity
 
@@ -70,7 +71,7 @@ def analyze(
         "confidence": 0.95,
         "minimum_blocks_for_interval": 3,
         "ml": model,
-        "comparisons": json.loads(comparisons.to_json(orient="records")),
+        "comparisons": json.loads(comparisons.to_json(orient="records", double_precision=15)),
         "versions": {
             name: importlib.metadata.version(name)
             for name in ("numpy", "pandas", "scikit-learn", "scipy")
@@ -92,6 +93,7 @@ def _write_results(output, summaries, matched, comparisons, assignments, report,
         ):
             frame.to_csv(output / f"{name}.csv", index=False, mode="x")
         summarize_runs(summaries).to_csv(output / "run_statistics.csv", mode="x")
+        write_summary(output, summaries, report)
         if plots:
             comparison_plot(matched, comparisons, output / "policy_comparisons.png")
             clustering_plot(assignments, output / "run_clusters.png")

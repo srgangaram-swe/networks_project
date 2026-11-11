@@ -66,6 +66,23 @@ jobs:
         with:
           persist-credentials: false
       - run: python3 scripts/branch_policy.py
+  cpp-prototype:
+    name: cpp-prototype
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install C++ prototype tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends cmake g++ libboost-dev clang-format
+      - run: cmake -S experiments/cpp_network_testing -B build/cpp-network-probe -DCMAKE_BUILD_TYPE=Debug
+      - run: cmake --build build/cpp-network-probe --parallel 2
+      - run: ctest --test-dir build/cpp-network-probe --output-on-failure
+      - run: clang-format --dry-run --Werror experiments/cpp_network_testing/server_host.cpp experiments/cpp_network_testing/server_client.cpp
+      - run: shellcheck experiments/cpp_network_testing/timing.sh
   linux-namespaces:
     name: linux-namespaces
     if: github.event_name == 'workflow_dispatch' && inputs.linux_namespaces

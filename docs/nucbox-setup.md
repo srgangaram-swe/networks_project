@@ -102,7 +102,9 @@ a failed step stops the script. Apt may retain installed packages after an
 interruption; inspect the error before rerunning the same idempotent setup.
 The script supports Ubuntu 24.04 LTS and Python 3.12 or newer. Other releases
 need manual preparation and verification. Use --plan on the Mac. Installation
-never starts experiment traffic, modifies physical NICs, or installs an OS.
+never starts a privileged experiment, modifies physical NICs, or installs an OS.
+Its tests send local loopback traffic. The installer also installs C++ build
+tools, builds Chris's retained prototype, and runs its sanitizer-backed checks.
 
 Record git rev-parse HEAD before running a test. This branch contains the
 unmerged pilot work and the equipment setup additions. After it is merged,

@@ -62,6 +62,9 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(report["runs"], 16)
         self.assertFalse(report["eligible_for_primary"])
         self.assertTrue((output / "run_clusters_tsne.png").exists())
+        self.assertIn("Primary eligibility: false", (output / "diagnostic_summary.txt").read_text())
+        self.assertIn("Unavailable ratios", (output / "diagnostic_summary.txt").read_text())
+        self.assertIn(r"cake\_bounded", (output / "writeup_table.tex").read_text())
         for name, checksum in report["artifacts"].items():
             self.assertEqual(digest(output / name), checksum)
         with self.assertRaises(FileExistsError):
@@ -143,4 +146,24 @@ class WorkflowTests(unittest.TestCase):
             match_baselines(runs),
             compare_policies(runs, n_resamples=100),
             self.root / "censored.png",
+        )
+        import json
+
+        from analysis.writeup import write_summary
+
+        write_summary(
+            self.root,
+            runs,
+            {
+                "runs": len(runs),
+                "unobserved_planned_cells": 0,
+                "bootstrap_seed": 562,
+                "resamples": 100,
+                "comparisons": json.loads(
+                    compare_policies(runs, n_resamples=100).to_json(orient="records")
+                ),
+            },
+        )
+        self.assertIn(
+            "added on-time p99 unavailable", (self.root / "diagnostic_summary.txt").read_text()
         )

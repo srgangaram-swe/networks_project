@@ -1,12 +1,41 @@
+import signal
+import subprocess
 import sys
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, call, patch
 
-from src.processes import CommandError, run_command, terminate
+from src.processes import CommandError, _signal_group, run_command, terminate
 
 
 class ProcessTests(unittest.TestCase):
+    def test_darwin_zombie_group_requires_reaped_child_and_disappeared_group(self):
+        child = MagicMock(pid=12345)
+        denied = PermissionError("group excludes exited processes")
+        with (
+            patch("src.processes.sys.platform", "darwin"),
+            patch("src.processes.os.killpg", side_effect=[denied, ProcessLookupError]) as send,
+        ):
+            _signal_group(child, signal.SIGTERM)
+        child.wait.assert_called_once_with(timeout=0.1)
+        self.assertEqual(send.call_args_list, [call(12345, signal.SIGTERM), call(12345, 0)])
+
+    def test_live_or_unverified_permission_failure_remains_an_error(self):
+        for platform, wait_error, signals in (
+            ("linux", None, [PermissionError("denied")]),
+            ("darwin", subprocess.TimeoutExpired("owned", 0.1), [PermissionError("denied")]),
+            ("darwin", None, [PermissionError("denied"), None]),
+            ("darwin", None, [PermissionError("denied"), PermissionError("still denied")]),
+        ):
+            child = MagicMock(pid=12345)
+            child.wait.side_effect = wait_error
+            with (
+                patch("src.processes.sys.platform", platform),
+                patch("src.processes.os.killpg", side_effect=signals),
+            ):
+                with self.assertRaises(PermissionError):
+                    _signal_group(child, signal.SIGTERM)
+
     def test_cleanup_failure_preserves_command_failure_and_closes_pipes(self):
         children = []
 

@@ -20,6 +20,9 @@ run_statistics.csv, policy_comparisons.csv, run_clusters.csv, three PNG figures,
 and report.json with input and output hashes, source identity, package versions,
 seeds, model settings, counts, and limitations. A failure retains partial output
 with a failed status. Success never upgrades diagnostic data to primary evidence.
+The output also contains diagnostic_summary.txt and writeup_table.tex, which
+provide the observed point estimates and context for drafting the report.
+They preserve unavailable values and do not generate final research conclusions.
 
 The complete NucBox command runs collection and this analysis together. See
 [the setup guide](../docs/nucbox-setup.md#run-the-complete-initial-experiment).

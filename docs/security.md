@@ -40,6 +40,8 @@ authorized for mutation, including when route discovery fails.
 The NucBox installer is a separate, explicit --install action for Ubuntu 24.04.
 It uses sudo only for distribution packages, then prepares the local Python
 environment and runs checks as the calling account. It requires a non-root
-caller and never starts traffic or modifies physical network configuration.
+caller and never launches a privileged experiment or modifies physical network
+configuration. Its portable checks use local loopback traffic. It also builds
+and checks the retained C++ prototype with sanitizer instrumentation.
 The manual Linux campaign job tests this installation path on a disposable
 host. Installing packages is not a vulnerability audit or device certification.
