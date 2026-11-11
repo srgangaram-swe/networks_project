@@ -20,4 +20,5 @@ mkdir -p .local
 sh -n scripts/check.sh
 sh -n scripts/setup_nucbox.sh
 sh -n scripts/check_analysis.sh
+sh -n scripts/setup_environment.sh
 git diff --check

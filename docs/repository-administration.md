@@ -1,6 +1,9 @@
 # Repository administration
 
 The three long-lived branches are dev, prod, and main.
+Dev is the default landing branch so visitors see the current pipeline,
+analysis preview, and setup instructions. Prod and main keep their candidate
+and release roles. Changing the landing branch does not approve primary data.
 The initial repository snapshot seeds all three. Subsequent work follows the
 review and promotion flow in CONTRIBUTING.md.
 

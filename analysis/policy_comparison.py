@@ -3,6 +3,7 @@
 import argparse
 import importlib.metadata
 import json
+import platform
 import sys
 from pathlib import Path
 
@@ -56,6 +57,11 @@ def analyze(
         "state": "writing",
         "eligible_for_primary": False,
         "runs": len(summaries),
+        "runtime": {
+            "python": platform.python_version(),
+            "system": platform.system(),
+            "machine": platform.machine(),
+        },
         "analysis_source": {
             **source_identity(ROOT),
             "module_sha256": {
@@ -77,7 +83,7 @@ def analyze(
         "comparisons": json.loads(comparisons.to_json(orient="records", double_precision=15)),
         "versions": {
             name: importlib.metadata.version(name)
-            for name in ("numpy", "pandas", "scikit-learn", "scipy")
+            for name in ("numpy", "pandas", "scikit-learn", "scipy", "matplotlib", "seaborn")
         },
     }
     _write_results(output, summaries, matched, comparisons, assignments, report, plots)

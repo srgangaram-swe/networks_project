@@ -1,0 +1,10 @@
+{
+  "attempts_sha256": "8cc512fad72ad01bf42d673850924ab5e3a8e2ec1c39abe2a3861afe24741ad2",
+  "eligible_for_primary": false,
+  "purpose": "development_diagnostics",
+  "request_count": 80000,
+  "requests_sha256": "2db1e83fb8e13e02e80cd6980784b9261ade27b4267fcb77ada090e3e429b7ea",
+  "run_count": 16,
+  "schema_version": 1,
+  "summary_sha256": "9a06e9fead7f75bd66550cf5c926d9f1067cef929cc9d3f5257703f9f6f43475"
+}
