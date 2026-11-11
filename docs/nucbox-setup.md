@@ -1,6 +1,6 @@
 # NucBox setup with the available equipment
 
-Related work items: #2 and #3. Updated November 7, 2026.
+Related work items: #2 and #3. Updated November 11, 2026.
 
 Saif has received a GMKtec NucBox, two Monoprice Cat6 outdoor patch cables,
 and two 2.5 Gb/s USB Ethernet adapters. The mini PC is believed to be the G9;
@@ -91,7 +91,7 @@ Run these commands on the NucBox after Linux is ready:
 
     git clone https://github.com/srgangaram-swe/networks_project.git
     cd networks_project
-    git switch feat/14-analysis-and-run-clustering
+    git switch dev
     sh scripts/setup_nucbox.sh --plan
     sh scripts/setup_nucbox.sh --install
 
@@ -106,10 +106,9 @@ never starts a privileged experiment, modifies physical NICs, or installs an OS.
 Its tests send local loopback traffic. The installer also installs C++ build
 tools, builds Chris's retained prototype, and runs its sanitizer-backed checks.
 
-Record git rev-parse HEAD before running a test. This branch contains the
-unmerged pilot work and the equipment setup additions. After it is merged,
-use the reviewed dev revision instead of assuming a moving branch is a fixed
-experiment version. Keep local observations under .local or runs.
+Record git rev-parse HEAD before running a test. Use the reviewed dev revision
+and keep that checkout unchanged during a campaign. A moving branch is not a
+fixed experiment version. Keep local observations under .local or runs.
 
 ## Inspect without changing the network
 
@@ -216,8 +215,50 @@ never rerun into an existing one. Individual campaign recovery still uses the
 retained attempt ledger and exact namespace ownership journal. Missing analysis
 dependencies mean the installer has not completed; do not skip the checks.
 
-This command runs the initial pilot. The full 280-run collection still needs
-the readiness work in [the completion checklist](project-completion.md).
+The analysis also writes diagnostic_summary.txt and writeup_table.tex. Use
+these with the checked CSV tables, figures, and report.json when drafting the
+results and limitations. They retain failed targets and missing intervals.
+
+## Plan the larger diagnostic matrix
+
+The default remains the 16-trial pilot. An explicit option uses the 280-cell
+planning matrix, with ten blocks, 60-second measurements, and ten-second
+warmups. It remains diagnostic, with primary eligibility set to false.
+Review [the completion checklist](project-completion.md) before scheduling it.
+Warmup and measurement alone require about 5 hours 27 minutes, plus setup,
+drain, validation, export, and analysis. Keep power and the controlling session
+available throughout. Do not use a long collection as a substitute for calibration.
+
+    .venv/bin/python scripts/nucbox_experiment.py plan --diagnostic-matrix
+    sudo .venv/bin/python scripts/nucbox_experiment.py run --diagnostic-matrix \
+      --output runs/nucbox-matrix-01 --authorized-isolated-host
+
+The exporter divides the 8.4 million measured request slots into 47 batches
+of at most six runs. Each batch stays below 200,000 request rows. The export
+root retains the full attempt ledger and a hash-bound index. Analysis accepts
+that root directly and validates one batch's requests at a time:
+
+    sudo .venv/bin/python -m analysis.policy_comparison \
+      runs/nucbox-matrix-01/export --output runs/nucbox-matrix-analysis-02
+
+Do not pass both the root and its batch directories; that duplicates runs.
+An incomplete export index is rejected. Retain it, investigate the failed
+operation, then export the unchanged campaign into a fresh directory.
+For an interrupted campaign, inspect owned resources first, correct the cause,
+and resume the retained plan without changing source or configuration:
+
+    sudo .venv/bin/python scripts/campaign.py --resume \
+      --output runs/nucbox-matrix-01/campaign \
+      --replacement-reason "Describe the investigated interruption and correction" \
+      --authorized-isolated-host
+
+Completed cells are skipped; a failed cell gets a new recorded attempt, with
+at most three attempts per cell. After recovery, run scripts/export_pilot.py
+with the campaign path and a fresh --output directory, then analyze that export.
+The top-level status.json retains the original failure; the campaign ledger
+and new export document the recovery. No command promotes observations to
+primary evidence. Exact workload timing, calibration, and protocol review
+remain necessary before the primary experiment.
 
 ## When two Linux endpoint computers become available
 

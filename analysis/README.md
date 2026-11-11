@@ -42,12 +42,16 @@ recorded block. Missing baselines, duplicate cells, unmatched requests, and
 changed source identities fail instead of triggering an average-baseline fallback.
 Run IDs, policies, blocks, and measured outcomes are never silently dropped.
 
-Up to 20 exports can be supplied as positional inputs. They must be disjoint
+Up to 128 exports can be supplied as positional inputs. They must be disjoint
 chunks of the same recorded campaign and source, with at most 20 runs and
 200,000 requests per export. Requests are checked one export at a time; the
 combined analysis keeps at most 400 run rows. These are current diagnostic
-bounds. They do not enable the disabled 280-run primary collector. Legacy CPU
-fields may be absent; new exports retain shared-host CPU scope and percentages.
+bounds. A batched export root can also be supplied directly; its completed index
+binds every batch's provenance and the full campaign attempt ledger. An incomplete
+index, changed hash, or duplicate run fails before analysis output is created.
+The explicit 280-cell diagnostic matrix exports 47 batches of at most six runs.
+Legacy CPU fields may be absent; new exports retain shared-host CPU scope and
+percentages. Neither execution nor analysis grants primary eligibility.
 
 ## Statistical estimates
 

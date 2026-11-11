@@ -35,7 +35,7 @@ def attach_design(summaries: pd.DataFrame, design: dict) -> pd.DataFrame:
         raise ValueError("recorded schedule differs from configuration")
     cells = {cell["cell_id"]: cell for cell in schedule["cells"]}
     attempts = design["attempts"]
-    if not isinstance(attempts, list) or len(attempts) > 120:
+    if not isinstance(attempts, list) or len(attempts) > 840:
         raise ValueError("invalid attempt ledger size")
     completed = [row for row in attempts if row["status"] == "completed"]
     if len(completed) != len(summaries):
@@ -76,10 +76,13 @@ def _design_row(row, by_digest, cells, source, cohort):
     }
 
 
-def load_data(export_dir: str | Path):
+def load_data(export_dir: str | Path, *, binding: dict | None = None):
     """At most 20 runs and 200,000 requests per export; O(bytes + N log N)."""
     directory = Path(export_dir)
     raw_provenance = read_bytes(directory / "provenance.json", 65536)
+    binding = binding or {}
+    if binding and hashlib.sha256(raw_provenance).hexdigest() != binding["provenance_sha256"]:
+        raise ValueError("batch provenance hash does not match export index")
     provenance = parse_json(raw_provenance)
     if (
         type(provenance["schema_version"]) is not int
@@ -104,11 +107,14 @@ def load_data(export_dir: str | Path):
             "design_bound_to_export": "attempts_sha256" in provenance,
         }
         design = parse_json(data)
+        if binding and design.get("campaign_ledger_sha256") != binding["campaign_ledger_sha256"]:
+            raise ValueError("batch design does not match campaign ledger")
         summaries = attach_design(summaries, design)
         provenance["planned_cells"] = len(design["plan"]["schedule"]["cells"])
         provenance["noncompleted_attempts"] = sum(
             a["status"] != "completed" for a in design["attempts"]
         )
     provenance["export_provenance_sha256"] = hashlib.sha256(raw_provenance).hexdigest()
+    provenance.update(binding)
     requests = requests.merge(summaries[["run_id", "policy"]], on="run_id", validate="many_to_one")
     return summaries, requests, provenance

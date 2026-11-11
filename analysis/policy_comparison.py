@@ -16,6 +16,7 @@ from analysis.utils.match_baselines import match_baselines
 from analysis.utils.summarize_runs import summarize_runs
 from analysis.writeup import write_summary
 from src.artifacts import atomic_json, digest
+from src.export_batches import MAX_ANALYSIS_RUNS, export_inputs
 from src.run_bundle import source_identity
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,11 +27,13 @@ def analyze(
 ) -> dict:
     if output.exists() or output.is_symlink():
         raise FileExistsError("choose an unused analysis output directory")
-    if not 1 <= len(directories) <= 20:
-        raise ValueError("analyze between one and twenty bounded exports")
     frames, inputs = [], []
-    for directory in directories:
-        summaries, _, provenance = load_data(directory)
+    run_count = 0
+    for directory, binding in export_inputs(directories):
+        summaries, _, provenance = load_data(directory, binding=binding)
+        run_count += len(summaries)
+        if run_count > MAX_ANALYSIS_RUNS:
+            raise ValueError("analysis exceeds 400 run rows")
         frames.append(summaries)
         inputs.append(provenance)
     summaries = pd.concat(frames, ignore_index=True)

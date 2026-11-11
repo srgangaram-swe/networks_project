@@ -1,5 +1,6 @@
 """Plots retain individual runs, missing intervals, and exploratory ML labels."""
 
+import math
 from pathlib import Path
 
 import matplotlib
@@ -83,10 +84,13 @@ def clustering_plot(assignments, destination: Path, projection: str = "pca") -> 
     if assignments.empty:
         return
     conditions = list(assignments.groupby(["requested_mbps", "flows"], sort=True))
-    fig, axes = plt.subplots(1, len(conditions), figsize=(7 * len(conditions), 6), squeeze=False)
+    columns = min(2, len(conditions))
+    rows = math.ceil(len(conditions) / columns)
+    height = 5 * rows + 1
+    fig, axes = plt.subplots(rows, columns, figsize=(7 * columns, height), squeeze=False)
     x, y = ("pc1", "pc2") if projection == "pca" else ("tsne1", "tsne2")
     display = "PCA" if projection == "pca" else "t-SNE"
-    for axis, ((load, flows), rows) in zip(axes[0], conditions, strict=True):
+    for axis, ((load, flows), rows) in zip(axes.flat, conditions, strict=False):
         sns.scatterplot(
             data=rows,
             x=x,
@@ -102,6 +106,8 @@ def clustering_plot(assignments, destination: Path, projection: str = "pca") -> 
             xlabel=f"{display} dimension 1",
             ylabel=f"{display} dimension 2",
         )
+    for axis in list(axes.flat)[len(conditions) :]:
+        axis.set_visible(False)
     fig.suptitle(f"{display}: exploratory run profiles", fontsize=16)
     fig.text(
         0.03,
@@ -112,7 +118,7 @@ def clustering_plot(assignments, destination: Path, projection: str = "pca") -> 
         "No held-out prediction, causal claim, or automatic run exclusion.",
         fontsize=10,
     )
-    fig.tight_layout(rect=(0, 0.15, 1, 0.94))
+    fig.tight_layout(rect=(0, 1.1 / height, 1, 1 - 0.4 / height))
     _save(fig, destination)
 
 

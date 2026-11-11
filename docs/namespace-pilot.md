@@ -46,8 +46,10 @@ understood, continue the same source revision explicitly:
 A replacement points to the previous attempt and records the reason. The
 previous observations and manifest digest stay in the ledger. Each cell has
 at most three attempts. A source or schedule change requires a separate
-campaign. The executable pilot is capped at 40 cells; the 280-cell primary
-plan remains disabled pending protocol and pilot acceptance.
+campaign. The default executable pilot is capped at 40 cells. The
+[NucBox guide](nucbox-setup.md) documents an explicit 280-cell diagnostic mode
+and bounded exports. That mode retains primary eligibility as false; protocol,
+timing, and calibration acceptance remain pending.
 
 ## Policy checks and predeclared tolerances
 

@@ -250,6 +250,23 @@ class CampaignTests(unittest.TestCase):
             create_campaign(self.directory, self.raw, 61)
         self.assertFalse(self.directory.exists())
 
+    def test_matrix_is_explicit_retained_bounded_and_resumable(self):
+        raw = read_json(ROOT / "configs/primary.json")
+        with self.assertRaisesRegex(ValueError, "40 cells"):
+            create_campaign(self.directory, raw)
+        self.assertFalse(self.directory.exists())
+        create_campaign(self.directory, raw, diagnostic_matrix=True)
+        plan = read_json(self.directory / "plan.json")
+        self.assertEqual(plan["kind"], "virtual_testbed_diagnostic_matrix")
+        self.assertEqual(len(plan["schedule"]["cells"]), 280)
+        result = self.run_campaign()
+        self.assertEqual(result["state"], "completed")
+        self.assertEqual(len(self.observed), 280)
+        self.assertEqual(self.run_campaign(), result)
+        self.assertEqual(len(self.observed), 280)
+        with self.assertRaisesRegex(ValueError, "280 cells"):
+            resolve_trials(dict(raw, repetitions=11), 10, diagnostic_matrix=True)
+
 
 if __name__ == "__main__":
     unittest.main()

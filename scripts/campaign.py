@@ -1,4 +1,4 @@
-"""Run or explicitly continue a small randomized Linux namespace pilot."""
+"""Run or explicitly continue a recorded diagnostic Linux namespace campaign."""
 
 import argparse
 import json
@@ -20,6 +20,7 @@ def main() -> int:
     parser.add_argument("--config", type=Path)
     parser.add_argument("--warmup-seconds", type=int, default=10)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--diagnostic-matrix", action="store_true")
     parser.add_argument("--replacement-reason", default="")
     parser.add_argument("--authorized-isolated-host", action="store_true")
     args = parser.parse_args()
@@ -32,12 +33,19 @@ def main() -> int:
             raise PermissionError("namespace pilot requires --authorized-isolated-host")
         require_linux()
         if args.resume:
-            if args.config is not None:
-                raise ValueError("resume uses the retained plan; omit --config")
+            if args.config is not None or args.diagnostic_matrix:
+                raise ValueError(
+                    "resume uses the retained plan; omit --config and --diagnostic-matrix"
+                )
         else:
             if args.config is None or args.replacement_reason:
                 raise ValueError("a new campaign needs --config and no replacement reason")
-            create_campaign(args.output, read_json(args.config, 65536), args.warmup_seconds)
+            create_campaign(
+                args.output,
+                read_json(args.config, 65536),
+                args.warmup_seconds,
+                diagnostic_matrix=args.diagnostic_matrix,
+            )
         result = execute_campaign(
             args.output, replacement_reason=args.replacement_reason, cancel=cancel
         )

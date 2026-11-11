@@ -1,4 +1,4 @@
-"""One recorded namespace pilot from inspection through statistical and ML analysis."""
+"""One recorded diagnostic campaign from inspection through statistical and ML analysis."""
 
 import argparse
 import json
@@ -18,12 +18,16 @@ from src.topology_runtime import require_linux  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def plan() -> dict:
-    configuration = read_json(ROOT / "configs/pilot.json", 65536)
-    schedule, _ = resolve_trials(configuration, 10)
+def plan(diagnostic_matrix: bool = False) -> dict:
+    name = "primary.json" if diagnostic_matrix else "pilot.json"
+    configuration = read_json(ROOT / "configs" / name, 65536)
+    schedule, _ = resolve_trials(configuration, 10, diagnostic_matrix=diagnostic_matrix)
     return {
         "schema_version": 1,
-        "kind": "virtual_testbed_diagnostic_pilot",
+        "kind": "virtual_testbed_diagnostic_matrix"
+        if diagnostic_matrix
+        else "virtual_testbed_diagnostic_pilot",
+        "diagnostic_matrix": diagnostic_matrix,
         "configuration": configuration,
         "trials": len(schedule["cells"]),
         "setup": smoke_plan(),
@@ -34,14 +38,16 @@ def plan() -> dict:
     }
 
 
-def run(directory: Path, authorized: bool, cancel: Event) -> dict:
+def run(
+    directory: Path, authorized: bool, cancel: Event, *, diagnostic_matrix: bool = False
+) -> dict:
     if not authorized:
         raise PermissionError("execution requires --authorized-isolated-host")
     require_linux()
     from analysis.policy_comparison import analyze
     from scripts.export_pilot import export
 
-    resolved = plan()
+    resolved = plan(diagnostic_matrix)
     if cancel.is_set():
         raise InterruptedError("experiment cancelled before setup")
     directory.mkdir(mode=0o700)
@@ -53,7 +59,12 @@ def run(directory: Path, authorized: bool, cancel: Event) -> dict:
         _stage(directory, report, "setup_check", cancel)
         run_smoke(directory / "setup", True, cancel)
         _stage(directory, report, "campaign", cancel)
-        create_campaign(directory / "campaign", resolved["configuration"], 10)
+        create_campaign(
+            directory / "campaign",
+            resolved["configuration"],
+            10,
+            diagnostic_matrix=diagnostic_matrix,
+        )
         execute_campaign(directory / "campaign", cancel=cancel)
         _stage(directory, report, "export", cancel)
         export(directory / "campaign", directory / "export")
@@ -86,6 +97,7 @@ def main() -> int:
     parser.add_argument("action", choices=("plan", "run"))
     parser.add_argument("--output", type=Path)
     parser.add_argument("--authorized-isolated-host", action="store_true")
+    parser.add_argument("--diagnostic-matrix", action="store_true")
     args = parser.parse_args()
     cancel = Event()
     previous = {
@@ -95,9 +107,14 @@ def main() -> int:
         if args.action == "run" and args.output is None:
             raise ValueError("run requires a fresh --output directory")
         result = (
-            plan()
+            plan(args.diagnostic_matrix)
             if args.action == "plan"
-            else run(args.output, args.authorized_isolated_host, cancel)
+            else run(
+                args.output,
+                args.authorized_isolated_host,
+                cancel,
+                diagnostic_matrix=args.diagnostic_matrix,
+            )
         )
         print(json.dumps(result, indent=2, sort_keys=True))
     except InterruptedError as error:

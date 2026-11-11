@@ -1,4 +1,4 @@
-"""Execute a bounded pilot schedule while retaining every attempted cell."""
+"""Execute a bounded diagnostic schedule while retaining every attempted cell."""
 
 import fcntl
 import os
@@ -15,9 +15,16 @@ from src.schedule import make_schedule
 from src.trial import ROOT, TrialConfig, run_trial
 
 MAX_PILOT_CELLS = 40
+MAX_MATRIX_CELLS = 280
+PLAN_BYTES = 262144
+# Up to 840 attempts, including two 1,024-character notes per attempt.
+# Escaped non-BMP characters can use twelve bytes per character.
+PROGRESS_BYTES = 32 * 1024 * 1024
 
 
-def resolve_trials(raw: dict, warmup_seconds: int) -> tuple[dict, list[TrialConfig]]:
+def resolve_trials(
+    raw: dict, warmup_seconds: int, *, diagnostic_matrix: bool = False
+) -> tuple[dict, list[TrialConfig]]:
     config = ExperimentConfig.from_mapping(raw)
     bounded_integer(warmup_seconds, "warmup_seconds", 0, 60)
     if (
@@ -27,9 +34,10 @@ def resolve_trials(raw: dict, warmup_seconds: int) -> tuple[dict, list[TrialConf
         config.foreground_requests_per_second,
     ) != (100, 20, 512, 500):
         raise ValueError("the executable topology requires 100 Mb/s, 20 ms, 512 bytes, and 500 rps")
-    if config.total_runs > MAX_PILOT_CELLS:
+    limit = MAX_MATRIX_CELLS if diagnostic_matrix else MAX_PILOT_CELLS
+    if config.total_runs > limit:
         raise ValueError(
-            "pilot execution is limited to 40 cells; primary collection is not approved"
+            f"diagnostic execution is limited to {limit} cells; primary collection is not approved"
         )
     schedule = make_schedule(config)
     trials = [
@@ -46,15 +54,21 @@ def resolve_trials(raw: dict, warmup_seconds: int) -> tuple[dict, list[TrialConf
     return schedule, trials
 
 
-def create_campaign(directory: Path, raw: dict, warmup_seconds: int = 10) -> None:
-    schedule, _ = resolve_trials(raw, warmup_seconds)
+def create_campaign(
+    directory: Path, raw: dict, warmup_seconds: int = 10, *, diagnostic_matrix: bool = False
+) -> None:
+    schedule, _ = resolve_trials(raw, warmup_seconds, diagnostic_matrix=diagnostic_matrix)
     source = source_identity(ROOT)
     directory.mkdir(mode=0o700)
     atomic_json(
         directory / "plan.json",
         {
             "schema_version": 1,
-            "kind": "virtual_testbed_pilot",
+            "kind": (
+                "virtual_testbed_diagnostic_matrix"
+                if diagnostic_matrix
+                else "virtual_testbed_pilot"
+            ),
             "configuration": raw,
             "warmup_seconds": warmup_seconds,
             "source": source,
@@ -72,20 +86,32 @@ def create_campaign(directory: Path, raw: dict, warmup_seconds: int = 10) -> Non
     )
 
 
-def _load(directory: Path) -> tuple[dict, dict, list[TrialConfig]]:
-    plan = read_json(directory / "plan.json", 65536)
-    progress = read_json(directory / "progress.json", 262144)
+def resolve_plan(plan: dict) -> tuple[dict, list[TrialConfig]]:
+    """The retained plan selects the execution bound, including on resume."""
     if (
         not isinstance(plan, dict)
         or plan.keys()
         != {"schema_version", "kind", "configuration", "warmup_seconds", "source", "schedule"}
         or type(plan["schema_version"]) is not int
         or plan["schema_version"] != 1
-        or plan["kind"] != "virtual_testbed_pilot"
+        or plan["kind"] not in {"virtual_testbed_pilot", "virtual_testbed_diagnostic_matrix"}
     ):
         raise ValueError("unsupported campaign plan")
-    schedule, trials = resolve_trials(plan["configuration"], plan["warmup_seconds"])
-    if plan["schedule"] != schedule or plan["source"] != source_identity(ROOT):
+    schedule, trials = resolve_trials(
+        plan["configuration"],
+        plan["warmup_seconds"],
+        diagnostic_matrix=plan["kind"] == "virtual_testbed_diagnostic_matrix",
+    )
+    if plan["schedule"] != schedule:
+        raise ValueError("retained schedule does not match the configuration")
+    return schedule, trials
+
+
+def _load(directory: Path) -> tuple[dict, dict, list[TrialConfig]]:
+    plan = read_json(directory / "plan.json", PLAN_BYTES)
+    progress = read_json(directory / "progress.json", PROGRESS_BYTES)
+    schedule, trials = resolve_plan(plan)
+    if plan["source"] != source_identity(ROOT):
         raise ValueError(
             "campaign schedule or source changed; start a separately identified campaign"
         )
@@ -225,9 +251,12 @@ def _execute(
 def execute_campaign(
     directory: Path, *, replacement_reason: str = "", cancel: Event | None = None
 ) -> dict:
-    """Serial execution, at most 40 cells and three explicitly justified attempts each.
+    """Serial diagnostic execution with three explicitly justified attempts per cell.
+
+    The default pilot has at most 40 cells; an explicit matrix plan permits 280.
 
     O(C + A*N) validation for C cells, A attempts and N records per attempt.
+    Scheduling and retained-ledger writes add O(C*A) metadata work (A <= 3*C).
     Retained evidence grows with attempts; working memory is bounded by one bundle.
     """
     if directory.is_symlink() or not directory.is_dir():

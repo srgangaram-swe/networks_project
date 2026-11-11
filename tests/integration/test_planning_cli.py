@@ -56,6 +56,16 @@ class PlanningCliTests(unittest.TestCase):
                 )
                 self.assertEqual(self.call("check_branch_coverage.py", report).returncode, expected)
 
+    def test_full_matrix_plan_is_portable_and_does_not_authorize_primary_collection(self):
+        result = self.call("nucbox_experiment.py", "plan", "--diagnostic-matrix")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        plan = json.loads(result.stdout)
+        self.assertEqual(plan["trials"], 280)
+        self.assertTrue(plan["diagnostic_matrix"])
+        self.assertFalse(plan["eligible_for_primary"])
+        self.assertFalse(plan["physical_interfaces_modified"])
+        self.assertEqual(plan["configuration"]["measurement_seconds"], 60)
+
 
 if __name__ == "__main__":
     unittest.main()

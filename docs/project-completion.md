@@ -23,7 +23,7 @@ checks, and real-socket regressions are documented in
 | Check and export | scripts/validate_bundle.py and scripts/export_pilot.py verify observations and export outcomes with hashes |
 | Analyze | analysis/policy_comparison.py matches block baselines, bootstraps policy comparisons, and reports missing or censored quantities |
 | Explore ML | analysis/run_clustering.py fits standardized K-means and records PCA and t-SNE projections |
-| Run together | scripts/nucbox_experiment.py runs the initial 16-trial namespace pilot through analysis |
+| Run together | scripts/nucbox_experiment.py runs the 16-trial namespace pilot through analysis; an explicit diagnostic mode supports the 280-cell matrix with bounded exports |
 
 Use the [NucBox guide](nucbox-setup.md) after first boot. Keep the Mac as the
 development and control machine. No physical NIC is selected or reconfigured
@@ -45,20 +45,23 @@ NucBox; it does not measure the adapters or cables.
    across overlapping intervals or relabel these windows as aligned.
 3. Finish #6 and #11 calibration on the actual testbed. Verify the effective
    bottleneck, delay placement, offloads, CUBIC/ECN, queue counters, sender
-   overhead, and bounded-priority behavior. The last hosted pilot retained
-   3.78% unsent slots and lower CAKE TCP goodput. Investigate and retain these
+   overhead, and bounded-priority behavior. Hosted run
+   [43108538117](https://github.com/srgangaram-swe/networks_project/actions/runs/43108538117)
+   retained 2,900 of 80,000 slots as unsent and CAKE goodput below the 90%
+   retention target. Investigate and retain these
    results; they cannot be turned into passing targets by selective exclusion.
-4. Review and enable the full collector for #12 and #13. The current executor
-   deliberately caps campaigns at 40 cells; configs/primary.json plans 280.
-   Full collection needs reviewed readiness criteria, a larger retained attempt
-   ledger, and bounded export batches rather than simply removing the guard.
-   The planned matrix is 40 unloaded and 240 loaded runs, with ten paired blocks
-   and sixty measured seconds per run. At 500 requests/s, it produces 8.4 million
-   measurement slots, so the current 200,000-row export limit needs batching.
-5. Complete #14 against the frozen primary schema and independently review the
-   estimator and plots. The statistical and ML workflow now exists and is tested
-   on diagnostic inputs. Exploratory clusters or t-SNE separation do not approve
-   the dataset, establish causality, or replace the planned policy comparison.
+4. Review readiness for #12 and #13 before primary collection. The explicit
+   diagnostic-matrix mode can execute the 280 planned cells, retains up to three
+   attempts per cell, and exports bounded batches with a full attempt ledger.
+   The matrix is 40 unloaded and 240 loaded runs, with ten paired blocks and
+   sixty measured seconds per run. Its 8.4 million measurement slots produce
+   47 bounded export batches. This execution support does not resolve timing,
+   calibration, or protocol acceptance. All manifests remain diagnostic.
+5. Independently review the estimator and plots when the primary schema and
+   dataset are frozen. The #14 statistical implementation and exploratory ML
+   workflow are tested on diagnostic inputs, including a complete temporary
+   280-cell analysis fixture. Clusters or t-SNE separation do not approve the
+   dataset, establish causality, or replace the planned policy comparison.
 
 ## Finish the course deliverables
 

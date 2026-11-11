@@ -49,8 +49,8 @@ class EntrypointTests(unittest.TestCase):
                 patch.object(
                     nucbox_experiment,
                     "create_campaign",
-                    side_effect=lambda *_: events.append("create"),
-                ),
+                    side_effect=lambda *a, **kw: events.append("create"),
+                ) as created,
                 patch.object(
                     nucbox_experiment,
                     "execute_campaign",
@@ -64,9 +64,11 @@ class EntrypointTests(unittest.TestCase):
                     side_effect=lambda *_: events.append("analysis"),
                 ),
             ):
-                result = nucbox_experiment.run(destination, True, Event())
+                result = nucbox_experiment.run(destination, True, Event(), diagnostic_matrix=True)
             self.assertEqual(events, ["smoke", "create", "campaign", "export", "analysis"])
             self.assertEqual(result["state"], "completed")
+            self.assertTrue(created.call_args.kwargs["diagnostic_matrix"])
+            self.assertEqual(created.call_args.args[1]["repetitions"], 10)
             destination = Path(temporary) / "failed"
             with (
                 patch.object(nucbox_experiment, "require_linux"),

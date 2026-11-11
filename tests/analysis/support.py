@@ -13,13 +13,15 @@ from src.schedule import make_schedule
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def fixture(directory, blocks=3, policies=("fifo", "fq_codel")):
+def fixture(directory, blocks=3, policies=("fifo", "fq_codel"), loads=(1.1,), flows=(1,)):
     config = read_json(ROOT / "configs/pilot.json")
     config.update(
         policies=list(policies),
         repetitions=blocks,
         unloaded_repetitions_per_policy=blocks,
         measurement_seconds=1,
+        background_load_fractions=list(loads),
+        background_flow_counts=list(flows),
     )
     schedule = make_schedule(ExperimentConfig.from_mapping(config))
     source = {"commit": "1" * 40, "tree_sha256": "2" * 64, "dirty": False}
