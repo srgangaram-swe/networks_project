@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from analysis.plots import clustering_plot, comparison_plot
+from analysis.plots import render_plots
 from analysis.run_clustering import cluster_runs
 from analysis.utils.compare_policies import compare_policies
 from analysis.utils.load_data import load_data
@@ -57,6 +57,8 @@ def analyze(
         "state": "writing",
         "eligible_for_primary": False,
         "runs": len(summaries),
+        "plot_bundle_version": 2,
+        "plots_requested": plots,
         "runtime": {
             "python": platform.python_version(),
             "system": platform.system(),
@@ -104,11 +106,13 @@ def _write_results(output, summaries, matched, comparisons, assignments, report,
         summarize_runs(summaries).to_csv(output / "run_statistics.csv", mode="x")
         write_summary(output, summaries, report)
         if plots:
-            comparison_plot(matched, comparisons, output / "policy_comparisons.png")
-            clustering_plot(assignments, output / "run_clusters.png")
-            clustering_plot(assignments, output / "run_clusters_tsne.png", projection="tsne")
+            report["plot_layout"] = render_plots(
+                summaries, matched, comparisons, assignments, report["ml"], output / "plots"
+            )
         report["artifacts"] = {
-            p.name: digest(p) for p in sorted(output.iterdir()) if p.name != "report.json"
+            str(p.relative_to(output)): digest(p)
+            for p in sorted(output.rglob("*"))
+            if p.is_file() and p.name != "report.json"
         }
         report["state"] = "completed"
         atomic_json(output / "report.json", report)

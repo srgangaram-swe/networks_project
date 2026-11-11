@@ -16,13 +16,28 @@ Mac, install those dependencies into the existing virtual environment:
 
 The output directory must be new and its parent must exist. The command writes
 every input run to runs.csv, recorded pairings to matched_baselines.csv,
-run_statistics.csv, policy_comparisons.csv, run_clusters.csv, three PNG figures,
+run_statistics.csv, policy_comparisons.csv, run_clusters.csv, a plots directory,
 and report.json with input and output hashes, source identity, package versions,
 seeds, model settings, counts, and limitations. A failure retains partial output
 with a failed status. Success never upgrades diagnostic data to primary evidence.
 The output also contains diagnostic_summary.txt and writeup_table.tex, which
 provide the observed point estimates and context for drafting the report.
 They preserve unavailable values and do not generate final research conclusions.
+
+The [plot guide and preliminary gallery](plots/README.md) describes each figure.
+Three statistical figures are always rendered when plots are enabled: paired
+policy estimates, scheduled-request outcomes, and mean per-run RTT quantiles.
+Four additional figures show available fitted clusters in PCA, t-SNE, physical
+latency/goodput units, and centroid/membership heatmaps. Every figure has PNG
+and SVG copies. A condition without a valid cluster fit keeps its measurements
+and unavailable status rather than receiving an invented cluster.
+
+Keys have a reserved band outside the data panels. Before saving, the renderer
+checks that legends do not overlap data panels and visible text stays inside
+the image. The report records these checks and hashes every nested plot.
+Visual inspection of the published gallery supplements these geometric checks.
+The earlier reference output retains its original three-figure format; the
+integrity checker recognizes both artifact versions.
 
 The complete NucBox command runs collection and this analysis together. See
 [the setup guide](../docs/nucbox-setup.md#run-the-complete-initial-experiment).

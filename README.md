@@ -7,6 +7,13 @@ when short request-response messages share a bottleneck with bulk TCP traffic.
 The question is how much foreground delay each policy can avoid while retaining
 bulk goodput.
 
+The pipeline creates an isolated Linux client-router-server topology, applies
+one queue policy, generates paced foreground requests alongside bulk traffic,
+and retains the measurements and cleanup record. Analysis checks those exports,
+matches each loaded run to its unloaded baseline, compares policies within
+randomized blocks, and produces statistical tables and exploratory ML figures.
+The Mac supports development and analysis; the NucBox will run collection.
+
 [Run the pipeline](#run-the-analysis-on-macos-or-linux) |
 [NucBox collection](#collect-on-the-nucbox) |
 [Docker and YAML](#run-analysis-with-docker-compose) |
@@ -14,7 +21,7 @@ bulk goodput.
 [Analysis definitions](analysis/README.md) |
 [Remaining work](docs/project-completion.md)
 
-## Diagnostic results
+## Analysis: preliminary namespace results
 
 This preview comes from [Linux workflow 43111991762](https://github.com/srgangaram-swe/networks_project/actions/runs/43111991762),
 source e3ddaff. It contains 16 randomized namespace trials and 80,000 measured
@@ -34,18 +41,33 @@ The proposed targets are a 50% reduction in added p99 and at least 90% of FIFO's
 bulk goodput. Both CAKE variants fell below the goodput target in this pilot.
 Unsent requests and the small number of blocks still need investigation.
 
-![Policy comparisons with every matched run and two-block point estimates](data/reference/namespace-pilot-2026-11-11/analysis/policy_comparisons.png)
+![Policy comparisons with every matched latency run and two-block point estimates](analysis/plots/preliminary/policy_comparisons.png)
 
 ### Exploratory run profiles
 
 K-means fits six standardized run metrics within each load/flow condition.
 PCA and t-SNE show those same metrics in two dimensions. Policy names are only
 plot labels, and separated groups do not establish causality or predictive accuracy.
-Click either image to inspect the full figure.
+Shape identifies policy and color identifies the fitted cluster. Keys sit below
+the data panels. Click an image to inspect the full figure.
+
+![The fitted clusters shown in measured TCP goodput and on-time p99 latency](analysis/plots/preliminary/run_clusters_metrics.png)
+
+![Standardized cluster centroids and actual policy membership counts](analysis/plots/preliminary/cluster_profiles.png)
 
 | PCA | t-SNE |
 |---|---|
-| ![PCA view of the eight loaded diagnostic runs](data/reference/namespace-pilot-2026-11-11/analysis/run_clusters.png) | ![Seeded t-SNE view of the same eight loaded runs](data/reference/namespace-pilot-2026-11-11/analysis/run_clusters_tsne.png) |
+| ![PCA view of the eight loaded diagnostic runs](analysis/plots/preliminary/run_clusters.png) | ![Seeded t-SNE view of the same eight loaded runs](analysis/plots/preliminary/run_clusters_tsne.png) |
+
+### Delivery and latency diagnostics
+
+The delivery chart includes unsent slots, so low reported RTT cannot hide
+generator omissions. The quantile chart compares means of per-run on-time RTT
+percentiles on a shared scale; it does not pool requests across runs.
+
+![Scheduled request outcomes by policy in unloaded and loaded runs](analysis/plots/preliminary/request_outcomes.png)
+
+![Mean per-run on-time RTT percentiles in unloaded and loaded runs](analysis/plots/preliminary/tail_quantiles.png)
 
 Browse the [comparison CSV](data/reference/namespace-pilot-2026-11-11/analysis/policy_comparisons.csv),
 [per-run statistics](data/reference/namespace-pilot-2026-11-11/analysis/run_statistics.csv),
@@ -53,6 +75,51 @@ Browse the [comparison CSV](data/reference/namespace-pilot-2026-11-11/analysis/p
 and [full provenance and model settings](data/reference/namespace-pilot-2026-11-11/analysis/report.json).
 The [reference directory](data/reference/namespace-pilot-2026-11-11/README.md)
 contains the exact export needed to rebuild these results.
+The [figure gallery](analysis/plots/README.md) includes vector copies and the
+source, input hashes, and layout checks for this revised presentation. The
+original reference export and its earlier analysis remain unchanged.
+
+## Insights
+
+FQ-CoDel is the most useful lead from this pilot: its mean added p99 was close
+to both CAKE variants while retaining 99.37% of FIFO goodput. The CAKE variants
+had slightly different point estimates of delay, but both retained less than
+90% of FIFO goodput. Delay alone would therefore give an incomplete picture
+of the proposed performance targets.
+
+The fitted clusters also need a careful reading. All four CAKE runs fall in
+one cluster; FIFO and FQ-CoDel share the other despite their very different
+latency. The model uses six standardized metrics, including goodput, jitter,
+and unsent rate. Cluster membership describes a combined run profile, not
+which policy is best. The physical-unit view and centroid heatmap make that
+distinction easier to see than a t-SNE projection alone.
+
+## Findings
+
+Across these 16 trials, 3,192 of 80,000 measurement slots were not sent. Zero
+timeout or late outcomes therefore does not mean every scheduled request
+received a reply. Unsent slots remain a measurement-quality concern, and
+on-time RTT describes only the requests represented in those quantiles.
+
+The loaded comparison has eight runs, with two paired blocks per policy.
+The analysis reports point estimates and leaves confidence intervals
+unavailable. The fixed two-cluster fit is exploratory; these data do not
+establish stable population structure, causal mechanisms, or predictive accuracy.
+
+## Conclusions and next experiment
+
+The diagnostic workflow has been exercised from Linux collection through
+checked export, statistical analysis, clustering, and figures. This gives us
+a reproducible starting point for the hardware campaign and the final report.
+It does not establish the result on the NucBox or its Ethernet adapters.
+
+Next, set up the NucBox, inspect its interfaces and queue support, investigate
+generator omissions, and resolve the collection-window and calibration checks
+in [the completion checklist](docs/project-completion.md). Freeze the reviewed
+protocol before primary collection, then repeat the paired comparisons with
+the planned independent blocks. The report and presentation should use that
+evidence, including any missed targets, rather than treating this preview as
+the final experiment.
 
 ## Run the analysis on macOS or Linux
 
@@ -99,9 +166,11 @@ choose a new name for each rebuild. Input data is never overwritten.
 | matched_baselines.csv | Same-policy, same-block unloaded baseline for each loaded run |
 | policy_comparisons.csv | Added latency, relative effects, goodput retention, interval status, and point targets |
 | run_clusters.csv | Cluster assignments and PCA/t-SNE coordinates |
-| policy_comparisons.png | Policy means, all matched runs, and available uncertainty |
-| run_clusters.png and run_clusters_tsne.png | Exploratory PCA and t-SNE panels |
-| report.json | Input/output hashes, source identities, settings, counts, and limitations |
+| plots/policy_comparisons.png and .svg | Policy means, all matched latency runs, and available uncertainty |
+| plots/request_outcomes.png and plots/tail_quantiles.png, plus .svg copies | Full delivery accounting and mean per-run RTT percentiles |
+| plots/run_clusters.png, plots/run_clusters_tsne.png, and plots/run_clusters_metrics.png, plus .svg copies | The same fitted assignments in PCA, t-SNE, and physical units |
+| plots/cluster_profiles.png and .svg | Standardized centroids and policy membership counts |
+| report.json | Input/output hashes, source identities, settings, counts, layout checks, and limitations |
 | diagnostic_summary.txt and writeup_table.tex | Readable results and a LaTeX table for drafting the report |
 
 A completed report still has primary eligibility set to false. Read interval
