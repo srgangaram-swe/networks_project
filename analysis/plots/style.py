@@ -1,5 +1,6 @@
 """Shared figure layout with a reserved key and caption band."""
 
+from io import BytesIO
 from pathlib import Path
 
 import matplotlib
@@ -181,7 +182,12 @@ def save_figure(fig, destination: Path):
             if extension == "svg":
                 metadata["Date"] = None
             with destination.with_suffix(f".{extension}").open("xb") as stream:
-                fig.savefig(stream, format=extension, dpi=200, metadata=metadata)
+                with BytesIO() as rendered:
+                    fig.savefig(rendered, format=extension, dpi=200, metadata=metadata)
+                    payload = rendered.getvalue()
+                if extension == "svg":
+                    payload = b"\n".join(line.rstrip() for line in payload.splitlines()) + b"\n"
+                stream.write(payload)
         return result
     finally:
         plt.close(fig)

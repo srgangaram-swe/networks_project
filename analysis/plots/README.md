@@ -16,8 +16,12 @@ data and analysis. New analysis writes these figures under its own plots directo
 | [RTT quantiles](preliminary/tail_quantiles.png) | Means of per-run on-time p50, p95, p99, and p99.9, on a common color scale. These are not pooled-request quantiles. |
 
 Each PNG has an SVG copy with the same basename. Open the full image for readable
-labels or use the vector copy in a report. The gallery manifest binds the input
-and figure hashes, analysis source, layout checks, and visual review.
+labels or use the vector copy in a report. The [gallery manifest](preliminary/manifest.json)
+binds the input and figure hashes, analysis source, layout checks, and visual
+review. The [assignment CSV](preliminary/run_clusters.csv) retains every plotted
+run and its projection coordinates. Nearby points can overlap in physical units;
+the membership heatmap shows the full counts. Seeded t-SNE coordinates can vary
+across numerical environments, so the manifest records the runtime and settings.
 
 There are only two paired blocks per policy and eight loaded runs. Confidence
 intervals are unavailable. FQ-CoDel retained about 99.37% of FIFO goodput;

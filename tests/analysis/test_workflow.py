@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import patch
 
@@ -72,6 +73,9 @@ class WorkflowTests(unittest.TestCase):
         for layout in report["plot_layout"].values():
             self.assertEqual(layout["legend_overlap_count"], 0)
             self.assertEqual(layout["text_overflow_count"], 0)
+        for vector in (output / "plots").glob("*.svg"):
+            self.assertEqual(ET.parse(vector).getroot().tag, "{http://www.w3.org/2000/svg}svg")
+            self.assertTrue(all(line == line.rstrip() for line in vector.read_bytes().splitlines()))
         self.assertIn("Primary eligibility: false", (output / "diagnostic_summary.txt").read_text())
         self.assertIn("Unavailable ratios", (output / "diagnostic_summary.txt").read_text())
         self.assertIn(r"cake\_bounded", (output / "writeup_table.tex").read_text())
