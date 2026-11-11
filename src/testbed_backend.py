@@ -6,6 +6,7 @@ from pathlib import Path
 from src.artifacts import parse_json
 from src.processes import run_command
 from src.queue_policy import check_queue_kinds, policy_commands
+from src.testbed_contract import verify_contract
 from src.topology import CLIENT_ADDRESS, SERVER_ADDRESS, Topology, inspection_commands
 from src.topology_runtime import OwnedTopology, require_linux
 
@@ -28,6 +29,7 @@ class Backend:
         if self.mode == "loopback":
             return
         require_linux()
+        verify_contract()
         # Check the policy before creating any resources.
         commands = policy_commands(self.topology, self.policy)
         self.lease = OwnedTopology.create(self.directory / "topology", self.topology)

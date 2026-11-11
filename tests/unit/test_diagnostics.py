@@ -29,6 +29,9 @@ class DiagnosticTests(unittest.TestCase):
             self.assertEqual(summary["jitter_ms"], 0)
             self.assertEqual(summary["jitter_pairs"], 499)
             self.assertEqual(summary["send_lag_p99_ms"], 0.001)
+            cpu = read_json(bundle.directory / "cpu.json")
+            self.assertEqual(summary["cpu_scope"], cpu["scope"])
+            self.assertEqual(summary["cpu_busy_percent"], cpu["busy_percent"])
             self.assertEqual(len(rows), 500)
             self.assertEqual(rows[0]["elapsed_seconds"], 0)
             destination = root / "synthetic-export"

@@ -6,9 +6,9 @@ primary evidence. Changing the frozen protocol requires a decision record.
 
 The [candidate v1 contract](decisions/0001-measurement-contract.md) supplies
 concrete workload, metric, queue, and scheduling choices for team review.
-It is not yet accepted. Equipment and access remain unconfirmed in the
-[inventory](equipment-inventory.md); do not start collection from the planning
-configuration alone.
+It is not yet accepted. Received equipment and outstanding Linux and access
+checks are recorded in the [inventory](equipment-inventory.md); do not start
+collection from the planning configuration alone.
 
 ## Research question and treatments
 

@@ -23,19 +23,31 @@ network namespaces and applies the four candidate queue profiles.
 
 Start with [the operating guide](docs/running-experiments.md). The
 [work-item status](docs/implementation-status.md) lists what is implemented and
-what still needs equipment, calibration, or scientific review. A separate manual
-check passed all four namespace profiles on a disposable Ubuntu runner.
-Diagnostic runs are explicitly
-ineligible for the primary experiment, and there are no queue-policy results yet.
+what still needs equipment, calibration, or scientific review. The
+[hosted namespace pilot](docs/namespace-pilot.md) passed all seven privileged
+checks and completed 16 randomized trials on a disposable Ubuntu runner.
+Diagnostic observations remain ineligible for the primary experiment; the
+report retains missed send slots and the lower CAKE TCP goodput.
 
 The [local diagnostic report](docs/pilot-readiness.md) includes six real loopback
-runs, their plot, and the remaining criteria for starting the Linux pilot.
+runs and their plot. The namespace report records the later Linux verification
+and the remaining criteria for primary collection.
 
 The [candidate measurement contract](docs/decisions/0001-measurement-contract.md)
 is ready for team review, with tests for request records and deadline handling.
-The [equipment checklist](docs/equipment-inventory.md) explains the read-only
-local inspection command. Hardware availability and permissions are still
-unconfirmed; neither the contract tests nor inspection certify a testbed.
+The [equipment checklist](docs/equipment-inventory.md) records the received
+mini PC, two adapters, and two cables. The two Linux endpoint computers are
+not available yet. Follow the [NucBox setup guide](docs/nucbox-setup.md) to use
+the mini PC as a single Linux namespace host and the Mac for development.
+Linux installation, device compatibility, and permission checks remain open.
+The read-only inspection and portable plans do not certify a testbed.
+
+The [analysis workflow](analysis/README.md) builds on Jonathan Lloyd's policy
+comparison code. It checks exports, matches recorded block baselines, and
+produces paired-bootstrap comparisons plus exploratory K-means, PCA, and t-SNE
+views of run metrics. The NucBox installer includes these dependencies. The
+[completion checklist](docs/project-completion.md) identifies remaining timing,
+full-collection, calibration, hardware, and course-delivery work.
 
 The proposal's target is a 50% reduction in foreground p99 added latency under
 saturating load while retaining at least 90% of FIFO's bulk goodput. These are

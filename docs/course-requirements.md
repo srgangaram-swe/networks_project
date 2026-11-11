@@ -1,6 +1,6 @@
 # Course requirements and delivery checklist
 
-Status checked September 21, 2026: the final-project rubric and official
+Status checked October 27, 2026: the final-project rubric and official
 deadlines have not been provided. The fields below remain placeholders.
 The proposal rubric does not establish the requirements for the final report,
 demonstration, or presentation.

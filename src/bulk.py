@@ -60,7 +60,10 @@ def client_command(
         "-O",
         str(plan.warmup_seconds),
         "-i",
-        "1",
+        # Periodic reports can straddle iperf's omit reset and contain invalid
+        # timestamps. Request its final receiver interval, then reconcile it
+        # with the end totals without rewriting any timestamps.
+        "0",
         "-J",
         "--get-server-output",
         "--connect-timeout",
@@ -126,6 +129,11 @@ def summarize_bulk(raw: Any, plan: BulkPlan) -> dict:
         intervals = _intervals(raw["intervals"], plan.flows)
         if not intervals:
             raise ValueError("no measured receiver interval")
+        if (
+            sum(row["bytes"] for row in intervals) != byte_count
+            or abs(intervals[-1]["end_seconds"] - seconds) > 0.01
+        ):
+            raise ValueError("receiver interval totals do not match the end summary")
         version = start["version"]
         if not isinstance(version, str) or not 1 <= len(version) <= 100:
             raise ValueError("invalid iperf3 version")
@@ -164,7 +172,13 @@ def _intervals(rows: list, flows: int) -> list[dict]:
         start = bounded_number(summary["start"], "interval start", last, 181)
         end = bounded_number(summary["end"], "interval end", start, 181)
         if end <= start or abs(start - last) > 0.01:
-            raise ValueError("receiver intervals have a gap or no duration")
+            raise ValueError(
+                f"receiver intervals have a gap or no duration: previous end {last}, "
+                f"current interval {start} to {end} seconds"
+            )
+        duration = bounded_number(summary["seconds"], "interval duration", 0.000001, 181)
+        if abs(duration - (end - start)) > 0.01:
+            raise ValueError("receiver interval duration contradicts its timestamps")
         count = bounded_integer(summary["bytes"], "interval bytes", 0, 2**53)
         result.append({"start_seconds": start, "end_seconds": end, "bytes": count})
         last = end

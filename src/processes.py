@@ -4,6 +4,7 @@ import os
 import selectors
 import signal
 import subprocess
+import sys
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -25,18 +26,12 @@ class CommandResult:
 
 def terminate(child: subprocess.Popen) -> None:
     """Reap only this child's session; also stop descendants holding pipe handles."""
-    try:
-        os.killpg(child.pid, signal.SIGTERM)
-    except ProcessLookupError:
-        pass
+    _signal_group(child, signal.SIGTERM)
     try:
         child.wait(timeout=0.5)
     except subprocess.TimeoutExpired:
         pass
-    try:
-        os.killpg(child.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
+    _signal_group(child, signal.SIGKILL)
     child.wait(timeout=1)
 
 
@@ -83,10 +78,28 @@ def _collect(
 
 
 def _request_stop(child: subprocess.Popen) -> None:
+    _signal_group(child, signal.SIGTERM)
+
+
+def _signal_group(child: subprocess.Popen, number: int) -> None:
     try:
-        os.killpg(child.pid, signal.SIGTERM)
+        os.killpg(child.pid, number)
     except ProcessLookupError:
-        pass
+        return
+    except PermissionError as denied:
+        if sys.platform != "darwin":
+            raise
+        # Darwin excludes zombies when signaling a group. Reap only our child
+        # and accept EPERM only if the group then demonstrably no longer exists.
+        try:
+            child.wait(timeout=0.1)
+        except subprocess.TimeoutExpired as pending:
+            raise denied from pending
+        try:
+            os.killpg(child.pid, 0)
+        except ProcessLookupError:
+            return
+        raise denied
 
 
 def run_command(

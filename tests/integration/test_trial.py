@@ -6,13 +6,14 @@ import sys
 import tempfile
 import threading
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from threading import Event
 from unittest.mock import patch
 
 from src.artifacts import read_json
 from src.bundle_validation import validate_bundle
-from src.trial import TrialConfig, _phase, run_trial
+from src.trial import TrialConfig, _phase, run_trial, unloaded_summary
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -56,6 +57,21 @@ class TrialTests(unittest.TestCase):
         cli = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
         self.assertEqual(cli.returncode, 2)
         self.assertIn("Invalid bundle", cli.stderr)
+
+    def test_unloaded_baseline_needs_no_iperf_and_does_not_cancel_a_campaign(self):
+        config = replace(self.config, flows=0, aggregate_bps=0)
+        cancel = Event()
+        run_trial(self.path, config, cancel)
+        self.assertFalse(cancel.is_set())
+        self.assertEqual(read_json(self.path / "bulk.json"), unloaded_summary(config))
+        self.assertTrue(validate_bundle(self.path)["integrity_valid"])
+        self.assertNotIn(
+            "bulk_window_alignment_pending",
+            read_json(self.path / "manifest.json")["validity"]["reasons"],
+        )
+        for flows, rate in ((0, 1), (1, 0), (False, 0)):
+            with self.assertRaises(ValueError):
+                replace(config, flows=flows, aggregate_bps=rate)
 
     def test_cancellation_retains_partial_evidence_and_joins_children(self):
         cancel = Event()

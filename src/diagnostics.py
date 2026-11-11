@@ -25,6 +25,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
     capture = read_json(directory / "foreground.json")
     bulk = read_json(directory / "bulk.json")
     environment = read_json(directory / "environment.json")
+    cpu = read_json(directory / "cpu.json")
     if environment["measurement_kind"] == "synthetic_fixture":
         raise ValueError("synthetic fixtures cannot be exported as observed diagnostics")
     warmup_count = capture["config"]["warmup_ms"] * capture["config"]["requests_per_second"] // 1000
@@ -60,6 +61,9 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
         "send_lag_p99_ms": nearest_rank(lags, 990),
         "requested_mbps": bulk["requested"]["aggregate_bps"] / 1_000_000,
         "goodput_mbps": bulk["goodput_mbps"],
+        "cpu_scope": cpu["scope"],
+        "cpu_busy_percent": cpu["busy_percent"],
+        "cpu_iowait_percent": cpu["iowait_percent"],
         "p99_censored": timeouts / sent > 0.01 if sent else True,
         "source_commit": manifest["source"]["commit"],
         "source_tree_sha256": manifest["source"]["tree_sha256"],

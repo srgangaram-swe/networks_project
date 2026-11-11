@@ -7,6 +7,17 @@ acceptance remain pending. The diagnostic runner records separate foreground
 and iperf3 windows and refuses to call those runs eligible for primary collection.
 See [the operating guide](../running-experiments.md) for the executable scope.
 
+The candidate namespace commands are recorded in
+[the versioned command snapshot](../../configs/namespace-contract-v1.json).
+Run .venv/bin/python scripts/verify_testbed_contract.py to compare that file
+with the current executable topology and policy plans. Namespace setup refuses
+a mismatch before creating resources. The comparison uses a fixed placeholder
+token, so run-specific namespace names do not change the contract digest.
+Source provenance includes this configuration file. This locks the candidate
+implementation against accidental drift; it does not mark the protocol
+accepted, pin a physical machine's software, or authorize primary collection.
+Review command and snapshot changes together through a documented decision.
+
 ## Workload and timing
 
 Use IPv4 UDP for the foreground request-response workload and TCP CUBIC for
