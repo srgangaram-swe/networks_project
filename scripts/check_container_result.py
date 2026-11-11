@@ -7,6 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from analysis.plot_artifacts import expected_artifacts  # noqa: E402
 from src.artifacts import digest, read_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,10 +29,11 @@ def check(directory: Path) -> None:
         _compare_points(observed, expected)
     if not isinstance(actual["artifacts"], dict):
         raise ValueError("invalid container artifact map")
+    expected_names = expected_artifacts(actual)
     for name, checksum in actual["artifacts"].items():
-        if name not in reference["artifacts"] or digest(directory / name) != checksum:
+        if name not in expected_names or digest(directory / name) != checksum:
             raise ValueError("container output hash mismatch")
-    if actual["artifacts"].keys() != reference["artifacts"].keys():
+    if actual["artifacts"].keys() != expected_names:
         raise ValueError("container omitted an analysis artifact")
 
 

@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import patch
 
@@ -63,7 +64,18 @@ class WorkflowTests(unittest.TestCase):
         self.assertFalse(report["eligible_for_primary"])
         self.assertTrue(report["runtime"]["python"])
         self.assertIn("seaborn", report["versions"])
-        self.assertTrue((output / "run_clusters_tsne.png").exists())
+        self.assertTrue((output / "plots/run_clusters_tsne.png").exists())
+        self.assertTrue((output / "plots/cluster_profiles.svg").exists())
+        self.assertEqual(len(report["plot_layout"]), 7)
+        from analysis.plot_artifacts import expected_artifacts
+
+        self.assertEqual(report["artifacts"].keys(), expected_artifacts(report))
+        for layout in report["plot_layout"].values():
+            self.assertEqual(layout["legend_overlap_count"], 0)
+            self.assertEqual(layout["text_overflow_count"], 0)
+        for vector in (output / "plots").glob("*.svg"):
+            self.assertEqual(ET.parse(vector).getroot().tag, "{http://www.w3.org/2000/svg}svg")
+            self.assertTrue(all(line == line.rstrip() for line in vector.read_bytes().splitlines()))
         self.assertIn("Primary eligibility: false", (output / "diagnostic_summary.txt").read_text())
         self.assertIn("Unavailable ratios", (output / "diagnostic_summary.txt").read_text())
         self.assertIn(r"cake\_bounded", (output / "writeup_table.tex").read_text())
@@ -113,7 +125,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_partial_output_and_secondary_persistence_failure_preserve_cause(self):
         error = OSError("disk full")
-        with patch("analysis.policy_comparison.comparison_plot", side_effect=error):
+        with patch("analysis.policy_comparison.render_plots", side_effect=error):
             with self.assertRaises(OSError) as caught:
                 policy_comparison.analyze([self.input], self.root / "failed", resamples=100)
         self.assertIs(caught.exception, error)
@@ -126,7 +138,7 @@ class WorkflowTests(unittest.TestCase):
             atomic_json(path, value)
 
         with (
-            patch("analysis.policy_comparison.comparison_plot", side_effect=error),
+            patch("analysis.policy_comparison.render_plots", side_effect=error),
             patch("analysis.policy_comparison.atomic_json", side_effect=save),
         ):
             with self.assertRaises(OSError) as caught:
@@ -181,24 +193,28 @@ class WorkflowTests(unittest.TestCase):
                 assignments.iloc[::-1].assign(requested_mbps=50),
             ]
         )
-        with patch("analysis.plots._save") as save:
+        with patch("analysis.plots.clusters.save_figure") as save:
             clustering_plot(conditions, self.root / "marker-regression.png", "tsne")
         figure = save.call_args.args[0]
         try:
             markers = []
             for axis in figure.axes[:3]:
-                legend = axis.get_legend()
-                labels = [text.get_text() for text in legend.get_texts()]
+                self.assertIsNone(axis.get_legend())
                 markers.append(
                     {
-                        label: handle.get_marker()
-                        for label, handle in zip(labels, legend.legend_handles, strict=True)
-                        if label in set(assignments.policy)
+                        collection.get_label(): tuple(
+                            map(tuple, collection.get_paths()[0].vertices)
+                        )
+                        for collection in axis.collections
                     }
                 )
             self.assertEqual(markers[0], markers[1])
             self.assertEqual(markers[0], markers[2])
+            self.assertEqual(len(markers[0]), 4)
             self.assertEqual(len(set(markers[0].values())), 4)
             self.assertFalse(figure.axes[3].get_visible())
+            from analysis.plots.style import audit_layout
+
+            self.assertEqual(audit_layout(figure)["legend_overlap_count"], 0)
         finally:
             plt.close(figure)

@@ -202,8 +202,9 @@ All workload traffic remains inside owned namespaces. The existing limitations
 on physical NIC measurements and primary eligibility still apply.
 
 Results are under hardware.json, setup/, campaign/, export/, and analysis/.
-The analysis directory contains CSV tables, report.json, policy_comparisons.png,
-run_clusters.png (PCA), and run_clusters_tsne.png. Read status.json for the
+The analysis directory contains CSV tables, report.json, and a plots subdirectory
+with PNG and SVG policy, delivery, RTT-quantile, and available cluster figures.
+The [plot guide](../analysis/plots/README.md) explains each view. Read status.json for the
 last stage and final state. The run directory is owned by root with mode 700;
 use sudo to inspect it locally rather than relaxing permissions on unrelated
 directories. After review, copy the export and analysis files to the Mac for
