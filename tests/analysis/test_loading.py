@@ -1,10 +1,12 @@
+import gzip
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 
-from analysis.utils.load_data import _csv, attach_design, load_data
+from analysis.utils.load_data import _csv, _csv_bytes, attach_design, load_data
 from src.artifacts import atomic_json, digest, read_json
 from tests.analysis.support import fixture, refresh
 
@@ -112,6 +114,30 @@ class LoadingTests(unittest.TestCase):
         path.write_text("a,a\n1,2\n")
         with self.assertRaises(ValueError):
             _csv(path, digest(path), 2)
+
+    def test_compressed_requests_keep_hash_checks_and_expansion_bound(self):
+        raw = self.path / "requests.csv"
+        original = raw.read_bytes()
+        zipped = self.path / "requests.csv.gz"
+        zipped.write_bytes(gzip.compress(original, mtime=0))
+        with self.assertRaisesRegex(ValueError, "not both"):
+            load_data(self.path)
+        raw.unlink()
+        self.assertEqual(len(load_data(self.path)[1]), 6000)
+        with patch("analysis.utils.load_data.MAX_JSON_BYTES", 64):
+            with self.assertRaisesRegex(ValueError, "expanded CSV"):
+                _csv_bytes(raw)
+        for data in (b"invalid gzip", gzip.compress(original)[:-8]):
+            zipped.write_bytes(data)
+            with self.assertRaisesRegex(ValueError, "compressed CSV"):
+                load_data(self.path)
+        zipped.write_bytes(gzip.compress(b"changed request bytes"))
+        with self.assertRaisesRegex(ValueError, "hash"):
+            load_data(self.path)
+        zipped.unlink()
+        zipped.symlink_to(self.path / "summary.csv")
+        with self.assertRaises(OSError):
+            load_data(self.path)
 
     def test_cpu_scope_and_percentages(self):
         original = pd.read_csv(self.path / "summary.csv")

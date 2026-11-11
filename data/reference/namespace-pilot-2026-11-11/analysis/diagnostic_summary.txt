@@ -1,0 +1,21 @@
+Diagnostic experiment summary
+
+Observed runs: 16. Unobserved planned cells: 0.
+Measured request slots: 80000.
+Unsent slots: 3192. Timeout/late outcomes: 0.
+Primary eligibility: false. These observations require calibration and protocol review.
+
+Loaded runs use the recorded same-policy, same-block unloaded baseline.
+Intervals use paired blocks, seed 562, and 10000 resamples.
+Fewer than three blocks has no interval. Unavailable ratios are not zero effects.
+
+cake_best_effort: 110 Mb/s requested, 1 flows, 2 blocks; added on-time p99 0.106 ms; added-p99 reduction 99.441%; goodput retained 89.371%.
+cake_bounded: 110 Mb/s requested, 1 flows, 2 blocks; added on-time p99 0.094 ms; added-p99 reduction 99.507%; goodput retained 89.184%.
+fifo: 110 Mb/s requested, 1 flows, 2 blocks; added on-time p99 18.977 ms; added-p99 reduction 0.000%; goodput retained 100.000%.
+fq_codel: 110 Mb/s requested, 1 flows, 2 blocks; added on-time p99 0.104 ms; added-p99 reduction 99.451%; goodput retained 99.368%.
+
+K-means describes standardized run metrics within each load/flow condition.
+PCA and t-SNE visualize those metrics; cluster labels are fitted in six dimensions.
+This is exploratory analysis, with no held-out prediction or automatic exclusion.
+Use report.json for source identities, intervals, model settings, and artifact hashes.
+Keep missed slots, censoring, and unfavorable goodput in the final discussion.

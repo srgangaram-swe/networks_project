@@ -61,6 +61,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(report["state"], "completed")
         self.assertEqual(report["runs"], 16)
         self.assertFalse(report["eligible_for_primary"])
+        self.assertTrue(report["runtime"]["python"])
+        self.assertIn("seaborn", report["versions"])
         self.assertTrue((output / "run_clusters_tsne.png").exists())
         self.assertIn("Primary eligibility: false", (output / "diagnostic_summary.txt").read_text())
         self.assertIn("Unavailable ratios", (output / "diagnostic_summary.txt").read_text())

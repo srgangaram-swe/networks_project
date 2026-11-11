@@ -119,6 +119,10 @@ execution. Ruff enforces the existing McCabe limit and analysis branch coverage
 has its own unchanged 90% floor. Synthetic fixtures stay in tests.
 
 CSV reading uses at most 32 MiB per file and 200,000 request rows per input.
+The published reference uses requests.csv.gz to keep the repository compact.
+Compressed input has the same 32 MiB bound before and after expansion; the
+original expanded CSV hash and all semantic checks still apply. Plain and
+compressed copies of the same input are rejected when both are present.
 Request validation is O(N log N), with O(N) memory per export. Bootstrap work is
 O(B R C), with at most 10,000 resamples, 400 run rows, and bounded conditions.
 Clustering fits at most 400 rows and six features; K-means has ten starts and

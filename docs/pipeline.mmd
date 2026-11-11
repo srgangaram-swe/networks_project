@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor User
+    participant Pipeline
+    participant Campaign
+    participant Trial
+    participant Analysis as Export and analysis
+    participant Files as Artifacts
+    User->>Pipeline: Run a recorded diagnostic plan
+    Pipeline->>Pipeline: Inspect host and check four policies
+    Pipeline->>Campaign: Save source, configuration, seed and schedule
+    loop Each unfinished scheduled cell
+        Campaign->>Trial: Run in fresh owned namespaces
+        Trial->>Trial: Warmup, measure, drain and clean up
+        Trial->>Files: Observations, counters and manifest
+        Trial-->>Campaign: Validated bundle or failure
+        Campaign->>Files: Retain attempt and manifest hash
+    end
+    Campaign-->>Pipeline: Completed schedule or stopped state
+    alt Collection completed
+        Pipeline->>Analysis: Export observations and full attempt ledger
+        Analysis->>Analysis: Check hashes, counts and recorded pairings
+        Analysis->>Analysis: Paired bootstrap, K-means, PCA and t-SNE
+        Analysis->>Files: CSV tables, plots, summary and LaTeX table
+        Pipeline-->>User: Completed diagnostic results
+    else Failure or cancellation
+        Pipeline->>Files: Keep failed stage and partial evidence
+        Pipeline-->>User: Inspect and resume with an explicit reason
+    end
+    Note over Pipeline,Files: No overwritten runs or automatic retries. Primary eligibility remains false.

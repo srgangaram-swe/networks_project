@@ -64,14 +64,12 @@ timeout 300 sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install \
     --yes --no-install-recommends \
     git python3-venv iproute2 iperf3 ethtool iputils-ping tcpdump kmod shellcheck \
     cmake g++ libboost-dev clang-format
-timeout 60 python3 -m venv .venv
-timeout 300 .venv/bin/python -m pip install --disable-pip-version-check \
-    --retries 1 --timeout 30 -r requirements-dev.txt -r requirements-analysis.txt
+sh scripts/setup_environment.sh
 sh scripts/check.sh
 sh scripts/check_analysis.sh
 timeout 120 cmake -S experiments/cpp_network_testing -B build/cpp-network-probe \
     -DPython3_EXECUTABLE="$PWD/.venv/bin/python" -DCMAKE_BUILD_TYPE=Debug
 timeout 120 cmake --build build/cpp-network-probe --parallel 2
 timeout 45 ctest --test-dir build/cpp-network-probe --output-on-failure
-shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh
+shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh scripts/setup_environment.sh
 printf '%s\n' 'Software installed and portable checks passed. Continue with the hardware inspection.'

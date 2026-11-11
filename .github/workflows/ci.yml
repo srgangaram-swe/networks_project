@@ -42,7 +42,7 @@ jobs:
           sudo apt-get update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3
       - run: sh scripts/check.sh
-      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh
+      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh scripts/setup_environment.sh
   analysis:
     name: analysis
     runs-on: ubuntu-24.04
@@ -54,9 +54,17 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12"
-      - run: python -m venv .venv
-      - run: .venv/bin/python -m pip install -r requirements-dev.txt -r requirements-analysis.txt
+      - run: sh scripts/setup_environment.sh
       - run: sh scripts/check_analysis.sh
+      - name: Rebuild the published analysis through Compose
+        run: |
+          mkdir -p .local/container-output
+          export LOCAL_UID="$(id -u)" LOCAL_GID="$(id -g)"
+          export INPUT_DIR="$PWD/data/reference/namespace-pilot-2026-11-11/export"
+          export OUTPUT_DIR="$PWD/.local/container-output"
+          docker compose config --quiet
+          docker compose run --build --rm analysis
+          .venv/bin/python scripts/check_container_result.py .local/container-output/analysis
   branch-policy:
     name: branch-policy
     runs-on: ubuntu-24.04
@@ -82,7 +90,7 @@ jobs:
       - run: cmake --build build/cpp-network-probe --parallel 2
       - run: ctest --test-dir build/cpp-network-probe --output-on-failure
       - run: clang-format --dry-run --Werror experiments/cpp_network_testing/server_host.cpp experiments/cpp_network_testing/server_client.cpp
-      - run: shellcheck experiments/cpp_network_testing/timing.sh
+      - run: shellcheck experiments/cpp_network_testing/timing.sh scripts/setup_environment.sh
   linux-namespaces:
     name: linux-namespaces
     if: github.event_name == 'workflow_dispatch' && inputs.linux_namespaces

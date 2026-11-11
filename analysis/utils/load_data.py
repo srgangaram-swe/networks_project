@@ -1,21 +1,23 @@
 """Bounded, checked diagnostic exports for Jonathan's comparison workflow."""
 
 import csv
+import gzip
 import hashlib
 import io
 import math
+import zlib
 from pathlib import Path
 
 import pandas as pd
 
 from analysis.utils.validate_data import validate_requests, validate_summaries
-from src.artifacts import json_bytes, parse_json, read_bytes
+from src.artifacts import MAX_JSON_BYTES, json_bytes, parse_json, read_bytes
 from src.experiment_config import ExperimentConfig
 from src.schedule import make_schedule
 
 
 def _csv(path: Path, checksum: str, limit: int) -> pd.DataFrame:
-    data = read_bytes(path)
+    data = _csv_bytes(path)
     if hashlib.sha256(data).hexdigest() != checksum:
         raise ValueError(f"{path.name} hash does not match provenance")
     header = next(csv.reader(io.StringIO(data.decode("utf-8"))), [])
@@ -25,6 +27,22 @@ def _csv(path: Path, checksum: str, limit: int) -> pd.DataFrame:
     if len(frame) > limit:
         raise ValueError(f"{path.name} exceeds its {limit}-row limit")
     return frame
+
+
+def _csv_bytes(path: Path) -> bytes:
+    compressed = path.with_suffix(path.suffix + ".gz")
+    if path.exists() or path.is_symlink():
+        if compressed.exists() or compressed.is_symlink():
+            raise ValueError("choose either plain or compressed CSV, not both")
+        return read_bytes(path)
+    try:
+        with gzip.GzipFile(fileobj=io.BytesIO(read_bytes(compressed))) as stream:
+            data = stream.read(MAX_JSON_BYTES + 1)
+    except (gzip.BadGzipFile, EOFError, zlib.error) as error:
+        raise ValueError("invalid or truncated compressed CSV") from error
+    if len(data) > MAX_JSON_BYTES:
+        raise ValueError("expanded CSV exceeds the 32 MiB file limit")
+    return data
 
 
 def attach_design(summaries: pd.DataFrame, design: dict) -> pd.DataFrame:

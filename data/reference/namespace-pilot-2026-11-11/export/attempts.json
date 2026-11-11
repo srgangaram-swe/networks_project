@@ -1,0 +1,321 @@
+{
+  "attempts": [
+    {
+      "cell_id": "b001-cake_best_effort-l110-f01",
+      "directory": "attempt-001-b001-cake_best_effort-l110-f01",
+      "error": "",
+      "manifest_sha256": "0f2c87ad25de7feca3661747590703be3b16161587e842da5b8f0fbdedf69ec8",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b001-cake_best_effort-l000-f00",
+      "directory": "attempt-002-b001-cake_best_effort-l000-f00",
+      "error": "",
+      "manifest_sha256": "2fb2186d877f00f499edc252385358bb9fc9845f5177d7342d3c137800374a8b",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b001-cake_bounded-l110-f01",
+      "directory": "attempt-003-b001-cake_bounded-l110-f01",
+      "error": "",
+      "manifest_sha256": "fdf18adebb6de9f06f0de516f06d088721be30b4425d70040bd6020d679389ac",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b001-cake_bounded-l000-f00",
+      "directory": "attempt-004-b001-cake_bounded-l000-f00",
+      "error": "",
+      "manifest_sha256": "a23754f0b2acb46c15a8d878ccb9c81596b9c51a68214c00577d057cf54e1c71",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b001-fifo-l110-f01",
+      "directory": "attempt-005-b001-fifo-l110-f01",
+      "error": "",
+      "manifest_sha256": "e256732374c8773e8927eeae05d23c6630657bad215b48761b644a753b678bd5",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b001-fifo-l000-f00",
+      "directory": "attempt-006-b001-fifo-l000-f00",
+      "error": "",
+      "manifest_sha256": "57a8ceded78c6af3f98321757ac65f2b51864db7948c69016e8d3ec4ac2af611",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b001-fq_codel-l000-f00",
+      "directory": "attempt-007-b001-fq_codel-l000-f00",
+      "error": "",
+      "manifest_sha256": "3cfa385b223f13c4ac4cbfa8d48542867ec81eac5a9dd29da4186ee6f86be537",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b001-fq_codel-l110-f01",
+      "directory": "attempt-008-b001-fq_codel-l110-f01",
+      "error": "",
+      "manifest_sha256": "7bafd51883d2262bcd34721d5bcf4585d9882e6dea9ebe44c35f74732cea144c",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-fq_codel-l000-f00",
+      "directory": "attempt-009-b002-fq_codel-l000-f00",
+      "error": "",
+      "manifest_sha256": "e5fc986034b64893955723f769c2f0d26d1e206e87772908bf64c711f6032f3f",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-fq_codel-l110-f01",
+      "directory": "attempt-010-b002-fq_codel-l110-f01",
+      "error": "",
+      "manifest_sha256": "8b685deaa9e171bee09195a7ecea6c422d241b114781503ff6b838d5bb3ba8d1",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-fifo-l110-f01",
+      "directory": "attempt-011-b002-fifo-l110-f01",
+      "error": "",
+      "manifest_sha256": "c02e8ae4ebe7bf970f39a1b59fd8e79ac43ffb43772f57a062bbef9a278615b8",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-fifo-l000-f00",
+      "directory": "attempt-012-b002-fifo-l000-f00",
+      "error": "",
+      "manifest_sha256": "1b1557ea83f1cbe3cea5c162ab69090f3a484c5ffb3049fe741ecf1c935bc366",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-cake_best_effort-l110-f01",
+      "directory": "attempt-013-b002-cake_best_effort-l110-f01",
+      "error": "",
+      "manifest_sha256": "e95b8bd0c5f33d9cb0e59ed94b7f5f0e49687d682d509880a77696ce7f64aa85",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-cake_best_effort-l000-f00",
+      "directory": "attempt-014-b002-cake_best_effort-l000-f00",
+      "error": "",
+      "manifest_sha256": "a6bea5bcb12c08add5b43df956a8d8a1d3e3b98e6a74d52be8be1e56c3bb306f",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-cake_bounded-l110-f01",
+      "directory": "attempt-015-b002-cake_bounded-l110-f01",
+      "error": "",
+      "manifest_sha256": "c12c8d1b3f4ef467d393398df349eb39b289e833eaf6e07bbb6015a3f0eadc81",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    },
+    {
+      "cell_id": "b002-cake_bounded-l000-f00",
+      "directory": "attempt-016-b002-cake_bounded-l000-f00",
+      "error": "",
+      "manifest_sha256": "eadc934c1c59e375f1a2c4fabc7a29a86c487ea0bb6574d7009b54855f6083fe",
+      "reason": "",
+      "replaces": null,
+      "status": "completed"
+    }
+  ],
+  "campaign_state": "completed",
+  "excluded_from_primary": "pilot_review_and_window_alignment_pending",
+  "plan": {
+    "configuration": {
+      "background_flow_counts": [
+        1
+      ],
+      "background_load_fractions": [
+        1.1
+      ],
+      "base_rtt_ms": 20,
+      "foreground_message_bytes": 512,
+      "foreground_requests_per_second": 500,
+      "link_rate_mbps": 100,
+      "measurement_seconds": 10,
+      "policies": [
+        "fifo",
+        "fq_codel",
+        "cake_best_effort",
+        "cake_bounded"
+      ],
+      "random_seed": 561,
+      "repetitions": 2,
+      "schema_version": 1,
+      "unloaded_repetitions_per_policy": 2
+    },
+    "kind": "virtual_testbed_pilot",
+    "schedule": {
+      "cells": [
+        {
+          "baseline_id": "b001-cake_best_effort-l000-f00",
+          "block": 1,
+          "cell_id": "b001-cake_best_effort-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "cake_best_effort"
+        },
+        {
+          "baseline_id": "b001-cake_best_effort-l000-f00",
+          "block": 1,
+          "cell_id": "b001-cake_best_effort-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "cake_best_effort"
+        },
+        {
+          "baseline_id": "b001-cake_bounded-l000-f00",
+          "block": 1,
+          "cell_id": "b001-cake_bounded-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "cake_bounded"
+        },
+        {
+          "baseline_id": "b001-cake_bounded-l000-f00",
+          "block": 1,
+          "cell_id": "b001-cake_bounded-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "cake_bounded"
+        },
+        {
+          "baseline_id": "b001-fifo-l000-f00",
+          "block": 1,
+          "cell_id": "b001-fifo-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "fifo"
+        },
+        {
+          "baseline_id": "b001-fifo-l000-f00",
+          "block": 1,
+          "cell_id": "b001-fifo-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "fifo"
+        },
+        {
+          "baseline_id": "b001-fq_codel-l000-f00",
+          "block": 1,
+          "cell_id": "b001-fq_codel-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "fq_codel"
+        },
+        {
+          "baseline_id": "b001-fq_codel-l000-f00",
+          "block": 1,
+          "cell_id": "b001-fq_codel-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "fq_codel"
+        },
+        {
+          "baseline_id": "b002-fq_codel-l000-f00",
+          "block": 2,
+          "cell_id": "b002-fq_codel-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "fq_codel"
+        },
+        {
+          "baseline_id": "b002-fq_codel-l000-f00",
+          "block": 2,
+          "cell_id": "b002-fq_codel-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "fq_codel"
+        },
+        {
+          "baseline_id": "b002-fifo-l000-f00",
+          "block": 2,
+          "cell_id": "b002-fifo-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "fifo"
+        },
+        {
+          "baseline_id": "b002-fifo-l000-f00",
+          "block": 2,
+          "cell_id": "b002-fifo-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "fifo"
+        },
+        {
+          "baseline_id": "b002-cake_best_effort-l000-f00",
+          "block": 2,
+          "cell_id": "b002-cake_best_effort-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "cake_best_effort"
+        },
+        {
+          "baseline_id": "b002-cake_best_effort-l000-f00",
+          "block": 2,
+          "cell_id": "b002-cake_best_effort-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "cake_best_effort"
+        },
+        {
+          "baseline_id": "b002-cake_bounded-l000-f00",
+          "block": 2,
+          "cell_id": "b002-cake_bounded-l110-f01",
+          "flows": 1,
+          "load_fraction": 1.1,
+          "policy": "cake_bounded"
+        },
+        {
+          "baseline_id": "b002-cake_bounded-l000-f00",
+          "block": 2,
+          "cell_id": "b002-cake_bounded-l000-f00",
+          "flows": 0,
+          "load_fraction": 0.0,
+          "policy": "cake_bounded"
+        }
+      ],
+      "schema_version": 1,
+      "seed": 561
+    },
+    "schema_version": 1,
+    "source": {
+      "commit": "e3ddafff30add309df4d75fc5fde8f4e99bbe34a",
+      "dirty": false,
+      "tree_sha256": "0e7564fe0fef50cb678ead3c9472dd173537a4518cbe0c19f30aed4fd6a3e645"
+    },
+    "warmup_seconds": 10
+  },
+  "primary_eligible": false,
+  "progress_sha256": "e8ad2b715f05b0079db1bc0bb05f9372769037fababb410cf5d98876f15c88a6",
+  "schema_version": 1,
+  "unattempted_cells": []
+}
