@@ -55,6 +55,15 @@ def export(campaign: Path, output: Path) -> None:
         },
     )
     atomic_json(output / "versions.json", tool_versions())
+    _bind_design(output, bool(directories))
+
+
+def _bind_design(output: Path, has_observations: bool) -> None:
+    """Bind schedule metadata to the same export as the validated observations."""
+    if has_observations:
+        provenance = read_json(output / "provenance.json", 65536)
+        provenance["attempts_sha256"] = digest(output / "attempts.json")
+        atomic_json(output / "provenance.json", provenance)
 
 
 def tool_versions() -> dict:

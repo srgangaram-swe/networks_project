@@ -91,7 +91,7 @@ Run these commands on the NucBox after Linux is ready:
 
     git clone https://github.com/srgangaram-swe/networks_project.git
     cd networks_project
-    git switch feat/6-9-11-pilot-evidence
+    git switch feat/14-analysis-and-run-clustering
     sh scripts/setup_nucbox.sh --plan
     sh scripts/setup_nucbox.sh --install
 
@@ -180,6 +180,42 @@ pattern. Correct the cause, retain the failed output, and choose a fresh
 directory for a new smoke check. Consult [the operating guide](running-experiments.md)
 for recovery details. See [the pilot notes](namespace-pilot.md) for the loaded
 campaign and its remaining measurement limits.
+
+## Run the complete initial experiment
+
+After installation and local inspection, plan the complete diagnostic path:
+
+    .venv/bin/python scripts/nucbox_experiment.py plan
+
+Then, on the authorized NucBox Linux host:
+
+    mkdir -p runs
+    sudo .venv/bin/python scripts/nucbox_experiment.py run \
+      --output runs/nucbox-pilot-01 --authorized-isolated-host
+
+The destination must be new. This runs read-only hardware inspection, four
+unloaded setup checks, the recorded 16-trial loaded/unloaded campaign, checked
+export, paired statistical comparisons, K-means clustering, PCA, and t-SNE.
+Expect roughly ten minutes for this diagnostic path, depending on the host.
+All workload traffic remains inside owned namespaces. The existing limitations
+on physical NIC measurements and primary eligibility still apply.
+
+Results are under hardware.json, setup/, campaign/, export/, and analysis/.
+The analysis directory contains CSV tables, report.json, policy_comparisons.png,
+run_clusters.png (PCA), and run_clusters_tsne.png. Read status.json for the
+last stage and final state. The run directory is owned by root with mode 700;
+use sudo to inspect it locally rather than relaxing permissions on unrelated
+directories. After review, copy the export and analysis files to the Mac for
+further work. They contain synthetic experiment traffic, not personal traffic.
+
+A failed stage stops the workflow and retains earlier outputs. Ctrl-C cancels
+owned collection. Correct the cause and use a new top-level output directory;
+never rerun into an existing one. Individual campaign recovery still uses the
+retained attempt ledger and exact namespace ownership journal. Missing analysis
+dependencies mean the installer has not completed; do not skip the checks.
+
+This command runs the initial pilot. The full 280-run collection still needs
+the readiness work in [the completion checklist](project-completion.md).
 
 ## When two Linux endpoint computers become available
 

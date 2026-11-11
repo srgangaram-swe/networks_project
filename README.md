@@ -42,6 +42,13 @@ the mini PC as a single Linux namespace host and the Mac for development.
 Linux installation, device compatibility, and permission checks remain open.
 The read-only inspection and portable plans do not certify a testbed.
 
+The [analysis workflow](analysis/README.md) builds on Jonathan Lloyd's policy
+comparison code. It checks exports, matches recorded block baselines, and
+produces paired-bootstrap comparisons plus exploratory K-means, PCA, and t-SNE
+views of run metrics. The NucBox installer includes these dependencies. The
+[completion checklist](docs/project-completion.md) identifies remaining timing,
+full-collection, calibration, hardware, and course-delivery work.
+
 The proposal's target is a 50% reduction in foreground p99 added latency under
 saturating load while retaining at least 90% of FIFO's bulk goodput. These are
 feasibility targets. We will report results that miss them as carefully as

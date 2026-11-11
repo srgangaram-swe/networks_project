@@ -168,3 +168,18 @@ and explicit acknowledgement of the authorized host. Commands have bounded
 runtime and output, and subprocesses use argument arrays without a shell.
 The complete resource and complexity bounds are in
 [engineering standards](engineering-standards.md).
+
+## Comparing queue policies
+
+After collection, run Jonathan's comparison workflow from the project root.
+The installer includes the pinned analysis and ML dependencies. The input must
+be a checked campaign export with its recorded schedule and attempt ledger.
+
+    .venv/bin/python -m analysis.policy_comparison runs/experiment/export \
+      --output runs/experiment-analysis
+
+The command writes matched baselines, paired-block comparisons, descriptive
+statistics, K-means assignments, PCA and t-SNE figures, and a hashed report.
+See [the analysis guide](../analysis/README.md) for estimators and limits.
+For the complete initial NucBox path, use
+[the one-command pilot](nucbox-setup.md#run-the-complete-initial-experiment).

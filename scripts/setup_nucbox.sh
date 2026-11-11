@@ -19,10 +19,11 @@ an operating system, enable SSH, configure physical NICs, or start traffic.
 Distribution packages:
   git python3-venv iproute2 iperf3 ethtool iputils-ping tcpdump kmod shellcheck
 Python packages:
-  requirements-dev.txt, installed into .venv
+  requirements-dev.txt and requirements-analysis.txt, installed into .venv
 Checks:
   sh scripts/check.sh
-  shellcheck scripts/check.sh scripts/setup_nucbox.sh
+  sh scripts/check_analysis.sh
+  shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh
 
 Next: inspect_hardware.py, then the authorized nucbox_smoke.py setup check.
 PLAN
@@ -62,7 +63,8 @@ timeout 300 sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install \
     git python3-venv iproute2 iperf3 ethtool iputils-ping tcpdump kmod shellcheck
 timeout 60 python3 -m venv .venv
 timeout 300 .venv/bin/python -m pip install --disable-pip-version-check \
-    --retries 1 --timeout 30 -r requirements-dev.txt
+    --retries 1 --timeout 30 -r requirements-dev.txt -r requirements-analysis.txt
 sh scripts/check.sh
-shellcheck scripts/check.sh scripts/setup_nucbox.sh
+sh scripts/check_analysis.sh
+shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh
 printf '%s\n' 'Software installed and portable checks passed. Continue with the hardware inspection.'

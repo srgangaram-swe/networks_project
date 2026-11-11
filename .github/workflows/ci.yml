@@ -42,7 +42,21 @@ jobs:
           sudo apt-get update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3
       - run: sh scripts/check.sh
-      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh
+      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh
+  analysis:
+    name: analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - run: python -m venv .venv
+      - run: .venv/bin/python -m pip install -r requirements-dev.txt -r requirements-analysis.txt
+      - run: sh scripts/check_analysis.sh
   branch-policy:
     name: branch-policy
     runs-on: ubuntu-24.04
@@ -69,23 +83,33 @@ jobs:
         run: sh scripts/setup_nucbox.sh --install
       - name: Exercise all four namespace profiles
         run: sudo env NETWORKS_RUN_PRIVILEGED=1 NETWORKS_EVIDENCE_DIR=.local/evidence/policy-checks .venv/bin/python -m unittest discover -s tests/linux -v
-      - name: Run the fixed randomized pilot
-        run: sudo .venv/bin/python scripts/campaign.py --config configs/pilot.json --output .local/campaign --authorized-isolated-host
+      - name: Run the NucBox experiment through analysis and t-SNE
+        run: sudo .venv/bin/python scripts/nucbox_experiment.py run --output .local/experiment --authorized-isolated-host
       - name: Export all completed observations and attempt accounting
         if: always()
         run: |
-          if sudo test -f .local/campaign/plan.json; then
-            sudo .venv/bin/python scripts/export_pilot.py .local/campaign --output .local/evidence/pilot
+          if sudo test -f .local/experiment/campaign/plan.json && ! sudo test -d .local/experiment/export; then
+            sudo .venv/bin/python scripts/export_pilot.py .local/experiment/campaign --output .local/experiment/export
           fi
           if sudo test -d .local/evidence; then
             sudo chmod -R a+rX .local/evidence
+          fi
+          if sudo test -d .local/experiment; then
+            sudo chmod -R a+rX .local/experiment
           fi
       - name: Retain the synthetic reference evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: namespace-pilot-evidence
-          path: .local/evidence
+          path: |
+            .local/evidence
+            .local/experiment/export
+            .local/experiment/analysis
+            .local/experiment/status.json
+            .local/experiment/hardware.json
+            .local/experiment/campaign/plan.json
+            .local/experiment/campaign/progress.json
           if-no-files-found: warn
           retention-days: 30
   nucbox-setup:
