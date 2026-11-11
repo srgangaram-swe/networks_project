@@ -14,7 +14,8 @@ import seaborn as sns
 def comparison_plot(matched, comparisons, destination: Path) -> None:
     conditions = list(comparisons.groupby(["requested_mbps", "flows"], sort=True))
     sns.set_theme(style="whitegrid", context="notebook")
-    fig, axes = plt.subplots(len(conditions), 3, figsize=(15, 4 * len(conditions)), squeeze=False)
+    height = 4 * len(conditions) + 1
+    fig, axes = plt.subplots(len(conditions), 3, figsize=(15, height), squeeze=False)
     specifications = (
         ("added_p99_ms", "Added on-time p99 (ms)"),
         ("goodput_retention_pct", "Goodput retained vs FIFO (%)"),
@@ -76,7 +77,7 @@ def comparison_plot(matched, comparisons, destination: Path) -> None:
         "Primary collection remains unapproved. On-time quantiles can be censored; see the report.",
         fontsize=10,
     )
-    fig.tight_layout(rect=(0, 0.13, 1, 0.95))
+    fig.tight_layout(rect=(0, 0.9 / height, 1, 1 - 0.5 / height))
     _save(fig, destination)
 
 
@@ -97,6 +98,8 @@ def clustering_plot(assignments, destination: Path, projection: str = "pca") -> 
             y=y,
             hue="cluster",
             style="policy",
+            hue_order=[0, 1],
+            style_order=sorted(assignments["policy"].unique()),
             palette="colorblind",
             s=90,
             ax=axis,

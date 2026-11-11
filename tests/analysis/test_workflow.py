@@ -167,3 +167,36 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn(
             "added on-time p99 unavailable", (self.root / "diagnostic_summary.txt").read_text()
         )
+
+    def test_policy_markers_remain_consistent_across_reordered_conditions(self):
+        import matplotlib.pyplot as plt
+
+        assignments, _ = cluster_runs(self.runs)
+        conditions = pd.concat(
+            [
+                assignments,
+                assignments.iloc[::-1].assign(requested_mbps=90),
+                assignments.iloc[::-1].assign(requested_mbps=50),
+            ]
+        )
+        with patch("analysis.plots._save") as save:
+            clustering_plot(conditions, self.root / "marker-regression.png", "tsne")
+        figure = save.call_args.args[0]
+        try:
+            markers = []
+            for axis in figure.axes[:3]:
+                legend = axis.get_legend()
+                labels = [text.get_text() for text in legend.get_texts()]
+                markers.append(
+                    {
+                        label: handle.get_marker()
+                        for label, handle in zip(labels, legend.legend_handles, strict=True)
+                        if label in set(assignments.policy)
+                    }
+                )
+            self.assertEqual(markers[0], markers[1])
+            self.assertEqual(markers[0], markers[2])
+            self.assertEqual(len(set(markers[0].values())), 4)
+            self.assertFalse(figure.axes[3].get_visible())
+        finally:
+            plt.close(figure)
