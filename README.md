@@ -60,6 +60,11 @@ macOS and Linux commands, a short local trial, recovery steps, and the hardware
 handoff procedure. Optional plotting dependencies are pinned separately in
 requirements-plots.txt.
 
+Install iperf3 before running the TCP integration tests. The operating guide has
+macOS and Linux commands, a short local trial, recovery steps, and the hardware
+handoff procedure. Optional plotting dependencies are pinned separately in
+requirements-plots.txt.
+
 The validator checks the planned experiment inputs. It does not configure
 interfaces or run traffic. Test fixtures are synthetic and are never evidence
 of network performance.
