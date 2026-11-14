@@ -48,6 +48,8 @@ def _csv_bytes(path: Path) -> bytes:
 def attach_design(summaries: pd.DataFrame, design: dict) -> pd.DataFrame:
     """Bind completed manifests to recorded schedule cells, never infer blocks."""
     plan = design["plan"]
+    if not summaries["transport"].eq(plan.get("transport", "udp")).all():
+        raise ValueError("transport differs from the recorded campaign")
     schedule = make_schedule(ExperimentConfig.from_mapping(plan["configuration"]))
     if schedule != plan["schedule"]:
         raise ValueError("recorded schedule differs from configuration")
@@ -94,7 +96,7 @@ def _design_row(row, by_digest, cells, source, cohort):
     }
 
 
-def load_data(export_dir: str | Path, *, binding: dict | None = None):
+def load_data(export_dir: str | Path, *, binding: dict | None = None, allow_simulated=False):
     """At most 20 runs and 200,000 requests per export; O(bytes + N log N)."""
     directory = Path(export_dir)
     raw_provenance = read_bytes(directory / "provenance.json", 65536)
@@ -112,7 +114,10 @@ def load_data(export_dir: str | Path, *, binding: dict | None = None):
     requests = _csv(directory / "requests.csv", provenance["requests_sha256"], 200000)
     if (len(summaries), len(requests)) != (provenance["run_count"], provenance["request_count"]):
         raise ValueError("export row counts do not match provenance")
-    validate_summaries(summaries)
+    validate_summaries(summaries, allow_simulated=allow_simulated)
+    simulated = summaries["measurement_kind"].eq("simulation")
+    if (provenance.get("purpose") == "simulation") != simulated.all():
+        raise ValueError("simulation provenance must identify its purpose")
     validate_requests(requests, summaries)
     if (directory / "attempts.json").exists():
         data = read_bytes(directory / "attempts.json")
@@ -125,6 +130,8 @@ def load_data(export_dir: str | Path, *, binding: dict | None = None):
             "design_bound_to_export": "attempts_sha256" in provenance,
         }
         design = parse_json(data)
+        if (design["plan"].get("kind") == "local_simulation") != simulated.all():
+            raise ValueError("simulation design and measurement labels disagree")
         if binding and design.get("campaign_ledger_sha256") != binding["campaign_ledger_sha256"]:
             raise ValueError("batch design does not match campaign ledger")
         summaries = attach_design(summaries, design)

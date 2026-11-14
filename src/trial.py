@@ -18,6 +18,8 @@ from src.processes import CommandError, run_command
 from src.run_bundle import RunBundle, source_identity
 from src.services import Service
 from src.testbed_backend import Backend
+from src.transport import validate_transport
+from src.trial_observers import observers
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -32,8 +34,13 @@ class TrialConfig:
     aggregate_bps: int = 8_000_000
     foreground_port: int = 42000
     bulk_port: int = 5201
+    transport: str = "udp"
+    shadow_forecast: bool = False
 
     def __post_init__(self) -> None:
+        validate_transport(self.transport)
+        if type(self.shadow_forecast) is not bool:
+            raise ValueError("shadow_forecast must be a boolean")
         bounded_integer(self.measurement_seconds, "measurement_seconds", 1, 120)
         bounded_integer(self.warmup_seconds, "warmup_seconds", 0, 60)
         if (self.flows, self.aggregate_bps) != (0, 0):
@@ -41,11 +48,11 @@ class TrialConfig:
         elif type(self.flows) is not int or type(self.aggregate_bps) is not int:
             raise ValueError("unloaded trials require integer zero flows and demand")
         self.foreground_plan()
-        if self.mode not in {"loopback", "namespace"}:
-            raise ValueError("mode must be loopback or namespace")
+        if self.mode not in {"loopback", "namespace", "physical"}:
+            raise ValueError("mode must be loopback, namespace, or physical")
         if self.mode == "loopback" and self.policy != "none":
             raise ValueError("loopback measurements have no queue policy")
-        if self.mode == "namespace" and self.foreground_port != 42000:
+        if self.mode != "loopback" and self.foreground_port != 42000:
             raise ValueError("the namespace classification contract requires foreground port 42000")
         for port in (self.foreground_port, self.bulk_port):
             endpoint("127.0.0.1", port)
@@ -68,10 +75,12 @@ def _foreground_command(
         sys.executable,
         str(ROOT / "scripts/foreground.py"),
         "client",
+        "--transport",
+        config.transport,
         "--bind",
         backend.client_address,
         "--port",
-        "42001" if config.mode == "namespace" else "0",
+        "42001" if config.mode != "loopback" else "0",
         "--peer",
         backend.server_address,
         "--peer-port",
@@ -88,17 +97,26 @@ def _foreground_command(
         str(bundle.directory / "foreground.json"),
     )
     return backend.command(
-        "client", args + (("--allow-isolated",) if config.mode == "namespace" else ())
+        "client",
+        args
+        + (("--allow-isolated",) if config.mode != "loopback" else ())
+        + (
+            ("--events-fifo", str(bundle.directory / "events.fifo"))
+            if config.shadow_forecast
+            else ()
+        ),
     )
 
 
 def _start_services(stack: ExitStack, config: TrialConfig, backend: Backend) -> Service:
-    isolated = config.mode == "namespace"
+    isolated = config.mode != "loopback"
     duration = config.warmup_seconds + config.measurement_seconds + 10
     responder_args = (
         sys.executable,
         str(ROOT / "scripts/foreground.py"),
         "responder",
+        "--transport",
+        config.transport,
         "--bind",
         backend.server_address,
         "--port",
@@ -175,6 +193,8 @@ def _collect_workloads(
                 else unloaded_summary(config),
             )
             bundle.artifact("cpu.json", cpu_usage(before, after))
+            if bulk_result is not None:
+                bundle.artifact("bulk-raw.json", parse_json(bulk_result.stdout))
         finally:
             # Stop both owned children before leaving the executor or removing
             # namespaces, even when another child failed first.
@@ -185,7 +205,7 @@ def _collect_workloads(
 def _submit_bulk(pool, config: TrialConfig, backend: Backend, deadline: int, cancel: Event):
     if not config.flows:
         return None
-    isolated = config.mode == "namespace"
+    isolated = config.mode != "loopback"
     command = backend.command(
         "client",
         client_command(
@@ -222,13 +242,19 @@ def unloaded_summary(config: TrialConfig) -> dict:
     }
 
 
-def run_trial(directory: Path, config: TrialConfig, cancel: Event | None = None) -> dict:
+def run_trial(
+    directory: Path, config: TrialConfig, cancel: Event | None = None, *, backend=None
+) -> dict:
     from src.bundle_validation import validate_contents
 
     cancel = cancel if cancel is not None else Event()
     directory = directory.absolute()
     bundle = RunBundle(directory, asdict(config), source_identity(ROOT))
-    backend = Backend(config.mode, config.policy, directory)
+    backend = (
+        backend
+        if backend is not None
+        else Backend(config.mode, config.policy, directory, transport=config.transport)
+    )
     primary_error = None
     try:
         bundle.transition("preflight")
@@ -237,7 +263,8 @@ def run_trial(directory: Path, config: TrialConfig, cancel: Event | None = None)
         bundle.transition("setup")
         backend.setup()
         bundle.artifact("queues-before.json", backend.snapshot())
-        _collect_workloads(bundle, config, backend, cancel)
+        with observers(bundle, config, backend):
+            _collect_workloads(bundle, config, backend, cancel)
         bundle.artifact("queues-after.json", backend.snapshot())
         bundle.transition("validation")
         validate_contents(bundle.directory, bundle.manifest)
@@ -251,14 +278,20 @@ def run_trial(directory: Path, config: TrialConfig, cancel: Event | None = None)
         bundle.transition("completed")
     except (OSError, ValueError, RuntimeError, TimeoutError, KeyboardInterrupt) as exc:
         primary_error = exc
-        bundle.fail(exc, cancelled=isinstance(exc, (KeyboardInterrupt, InterruptedError)))
+        try:
+            bundle.fail(exc, cancelled=isinstance(exc, (KeyboardInterrupt, InterruptedError)))
+        except (OSError, ValueError) as persistence:
+            exc.add_note(f"retaining the failed trial also failed: {persistence}")
         raise
     finally:
         try:
             backend.close()
         except (OSError, RuntimeError) as exc:
             bundle.manifest["errors"].append({"type": "cleanup_error", "message": str(exc)[:1024]})
-            bundle.save()
+            try:
+                bundle.save()
+            except (OSError, ValueError) as persistence:
+                exc.add_note(f"retaining cleanup details also failed: {persistence}")
             if primary_error is None:
                 raise CommandError("topology cleanup failed; retain the ownership journal") from exc
             primary_error.add_note(f"topology cleanup also failed: {exc}")

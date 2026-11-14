@@ -66,7 +66,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("seaborn", report["versions"])
         self.assertTrue((output / "plots/run_clusters_tsne.png").exists())
         self.assertTrue((output / "plots/cluster_profiles.svg").exists())
-        self.assertEqual(len(report["plot_layout"]), 7)
+        self.assertEqual(len(report["plot_layout"]), 12)
         from analysis.plot_artifacts import expected_artifacts
 
         self.assertEqual(report["artifacts"].keys(), expected_artifacts(report))

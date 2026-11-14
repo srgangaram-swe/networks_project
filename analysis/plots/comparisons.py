@@ -58,7 +58,12 @@ def comparison_plot(matched, comparisons, destination):
         "On-time RTT can be censored. Diagnostic data; check request outcomes too.",
         handles,
     )
-    return save_figure(fig, destination)
+    return save_figure(
+        fig,
+        destination,
+        measurement_kind=matched.attrs.get("measurement_kind"),
+        transport=matched.attrs.get("transport", "udp"),
+    )
 
 
 def _estimates(axis, rows, observed, metric):

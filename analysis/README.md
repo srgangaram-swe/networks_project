@@ -22,13 +22,17 @@ seeds, model settings, counts, and limitations. A failure retains partial output
 with a failed status. Success never upgrades diagnostic data to primary evidence.
 The output also contains diagnostic_summary.txt and writeup_table.tex, which
 provide the observed point estimates and context for drafting the report.
-They preserve unavailable values and do not generate final research conclusions.
+They preserve unavailable values. Generated insights.txt separates measured point
+estimates, model diagnostics and remaining limits from final research conclusions.
 
 The [plot guide and preliminary gallery](plots/README.md) describes each figure.
 Three statistical figures are always rendered when plots are enabled: paired
 policy estimates, scheduled-request outcomes, and mean per-run RTT quantiles.
-Four additional figures show available fitted clusters in PCA, t-SNE, physical
-latency/goodput units, and centroid/membership heatmaps. Every figure has PNG
+Additional figures show available fitted clusters in PCA, t-SNE, physical
+latency/goodput units, and centroid/membership heatmaps. Separate PCA views show
+Ward agglomerative and DBSCAN assignments. Ridge/Lasso prediction and coefficient
+figures explain unavailable fits when independent blocks are insufficient. A
+runtime chart records completed compute stages. Every figure has PNG
 and SVG copies. A condition without a valid cluster fit keeps its measurements
 and unavailable status rather than receiving an invented cluster.
 
@@ -37,7 +41,7 @@ checks that legends do not overlap data panels and visible text stays inside
 the image. The report records these checks and hashes every nested plot.
 Visual inspection of the published gallery supplements these geometric checks.
 The earlier reference output retains its original three-figure format; the
-integrity checker recognizes both artifact versions.
+integrity checker recognizes all three artifact versions.
 
 The complete NucBox command runs collection and this analysis together. See
 [the setup guide](../docs/nucbox-setup.md#run-the-complete-initial-experiment).
@@ -114,11 +118,38 @@ versions are saved. The eight loaded pilot runs support a mechanics check,
 not a stable account of population structure. Apparent islands and distances
 in t-SNE do not establish global separation, treatment effects, or prediction.
 
-This is unsupervised exploratory analysis. No held-out predictive accuracy is
-claimed and no cluster or distance automatically excludes a measurement.
-Supervised modeling would require an explicit prediction target, more independent
-blocks, and splits that keep a block and its baselines together. The current
-pilot does not support that claim.
+No cluster or distance automatically excludes a measurement. These fitted groups
+describe geometry, not predictive accuracy or treatment ranking.
+
+Ward agglomerative clustering uses two groups on the same standardized features.
+DBSCAN uses Euclidean radius 1.5 and at least three neighbors; label -1 remains
+noise. These are diagnostic defaults, not a claim of optimal cluster structure.
+The report includes silhouette, Davies-Bouldin and Calinski-Harabasz scores when
+defined, plus adjusted Rand agreement with K-means. Agreement is not accuracy.
+
+## Ridge and Lasso
+
+These models predict added on-time p99 from policy, requested demand and flow
+count. They require at least six independent paired blocks. The outer grouped
+fold holds out whole blocks, including their unloaded baselines. Inner grouped
+folds choose alpha from 0.01, 0.1, 1 and 10. Category encoding and standardization
+are fitted on training data only. Each fit uses one numerical thread.
+
+The report retains every held-out prediction, MAE, RMSE, R2, and a training-mean
+baseline. Coefficients come from a separate full-data descriptive fit. They are
+not causal effects. This estimates interpolation among observed designs; it does
+not establish generalization to a new host, transport or unseen queue policy.
+The two-block measured reference remains insufficient. The six-block toy dataset
+tests this software path and is labeled as simulated throughout.
+
+Analysis stage timing uses monotonic wall time and analysis-process CPU time.
+The runtime figure excludes its own rendering; analysis_timings.json retains the
+completed plotting stage. Collection logs report coordinator and worker costs
+separately. A timing observation is not a guaranteed speedup.
+
+Pass --allow-simulated explicitly to analyze toy exports. Mixing simulated and
+measured rows, transports, source revisions or campaign designs is rejected.
+For live future-window forecasting, see [TCP measurements](../docs/tcp-measurements.md).
 
 Methods: [K-means](https://scikit-learn.org/stable/modules/clustering.html#k-means),
 [standardization](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html),

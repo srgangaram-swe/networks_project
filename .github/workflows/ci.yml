@@ -15,6 +15,19 @@ on:
         description: Run only the unloaded namespace setup check on a disposable Linux runner
         type: boolean
         default: false
+      physical_standin:
+        description: Check dedicated-interface ownership and UDP/TCP collection over isolated SSH
+        type: boolean
+        default: false
+      foreground_transport:
+        description: Foreground protocol for the complete namespace campaign
+        type: choice
+        options: [udp, tcp]
+        default: udp
+      shadow_forecast:
+        description: Collect advisory future-window forecasts alongside namespace traffic
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -42,7 +55,7 @@ jobs:
           sudo apt-get update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3
       - run: sh scripts/check.sh
-      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh scripts/setup_environment.sh
+      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh scripts/setup_environment.sh scripts/run_pipeline.sh
   analysis:
     name: analysis
     runs-on: ubuntu-24.04
@@ -109,12 +122,20 @@ jobs:
       - name: Exercise all four namespace profiles
         run: sudo env NETWORKS_RUN_PRIVILEGED=1 NETWORKS_EVIDENCE_DIR=.local/evidence/policy-checks .venv/bin/python -m unittest discover -s tests/linux -v
       - name: Run the NucBox experiment through analysis and t-SNE
-        run: sudo .venv/bin/python scripts/nucbox_experiment.py run --output .local/experiment --authorized-isolated-host
+        env:
+          FOREGROUND_TRANSPORT: ${{ inputs.foreground_transport }}
+          SHADOW_FORECAST: ${{ inputs.shadow_forecast }}
+        run: |
+          options=(--transport "$FOREGROUND_TRANSPORT")
+          if [ "$SHADOW_FORECAST" = true ]; then
+            options+=(--shadow-forecast)
+          fi
+          sudo .venv/bin/python scripts/pipeline.py --topology namespace "${options[@]}" --output .local/experiment --authorized-isolated-host
       - name: Export all completed observations and attempt accounting
         if: always()
         run: |
-          if sudo test -f .local/experiment/campaign/plan.json && ! sudo test -d .local/experiment/export; then
-            sudo .venv/bin/python scripts/export_pilot.py .local/experiment/campaign --output .local/experiment/export
+          if sudo test -f .local/experiment/namespace/campaign/plan.json && ! sudo test -d .local/experiment/namespace/export; then
+            sudo .venv/bin/python scripts/export_pilot.py .local/experiment/namespace/campaign --output .local/experiment/namespace/export
           fi
           if sudo test -d .local/evidence; then
             sudo chmod -R a+rX .local/evidence
@@ -129,12 +150,18 @@ jobs:
           name: namespace-pilot-evidence
           path: |
             .local/evidence
-            .local/experiment/export
-            .local/experiment/analysis
+            .local/experiment/namespace/export
+            .local/experiment/namespace/analysis
             .local/experiment/status.json
-            .local/experiment/hardware.json
-            .local/experiment/campaign/plan.json
-            .local/experiment/campaign/progress.json
+            .local/experiment/timings.json
+            .local/experiment/events.jsonl
+            .local/experiment/namespace/status.json
+            .local/experiment/namespace/hardware.json
+            .local/experiment/namespace/campaign/plan.json
+            .local/experiment/namespace/campaign/progress.json
+            .local/experiment/namespace/campaign/attempt-*/foreground-transport.json
+            .local/experiment/namespace/campaign/attempt-*/tcp-observer.json
+            .local/experiment/namespace/campaign/attempt-*/shadow-forecast.json
           if-no-files-found: warn
           retention-days: 30
   nucbox-setup:
@@ -176,5 +203,39 @@ jobs:
           path: |
             .local/hardware-inventory.json
             .local/nucbox-smoke
+          if-no-files-found: warn
+          retention-days: 30
+  physical-standin:
+    name: physical-standin
+    if: github.event_name == 'workflow_dispatch' && inputs.physical_standin
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - run: sh scripts/setup_environment.sh
+      - name: Install disposable testbed tools
+        run: |
+          sudo apt-get update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iproute2 iperf3 ethtool openssh-server kmod
+      - name: Exercise owned veth interfaces and private loopback SSH
+        run: sudo env NETWORKS_PHYSICAL_STANDIN=1 .venv/bin/python -m unittest tests.linux.test_physical_standin -v
+      - name: Export only the aggregate check report
+        if: always()
+        run: |
+          if sudo test -f .local/physical-standin-evidence/report.json; then
+            mkdir -p artifacts/physical-standin
+            sudo cat .local/physical-standin-evidence/report.json > artifacts/physical-standin/report.json
+          fi
+      - name: Retain the check report without SSH material or private profiles
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: physical-backend-standin-report
+          path: artifacts/physical-standin
           if-no-files-found: warn
           retention-days: 30

@@ -16,8 +16,16 @@ atomically; a second attempt cannot reuse the directory.
 | bulk.json | iperf3 version, requested aggregate and per-stream rates, actual receiver flow set, bytes, receiver duration, intervals, and goodput |
 | cpu.json | Linux shared-host busy and I/O-wait percentages, or explicit unavailable values on unsupported systems |
 | queues-before.json and queues-after.json | Namespace inspection and qdisc snapshots, or an explicit unchanged-loopback record |
+| foreground-transport.json | Foreground transport, event-stream quality and available Linux TCP_INFO counters |
+| tcp-observer.json | Linux TCP trials: passive header/ACK candidates, timing windows and capture quality |
+| shadow-forecast.json | Optional future-window advisory predictions and delayed outcomes |
+| bulk-raw.json | Loaded trials: retained iperf3 receiver evidence used to reconstruct bulk.json |
 
-The manifest hashes exactly these seven artifacts. Hashes detect changes; they
+The original seven artifacts remain required. New configuration records also
+require foreground transport evidence, Linux TCP observation where applicable,
+and shadow output when requested. Only those documented optional artifact names
+are permitted. Legacy UDP bundles without the new fields remain readable.
+Hashes detect changes; they
 do not authenticate who collected the observations. The independent validator
 also checks exact schemas, units, source identifiers, timestamp ordering, phase
 arithmetic, request identifiers, event totals, flow allocation, receiver byte

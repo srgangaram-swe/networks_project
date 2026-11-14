@@ -64,6 +64,11 @@ scheduling and cleanup, so they are not real-time guarantees.
 | Diagnostic campaign | O(C + A N) validation and O(C A) scheduling/ledger writes for C cells, A attempts, and N records per attempt | Default 40-cell bound; explicit matrix at most 280 cells and three attempts per cell; 256 KiB plan and 32 MiB progress limits, including escaped diagnostic notes |
 | Paired analysis | O(N log N + B R C) for requests N, bootstrap draws B, run rows R, and conditions C | One export's requests at a time; 128 export batches, 400 run rows, 10,000 resamples; missing blocks and invalid ratios never silently removed |
 | Exploratory ML | Bounded K-means iterations plus PCA, t-SNE, and O(R^2) silhouette distances | Six features, at most 400 runs, two clusters, ten starts, 100 K-means iterations, 1,000 t-SNE iterations, one numerical thread |
+| Local simulation | O(N + R log R) for N generated request slots and bounded per-run sorting | At most eight spawned workers, 160 trials, 120-second collection deadline; default 48 trials and 240,000 slots |
+| Passive TCP observation | O(P) for observed packets P | Two million packets, 64 bidirectional flows, 191 aggregate windows; only 160 header bytes read per packet |
+| Shadow forecasting | O(W^2 D^2 + N log N) with W bounded windows, D fixed features and bounded cohort RTT sorting | 191 windows, nine features, 1,024 pending requests, 500 RTT values per cohort, 300,000 events; separate process and nonblocking 512-byte FIFO records |
+| Physical collection | Serial trials with bounded per-command deadlines and O(A) artifact retrieval | At most 280 trial cells, 256 retained workers per role lease, five-second lock deadline, exact interface and namespace ownership checks |
+| Extended offline models | O(R^2) distances for Ward/DBSCAN; bounded grouped Ridge/Lasso fits | At most 400 rows, fixed alpha grid, at most five outer and three inner folds, one numerical thread |
 
 Do not substitute offered demand for achieved throughput or an asymptotic bound
 for a measurement. Profile before optimizing, state the input size and workload,

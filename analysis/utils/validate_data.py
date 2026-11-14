@@ -35,7 +35,8 @@ def numeric(frame, columns, nullable=()):
             raise ValueError(f"missing numeric values: {name}")
 
 
-def validate_summaries(frame):
+def validate_summaries(frame, *, allow_simulated=False):
+    _validate_transport(frame)
     required(
         frame,
         (
@@ -66,8 +67,9 @@ def validate_summaries(frame):
             raise ValueError(f"invalid identity: {name}")
     if not frame["policy"].isin(POLICIES | {"none"}).all():
         raise ValueError("unsupported policy")
-    if not frame["measurement_kind"].isin(("virtual_testbed", "loopback_diagnostic")).all():
-        raise ValueError("fixture data cannot be analyzed as observed measurements")
+    kinds = _measurement_kinds(allow_simulated)
+    if not frame["measurement_kind"].isin(kinds).all():
+        raise ValueError("simulation requires explicit permission; fixtures are not measurements")
     for name in ("p99_censored", "eligible_for_primary", "source_dirty"):
         if not frame[name].isin(("True", "False")).all():
             raise ValueError(f"invalid boolean: {name}")
@@ -83,6 +85,18 @@ def validate_summaries(frame):
     if any(name in frame for name in ("cpu_scope", "cpu_busy_percent", "cpu_iowait_percent")):
         required(frame, ("cpu_scope",))
         _cpu(frame)
+
+
+def _measurement_kinds(allow_simulated):
+    observed = ("virtual_testbed", "loopback_diagnostic", "physical_testbed")
+    return observed + (("simulation",) if allow_simulated else ())
+
+
+def _validate_transport(frame):
+    if "transport" not in frame:
+        frame["transport"] = "udp"
+    if not frame["transport"].isin(("udp", "tcp")).all():
+        raise ValueError("foreground transport must be udp or tcp")
 
 
 def _cpu(frame):

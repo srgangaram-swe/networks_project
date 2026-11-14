@@ -1,0 +1,440 @@
+{
+  "configuration": {
+    "background_flow_counts": [
+      1
+    ],
+    "background_load_fractions": [
+      1.1
+    ],
+    "base_rtt_ms": 20,
+    "foreground_message_bytes": 512,
+    "foreground_requests_per_second": 500,
+    "link_rate_mbps": 100,
+    "measurement_seconds": 10,
+    "policies": [
+      "fifo",
+      "fq_codel",
+      "cake_best_effort",
+      "cake_bounded"
+    ],
+    "random_seed": 561,
+    "repetitions": 6,
+    "schema_version": 1,
+    "unloaded_repetitions_per_policy": 6
+  },
+  "eligible_for_primary": false,
+  "kind": "local_simulation",
+  "measurement_slots": 240000,
+  "model": {
+    "delay_factors": {
+      "cake_best_effort": 0.2,
+      "cake_bounded": 0.16,
+      "fifo": 1.0,
+      "fq_codel": 0.3
+    },
+    "goodput_factors": {
+      "cake_best_effort": 0.94,
+      "cake_bounded": 0.95,
+      "fifo": 1.0,
+      "fq_codel": 0.98
+    },
+    "purpose": "software_testing_only",
+    "version": "toy-queue-v1"
+  },
+  "schedule": {
+    "cells": [
+      {
+        "baseline_id": "b001-cake_best_effort-l000-f00",
+        "block": 1,
+        "cell_id": "b001-cake_best_effort-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b001-cake_best_effort-l000-f00",
+        "block": 1,
+        "cell_id": "b001-cake_best_effort-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b001-cake_bounded-l000-f00",
+        "block": 1,
+        "cell_id": "b001-cake_bounded-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b001-cake_bounded-l000-f00",
+        "block": 1,
+        "cell_id": "b001-cake_bounded-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b001-fifo-l000-f00",
+        "block": 1,
+        "cell_id": "b001-fifo-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b001-fifo-l000-f00",
+        "block": 1,
+        "cell_id": "b001-fifo-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b001-fq_codel-l000-f00",
+        "block": 1,
+        "cell_id": "b001-fq_codel-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b001-fq_codel-l000-f00",
+        "block": 1,
+        "cell_id": "b001-fq_codel-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b002-fq_codel-l000-f00",
+        "block": 2,
+        "cell_id": "b002-fq_codel-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b002-fq_codel-l000-f00",
+        "block": 2,
+        "cell_id": "b002-fq_codel-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b002-fifo-l000-f00",
+        "block": 2,
+        "cell_id": "b002-fifo-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b002-fifo-l000-f00",
+        "block": 2,
+        "cell_id": "b002-fifo-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b002-cake_best_effort-l000-f00",
+        "block": 2,
+        "cell_id": "b002-cake_best_effort-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b002-cake_best_effort-l000-f00",
+        "block": 2,
+        "cell_id": "b002-cake_best_effort-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b002-cake_bounded-l000-f00",
+        "block": 2,
+        "cell_id": "b002-cake_bounded-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b002-cake_bounded-l000-f00",
+        "block": 2,
+        "cell_id": "b002-cake_bounded-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b003-cake_best_effort-l000-f00",
+        "block": 3,
+        "cell_id": "b003-cake_best_effort-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b003-cake_best_effort-l000-f00",
+        "block": 3,
+        "cell_id": "b003-cake_best_effort-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b003-fq_codel-l000-f00",
+        "block": 3,
+        "cell_id": "b003-fq_codel-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b003-fq_codel-l000-f00",
+        "block": 3,
+        "cell_id": "b003-fq_codel-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b003-fifo-l000-f00",
+        "block": 3,
+        "cell_id": "b003-fifo-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b003-fifo-l000-f00",
+        "block": 3,
+        "cell_id": "b003-fifo-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b003-cake_bounded-l000-f00",
+        "block": 3,
+        "cell_id": "b003-cake_bounded-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b003-cake_bounded-l000-f00",
+        "block": 3,
+        "cell_id": "b003-cake_bounded-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b004-fq_codel-l000-f00",
+        "block": 4,
+        "cell_id": "b004-fq_codel-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b004-fq_codel-l000-f00",
+        "block": 4,
+        "cell_id": "b004-fq_codel-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b004-cake_bounded-l000-f00",
+        "block": 4,
+        "cell_id": "b004-cake_bounded-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b004-cake_bounded-l000-f00",
+        "block": 4,
+        "cell_id": "b004-cake_bounded-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b004-cake_best_effort-l000-f00",
+        "block": 4,
+        "cell_id": "b004-cake_best_effort-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b004-cake_best_effort-l000-f00",
+        "block": 4,
+        "cell_id": "b004-cake_best_effort-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b004-fifo-l000-f00",
+        "block": 4,
+        "cell_id": "b004-fifo-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b004-fifo-l000-f00",
+        "block": 4,
+        "cell_id": "b004-fifo-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b005-fq_codel-l000-f00",
+        "block": 5,
+        "cell_id": "b005-fq_codel-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b005-fq_codel-l000-f00",
+        "block": 5,
+        "cell_id": "b005-fq_codel-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b005-fifo-l000-f00",
+        "block": 5,
+        "cell_id": "b005-fifo-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b005-fifo-l000-f00",
+        "block": 5,
+        "cell_id": "b005-fifo-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b005-cake_bounded-l000-f00",
+        "block": 5,
+        "cell_id": "b005-cake_bounded-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b005-cake_bounded-l000-f00",
+        "block": 5,
+        "cell_id": "b005-cake_bounded-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b005-cake_best_effort-l000-f00",
+        "block": 5,
+        "cell_id": "b005-cake_best_effort-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b005-cake_best_effort-l000-f00",
+        "block": 5,
+        "cell_id": "b005-cake_best_effort-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b006-fq_codel-l000-f00",
+        "block": 6,
+        "cell_id": "b006-fq_codel-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b006-fq_codel-l000-f00",
+        "block": 6,
+        "cell_id": "b006-fq_codel-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fq_codel"
+      },
+      {
+        "baseline_id": "b006-cake_bounded-l000-f00",
+        "block": 6,
+        "cell_id": "b006-cake_bounded-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b006-cake_bounded-l000-f00",
+        "block": 6,
+        "cell_id": "b006-cake_bounded-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_bounded"
+      },
+      {
+        "baseline_id": "b006-fifo-l000-f00",
+        "block": 6,
+        "cell_id": "b006-fifo-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b006-fifo-l000-f00",
+        "block": 6,
+        "cell_id": "b006-fifo-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "fifo"
+      },
+      {
+        "baseline_id": "b006-cake_best_effort-l000-f00",
+        "block": 6,
+        "cell_id": "b006-cake_best_effort-l000-f00",
+        "flows": 0,
+        "load_fraction": 0.0,
+        "policy": "cake_best_effort"
+      },
+      {
+        "baseline_id": "b006-cake_best_effort-l000-f00",
+        "block": 6,
+        "cell_id": "b006-cake_best_effort-l110-f01",
+        "flows": 1,
+        "load_fraction": 1.1,
+        "policy": "cake_best_effort"
+      }
+    ],
+    "schema_version": 1,
+    "seed": 561
+  },
+  "source": {
+    "commit": "7bf62aacf1c592ece3b9f9610ff57b9ce41d142e",
+    "dirty": false,
+    "tree_sha256": "ab0926509739e653eb780930256e397a0cafaf91715f7b740a5a9a4361beddcd"
+  },
+  "transport": "udp"
+}

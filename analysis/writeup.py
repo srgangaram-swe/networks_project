@@ -33,6 +33,9 @@ def write_summary(directory: Path, summaries, report: dict) -> None:
         r" & (Mb/s) & & & (ms) & retained (\%) \\",
         r"\hline",
     ]
+    if report.get("measurement_kind") == "simulation":
+        lines.insert(0, "SIMULATED DATA: toy-model software validation only.")
+        table.insert(1, r"\textbf{Simulated data: software validation only.}\par")
     for row in rows:
         added, retained = _number(row["added_p99_ms"]), _number(row["goodput_retention_pct"])
         lines.append(
@@ -53,7 +56,8 @@ def write_summary(directory: Path, summaries, report: dict) -> None:
             "",
             "K-means describes standardized run metrics within each load/flow condition.",
             "PCA and t-SNE visualize those metrics; cluster labels are fitted in six dimensions.",
-            "This is exploratory analysis, with no held-out prediction or automatic exclusion.",
+            "Clustering is exploratory and excludes no runs automatically. "
+            "The separate Ridge/Lasso validation status is recorded in report.json.",
             "Use report.json for source identities, intervals, model settings, "
             "and artifact hashes.",
             "Keep missed slots, censoring, and unfavorable goodput in the final discussion.",

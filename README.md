@@ -14,6 +14,19 @@ matches each loaded run to its unloaded baseline, compares policies within
 randomized blocks, and produces statistical tables and exploratory ML figures.
 The Mac supports development and analysis; the NucBox will run collection.
 
+One launcher selects local simulation, one-host Linux namespaces, or three
+configured physical Linux roles. It also selects UDP or TCP foreground traffic
+and can run a separate advisory model for future RTT and timeout outcomes.
+The [complete run guide](docs/topology-pipeline.md) covers setup, profiles,
+commands, outputs and recovery.
+
+    sh scripts/run_pipeline.sh --topology local --transport udp \
+      --workers 4 --output runs/local-check-01
+
+This local check generates 48 trials and 240,000 slots from a clearly labeled
+toy model, then exports, analyzes and plots them. These simulated rows exercise
+the software; the measured preliminary results below still come from Linux.
+
 [Run the pipeline](#run-the-analysis-on-macos-or-linux) |
 [NucBox collection](#collect-on-the-nucbox) |
 [Docker and YAML](#run-analysis-with-docker-compose) |
@@ -58,6 +71,19 @@ the data panels. Click an image to inspect the full figure.
 | PCA | t-SNE |
 |---|---|
 | ![PCA view of the eight loaded diagnostic runs](analysis/plots/preliminary/run_clusters.png) | ![Seeded t-SNE view of the same eight loaded runs](analysis/plots/preliminary/run_clusters_tsne.png) |
+
+Ward agglomerative clustering gives the same two groups on these eight loaded
+runs. DBSCAN instead finds one dense group and marks four runs as noise at its
+fixed radius. The different partitions show how much the answer depends on the
+algorithm and its assumptions. All eight runs remain in the comparison.
+
+| Ward agglomerative | DBSCAN with noise retained |
+|---|---|
+| ![Ward assignments on the measured namespace pilot](analysis/plots/extended/run_clusters_agglomerative.png) | ![DBSCAN assignments and four noise runs on the measured namespace pilot](analysis/plots/extended/run_clusters_dbscan.png) |
+
+The [extended measured gallery](analysis/plots/extended) includes all twelve
+figure pairs, internal cluster metrics, source bindings and generated findings.
+The two-block reference leaves Ridge/Lasso unavailable.
 
 ### Delivery and latency diagnostics
 
@@ -123,6 +149,28 @@ the final experiment.
 
 ## Run the analysis on macOS or Linux
 
+### Software validation with more simulated rows
+
+The separate [simulation gallery](analysis/plots/simulation) uses six blocks,
+48 toy trials and 240,000 scheduled slots. Every figure carries its simulation
+label. The assumed policy factors make the regression problem deliberately
+simple, so small errors here validate the code path rather than a physical
+prediction claim. Whole blocks and their baselines stay outside training.
+
+![Ridge and Lasso predictions for held-out blocks of simulated data](analysis/plots/simulation/ridge_lasso_predictions.png)
+
+![Descriptive Ridge and Lasso coefficients from the simulated design](analysis/plots/simulation/ridge_lasso_coefficients.png)
+
+![Measured analysis stage wall and process CPU costs for the simulated example](analysis/plots/simulation/analysis_runtime.png)
+
+An alternating three-repeat collection check on this Mac had median wall times
+of 0.822 seconds with one worker and 0.273 seconds with four, about 3.01 times
+faster for this 240,000-slot software workload. The request tables were identical.
+The [timing record](analysis/plots/simulation/worker-benchmark.json) retains every
+repeat and source identity. This is not a network throughput benchmark.
+
+### Set up and rebuild the measured reference
+
 Prerequisites: Git and Python 3.12 or newer. Run the following from a terminal:
 
     git clone https://github.com/srgangaram-swe/networks_project.git
@@ -166,12 +214,18 @@ choose a new name for each rebuild. Input data is never overwritten.
 | matched_baselines.csv | Same-policy, same-block unloaded baseline for each loaded run |
 | policy_comparisons.csv | Added latency, relative effects, goodput retention, interval status, and point targets |
 | run_clusters.csv | Cluster assignments and PCA/t-SNE coordinates |
+| cluster_diagnostics.csv | Internal silhouette, Davies-Bouldin, Calinski-Harabasz, noise and partition agreement scores |
+| regression_predictions.csv | Ridge/Lasso predictions from held-out blocks, when at least six blocks exist |
 | plots/policy_comparisons.png and .svg | Policy means, all matched latency runs, and available uncertainty |
 | plots/request_outcomes.png and plots/tail_quantiles.png, plus .svg copies | Full delivery accounting and mean per-run RTT percentiles |
 | plots/run_clusters.png, plots/run_clusters_tsne.png, and plots/run_clusters_metrics.png, plus .svg copies | The same fitted assignments in PCA, t-SNE, and physical units |
 | plots/cluster_profiles.png and .svg | Standardized centroids and policy membership counts |
+| plots/run_clusters_agglomerative.png and plots/run_clusters_dbscan.png, plus .svg copies | Separate Ward and DBSCAN assignments in PCA coordinates |
+| plots/ridge_lasso_predictions.png and plots/ridge_lasso_coefficients.png, plus .svg copies | Held-out errors and descriptive regularized coefficients |
+| plots/analysis_runtime.png and analysis_timings.json | Completed analysis-stage wall and process CPU costs |
 | report.json | Input/output hashes, source identities, settings, counts, layout checks, and limitations |
 | diagnostic_summary.txt and writeup_table.tex | Readable results and a LaTeX table for drafting the report |
+| insights.txt | Generated findings, model diagnostics, uncertainty and remaining limits |
 
 A completed report still has primary eligibility set to false. Read interval
 and comparison status fields before interpreting a percentage. See the
@@ -263,24 +317,37 @@ sequenceDiagram
     participant Pipeline
     participant Campaign
     participant Trial
+    participant Monitor as TCP observation and shadow model
     participant Analysis as Export and analysis
     participant Files as Artifacts
-    User->>Pipeline: Run a recorded diagnostic plan
-    Pipeline->>Pipeline: Inspect host and check four policies
+    User->>Pipeline: Select topology, UDP or TCP, output and optional forecasts
+    alt Local software check
+        Pipeline->>Pipeline: Collect 48 seeded toy trials in bounded worker pool
+    else Linux namespace or physical testbed
+        Pipeline->>Pipeline: Check source, tools and isolated resource ownership
     Pipeline->>Campaign: Save source, configuration, seed and schedule
     loop Each unfinished scheduled cell
-        Campaign->>Trial: Run in fresh owned namespaces
-        Trial->>Trial: Warmup, measure, drain and clean up
+        Campaign->>Trial: Run serially in owned namespaces or dedicated NIC roles
+        opt TCP telemetry or shadow forecasts
+            Trial->>Monitor: Start separate observers with bounded nonblocking events
+            Monitor->>Monitor: Count ACK candidates and forecast future cohorts
+        end
+        Trial->>Trial: Warmup, measure and drain
         Trial->>Files: Observations, counters and manifest
+        Trial->>Monitor: Stop and join before topology cleanup
+        Monitor->>Files: Capture quality, socket counters and advisory forecasts
+        Trial->>Trial: Validate and clean up exact owned resources
         Trial-->>Campaign: Validated bundle or failure
         Campaign->>Files: Retain attempt and manifest hash
     end
     Campaign-->>Pipeline: Completed schedule or stopped state
+    end
     alt Collection completed
         Pipeline->>Analysis: Export observations and full attempt ledger
         Analysis->>Analysis: Check hashes, counts and recorded pairings
-        Analysis->>Analysis: Paired bootstrap, K-means, PCA and t-SNE
-        Analysis->>Files: CSV tables, plots, summary and LaTeX table
+        Analysis->>Analysis: Paired bootstrap, K-means, Ward, DBSCAN, PCA and t-SNE
+        Analysis->>Analysis: Ridge and Lasso with held-out blocks
+        Analysis->>Files: CSV tables, Seaborn plots, insights, timings and LaTeX table
         Pipeline-->>User: Completed diagnostic results
     else Failure or cancellation
         Pipeline->>Files: Keep failed stage and partial evidence

@@ -2,6 +2,7 @@
 
 from src.experiment_config import POLICIES, bounded_integer
 from src.topology import CLIENT_ADDRESS, SERVER_ADDRESS, Topology
+from src.transport import validate_transport
 
 
 def _sanitize(topology: Topology) -> list[tuple[str, ...]]:
@@ -49,7 +50,7 @@ def _sanitize(topology: Topology) -> list[tuple[str, ...]]:
     return commands
 
 
-def _bounded_filters(topology: Topology) -> list[tuple[str, ...]]:
+def _bounded_filters(topology: Topology, transport="udp") -> list[tuple[str, ...]]:
     prefix = ("tc", "filter", "add", "dev", "to-client", "parent", "1:", "protocol", "ip")
     return [
         topology.command(
@@ -63,7 +64,7 @@ def _bounded_filters(topology: Topology) -> list[tuple[str, ...]]:
             "dst_ip",
             CLIENT_ADDRESS,
             "ip_proto",
-            "udp",
+            transport,
             "src_port",
             "42000",
             "dst_port",
@@ -110,7 +111,7 @@ def _bounded_filters(topology: Topology) -> list[tuple[str, ...]]:
     ]
 
 
-def policy_commands(topology: Topology, policy: str) -> list[tuple[str, ...]]:
+def policy_commands(topology: Topology, policy: str, *, transport="udp") -> list[tuple[str, ...]]:
     """Plan O(1) commands at the fixed 100 Mb/s candidate protocol settings.
 
     Install once into a fresh topology. Reset means replacing that whole owned
@@ -118,6 +119,7 @@ def policy_commands(topology: Topology, policy: str) -> list[tuple[str, ...]]:
     """
     if policy not in POLICIES:
         raise ValueError("unsupported queue policy")
+    validate_transport(transport)
     commands = _sanitize(topology)
     prefix = ("tc", "qdisc", "add", "dev", "to-client")
     if policy in {"fifo", "fq_codel"}:
@@ -196,7 +198,7 @@ def policy_commands(topology: Topology, policy: str) -> list[tuple[str, ...]]:
             )
         )
         if policy == "cake_bounded":
-            commands.extend(_bounded_filters(topology))
+            commands.extend(_bounded_filters(topology, transport))
     return commands
 
 

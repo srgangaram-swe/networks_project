@@ -3,24 +3,37 @@ sequenceDiagram
     participant Pipeline
     participant Campaign
     participant Trial
+    participant Monitor as TCP observation and shadow model
     participant Analysis as Export and analysis
     participant Files as Artifacts
-    User->>Pipeline: Run a recorded diagnostic plan
-    Pipeline->>Pipeline: Inspect host and check four policies
+    User->>Pipeline: Select topology, UDP or TCP, output and optional forecasts
+    alt Local software check
+        Pipeline->>Pipeline: Collect 48 seeded toy trials in bounded worker pool
+    else Linux namespace or physical testbed
+        Pipeline->>Pipeline: Check source, tools and isolated resource ownership
     Pipeline->>Campaign: Save source, configuration, seed and schedule
     loop Each unfinished scheduled cell
-        Campaign->>Trial: Run in fresh owned namespaces
-        Trial->>Trial: Warmup, measure, drain and clean up
+        Campaign->>Trial: Run serially in owned namespaces or dedicated NIC roles
+        opt TCP telemetry or shadow forecasts
+            Trial->>Monitor: Start separate observers with bounded nonblocking events
+            Monitor->>Monitor: Count ACK candidates and forecast future cohorts
+        end
+        Trial->>Trial: Warmup, measure and drain
         Trial->>Files: Observations, counters and manifest
+        Trial->>Monitor: Stop and join before topology cleanup
+        Monitor->>Files: Capture quality, socket counters and advisory forecasts
+        Trial->>Trial: Validate and clean up exact owned resources
         Trial-->>Campaign: Validated bundle or failure
         Campaign->>Files: Retain attempt and manifest hash
     end
     Campaign-->>Pipeline: Completed schedule or stopped state
+    end
     alt Collection completed
         Pipeline->>Analysis: Export observations and full attempt ledger
         Analysis->>Analysis: Check hashes, counts and recorded pairings
-        Analysis->>Analysis: Paired bootstrap, K-means, PCA and t-SNE
-        Analysis->>Files: CSV tables, plots, summary and LaTeX table
+        Analysis->>Analysis: Paired bootstrap, K-means, Ward, DBSCAN, PCA and t-SNE
+        Analysis->>Analysis: Ridge and Lasso with held-out blocks
+        Analysis->>Files: CSV tables, Seaborn plots, insights, timings and LaTeX table
         Pipeline-->>User: Completed diagnostic results
     else Failure or cancellation
         Pipeline->>Files: Keep failed stage and partial evidence

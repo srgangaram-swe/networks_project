@@ -1,0 +1,4 @@
+requested_mbps,flows,algorithm,clusters,noise_runs,noise_fraction,silhouette,davies_bouldin,calinski_harabasz,score_scope,adjusted_rand_agreement_with_kmeans
+110.00000000000001,1,kmeans,2,0,0.0,0.21174105623001505,1.6164193087208631,7.846469290020591,non_noise_runs_in_standardized_feature_space,1.0
+110.00000000000001,1,agglomerative,2,0,0.0,0.21174105623001505,1.6164193087208631,7.846469290020591,non_noise_runs_in_standardized_feature_space,1.0
+110.00000000000001,1,dbscan,1,19,0.7916666666666666,,,,non_noise_runs_in_standardized_feature_space,0.14920733602735467

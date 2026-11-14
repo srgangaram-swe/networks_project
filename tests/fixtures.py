@@ -72,6 +72,9 @@ def valid_bundle(directory: Path, *, measurement_kind: str = "synthetic_fixture"
     bundle.save()
     foreground = capture()
     bundle.artifact("foreground.json", foreground)
+    bundle.artifact(
+        "foreground-transport.json", {"transport": "udp", "event_stream": {"sent": 0, "dropped": 0}}
+    )
     bulk = {
         "requested": asdict(config.bulk_plan()),
         "per_flow_bps": 8_000_000,

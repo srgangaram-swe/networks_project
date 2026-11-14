@@ -123,6 +123,16 @@ class BundleTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bundle.transition("failed")
 
+    def test_legacy_udp_bundle_without_optional_metrics_remains_readable(self):
+        config = read_json(self.root / "configuration.json")
+        del config["transport"]
+        del config["shadow_forecast"]
+        self.replace_artifact("configuration.json", config)
+        del self.bundle.manifest["artifacts"]["foreground-transport.json"]
+        (self.root / "foreground-transport.json").unlink()
+        self.bundle.save()
+        self.assertTrue(validate_bundle(self.root)["integrity_valid"])
+
     def test_missing_altered_and_symlinked_artifacts_fail(self):
         path = self.root / "foreground.json"
         old = path.read_bytes()

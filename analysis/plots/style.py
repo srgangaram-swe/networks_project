@@ -69,7 +69,7 @@ def footer(key, caption: str, handles=()):
         )
     key.text(
         0.01,
-        0.43 if handles else 0.8,
+        (0.3 if len(handles) > 8 else 0.43) if handles else 0.8,
         caption,
         va="top",
         fontsize=9.5,
@@ -78,7 +78,14 @@ def footer(key, caption: str, handles=()):
     )
 
 
-def cluster_key():
+def cluster_palette(labels):
+    palette = sns.color_palette("colorblind", max(2, len(set(labels) - {-1})))
+    colors = {label: palette[index] for index, label in enumerate(sorted(set(labels) - {-1}))}
+    colors[-1] = "#818A96"
+    return colors
+
+
+def cluster_key(labels=(0, 1)):
     handles = [
         Line2D(
             [],
@@ -92,6 +99,7 @@ def cluster_key():
         )
         for p in POLICIES
     ]
+    colors = cluster_palette(labels)
     handles += [
         Line2D(
             [],
@@ -100,9 +108,10 @@ def cluster_key():
             color="none",
             markerfacecolor=color,
             markersize=8,
-            label=f"Cluster {label}",
+            label="Noise" if label == -1 else f"Cluster {label}",
         )
-        for label, color in CLUSTERS.items()
+        for label, color in colors.items()
+        if label in sorted(set(labels))[:8]
     ]
     return handles
 
@@ -171,8 +180,25 @@ def audit_layout(fig):
     }
 
 
-def save_figure(fig, destination: Path):
+def save_figure(fig, destination: Path, *, measurement_kind="virtual_testbed", transport="udp"):
     try:
+        fig._suptitle.set_text(
+            fig._suptitle.get_text() + f"\nForeground transport: {transport.upper()}"
+        )
+        if measurement_kind == "simulation":
+            fig.suptitle(
+                "SIMULATED DATA: software validation\n" + fig._suptitle.get_text(),
+                fontsize=16,
+                fontweight="bold",
+                color="#172B42",
+            )
+        elif measurement_kind == "physical_testbed":
+            fig.suptitle(
+                "Physical testbed diagnostics\n" + fig._suptitle.get_text(),
+                fontsize=16,
+                fontweight="bold",
+                color="#172B42",
+            )
         result = audit_layout(fig)
         for extension in ("png", "svg"):
             metadata = {

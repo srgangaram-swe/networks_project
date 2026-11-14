@@ -92,7 +92,17 @@ class PlotTests(unittest.TestCase):
             model,
             self.root / "plots",
         )
-        self.assertEqual(set(result), {"policy_comparisons", "request_outcomes", "tail_quantiles"})
+        self.assertEqual(
+            set(result),
+            {
+                "policy_comparisons",
+                "request_outcomes",
+                "tail_quantiles",
+                "ridge_lasso_predictions",
+                "ridge_lasso_coefficients",
+                "analysis_runtime",
+            },
+        )
         self.assertIsNone(cluster_metrics_plot(self.runs, assignments, self.root / "none.png"))
         self.assertIsNone(cluster_profile_plot(assignments, model, self.root / "none.png"))
         report = {"plot_bundle_version": 2, "plots_requested": True, "ml": model}
@@ -100,6 +110,6 @@ class PlotTests(unittest.TestCase):
         report["plots_requested"] = False
         self.assertEqual(expected_artifacts(report), TABLE_FILES)
         self.assertEqual(len(expected_artifacts({})), 10)
-        for invalid in (True, 0, 3, "2"):
+        for invalid in (True, 0, 4, "2"):
             with self.assertRaises(ValueError):
                 expected_artifacts({"plot_bundle_version": invalid})

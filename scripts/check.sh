@@ -21,4 +21,5 @@ sh -n scripts/check.sh
 sh -n scripts/setup_nucbox.sh
 sh -n scripts/check_analysis.sh
 sh -n scripts/setup_environment.sh
+sh -n scripts/run_pipeline.sh
 git diff --check

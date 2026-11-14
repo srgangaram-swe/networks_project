@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "roles": {
+    "client": {
+      "host": "experiment-client",
+      "repository": "/home/research/networks_project",
+      "interfaces": {"eth0": "enx001122334401"}
+    },
+    "router": {
+      "host": "experiment-router",
+      "repository": "/home/research/networks_project",
+      "interfaces": {"to-client": "enp1s0", "to-server": "enp2s0"}
+    },
+    "server": {
+      "host": "experiment-server",
+      "repository": "/home/research/networks_project",
+      "interfaces": {"eth0": "enx001122334402"}
+    }
+  }
+}
