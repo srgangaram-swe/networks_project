@@ -24,6 +24,12 @@ six items retain unmet criteria; promoting this source does not complete them.
 | #10: Bundle validation | Complete schema-v1 integrity validator with hash and semantic checks, receiver-duration cross-checks, complete labeled fixtures, and corrupt/incomplete CLI regressions | Primary eligibility stays disabled; future collector schema changes must update the validator with #9 |
 | #11: Pilot readiness | Local diagnostic workflow, complete cross-policy Linux mechanics pilot, checked export and rendered figure, per-run summaries, and explicit refusal to admit diagnostic runs as primary evidence | Full-duration bottleneck and generator-overhead calibration, independent data review, and recorded scientific go/no-go decision |
 
+Work item #37 adds the [topology launcher](topology-pipeline.md), framed TCP,
+passive ACK and socket telemetry, optional causal shadow forecasts, deterministic
+parallel simulation, extended clustering and block-validated Ridge/Lasso. These
+software additions preserve the completed components and the pending scientific
+criteria above. They do not turn a hosted stand-in into actual equipment evidence.
+
 On November 7, 2026, Saif reported that the mini PC, adapters, and two cables
 had arrived. Linux has not been installed or configured by the team on the
 newly unboxed unit. The two Linux endpoint computers are unavailable, and the

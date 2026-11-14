@@ -119,7 +119,10 @@ class AckObserver:
             and (packet["ack"], packet["window"]) == (state["ack"], state["window"])
         ):
             counts[f"{scope}_duplicate_ack_candidates"] += 1
-        state.update(ack=packet["ack"], window=packet["window"])
+        # Reordered stale ACKs must not move the cumulative high-water mark back.
+        if state["ack"] is None or ahead(packet["ack"], state["ack"]):
+            state["ack"] = packet["ack"]
+        state["window"] = packet["window"]
 
     def report(self):
         return {

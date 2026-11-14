@@ -120,6 +120,13 @@ class TransportTests(unittest.TestCase):
         observer.observe(bytes(ack), 3)
         self.assertEqual(observer.report()["windows"][0]["bulk_duplicate_ack_candidates"], 1)
 
+    def test_stale_reordered_acknowledgments_cannot_replace_the_greatest_ack(self):
+        observer = AckObserver("192.0.2.2", "198.51.100.2", 0)
+        observer.observe(packet(seq=100, payload=1000), 0)
+        for index, ack in enumerate((600, 500, 500, 600, 1100, 600, 600), 1):
+            observer.observe(packet(outbound=False, ack=ack), index)
+        self.assertEqual(observer.report()["windows"][0]["foreground_duplicate_ack_candidates"], 1)
+
     def test_atomic_fifo_writes_drop_without_blocking_and_reject_regular_files(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "events"

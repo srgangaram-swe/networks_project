@@ -38,8 +38,9 @@ header parser and writes aggregate counters, never payload captures.
 It follows both request and reverse bulk directions.
 
 A duplicate-ACK candidate must acknowledge outstanding observed data, carry
-no TCP payload or SYN/FIN/RST, repeat the previous cumulative ACK number, and
-repeat the advertised window. These are the header conditions in
+no TCP payload or SYN/FIN/RST, match the greatest cumulative ACK observed on
+that connection, and repeat the most recently advertised window. Reordered
+stale ACKs cannot move that cumulative high-water mark back. These are the header conditions in
 [RFC 5681, section 2](https://www.rfc-editor.org/rfc/rfc5681.html#section-2).
 Repeated sequence candidates are counted separately. ACK and sequence counters
 are split between the foreground port pair and bulk connections.
