@@ -34,6 +34,17 @@ def save_result(path: Path, result: dict) -> None:
             os.unlink(temporary)
 
 
+def checked_output(path):
+    if path is None:
+        raise ValueError("choose a new output file in an existing directory")
+    metrics = path.with_name(path.stem + "-transport.json")
+    if not path.parent.is_dir() or any(
+        item.exists() or item.is_symlink() for item in (path, metrics)
+    ):
+        raise ValueError("choose new capture and transport files in an existing directory")
+    return metrics
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("role", choices=("client", "responder"))
@@ -77,8 +88,7 @@ def main() -> int:
                 ready=lambda bind: print(json.dumps({"ready": bind}), file=sys.stderr, flush=True),
             )
         else:
-            if args.output is None or not args.output.parent.is_dir() or args.output.exists():
-                raise ValueError("choose a new output file in an existing directory")
+            metrics_path = checked_output(args.output)
             plan = Workload(args.warmup_ms, args.measurement_ms, args.drain_ms, args.rate)
             client = tcp_client if args.transport == "tcp" else run_client
             with EventWriter(args.events_fifo) as writer:
@@ -93,7 +103,7 @@ def main() -> int:
                 )
                 metrics = result.pop("transport_metrics", {"transport": "udp"})
                 metrics["event_stream"] = {"sent": writer.sent, "dropped": writer.dropped}
-                save_result(args.output.parent / "foreground-transport.json", metrics)
+                save_result(metrics_path, metrics)
             save_result(args.output, result)
         print(json.dumps({key: result[key] for key in ("status", "counts", "bind")}))
         return {"completed": 0, "cancelled": 130, "io_error": 2}[result["status"]]

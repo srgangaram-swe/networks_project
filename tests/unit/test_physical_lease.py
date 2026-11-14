@@ -60,6 +60,10 @@ class LeaseTests(unittest.TestCase):
         with self.assertRaises(PermissionError):
             self.prepare()
         self.assertFalse(self.kernel.identities)
+        self.kernel.routes = [{"dst": "default", "nexthops": [{"dev": "router0"}]}]
+        with self.assertRaises(PermissionError):
+            self.prepare()
+        self.assertFalse(self.kernel.identities)
         self.kernel.routes = []
         self.kernel.queues = [{"kind": "cake", "handle": "1:"}]
         with self.assertRaises(PermissionError):

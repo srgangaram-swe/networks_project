@@ -14,7 +14,7 @@ from src.topology_runtime import namespace_identity, require_linux
 def inspect_interfaces(item: dict) -> list[dict]:
     routes = parse_json(run_command(("ip", "-j", "route", "show", "table", "all")).stdout)
     ipv6 = parse_json(run_command(("ip", "-j", "-6", "route", "show", "table", "all")).stdout)
-    routed = {row.get("dev") for row in routes + ipv6}
+    routed = _routed_interfaces(routes + ipv6)
     result = []
     for canonical, name in item["interfaces"].items():
         links = parse_json(run_command(("ip", "-j", "address", "show", "dev", name)).stdout)
@@ -53,6 +53,12 @@ def inspect_interfaces(item: dict) -> list[dict]:
             }
         )
     return result
+
+
+def _routed_interfaces(routes):
+    return {row.get("dev") for row in routes} | {
+        hop.get("dev") for row in routes for hop in row.get("nexthops", [])
+    }
 
 
 class PhysicalLease:

@@ -321,8 +321,15 @@ class ForegroundIoTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
             self.assertEqual(path.read_bytes(), saved)
             self.assertEqual(
-                set(Path(directory).iterdir()), {path, path.parent / "foreground-transport.json"}
+                set(Path(directory).iterdir()), {path, path.parent / "result-transport.json"}
             )
+            second = path.with_name("second.json")
+            result = subprocess.run(
+                command[:-1] + [str(second)], cwd=ROOT, capture_output=True, text=True, timeout=5
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(path.with_name("second-transport.json").exists())
+            self.assertEqual(path.read_bytes(), saved)
 
     def test_atomic_save_does_not_replace_file_or_leave_temporary(self):
         with tempfile.TemporaryDirectory() as directory:

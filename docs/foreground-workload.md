@@ -98,6 +98,10 @@ that refuses to replace an existing destination. Choose a local filesystem
 that supports hard links. The CLI does not create parent directories. Raw
 output belongs under the ignored runs directory.
 
+The client also writes transport evidence beside the capture, using its basename
+plus -transport.json. A foreground-smoke.json capture therefore gets a separate
+foreground-smoke-transport.json file. Both destinations must be unused.
+
 ## Bounds and safety
 
 Default traffic stays on loopback. Private IPv4 testbed addresses require
