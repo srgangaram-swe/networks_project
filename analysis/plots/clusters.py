@@ -7,11 +7,11 @@ import pandas as pd
 import seaborn as sns
 
 from analysis.plots.style import (
-    CLUSTERS,
     LABELS,
     MARKERS,
     POLICIES,
     cluster_key,
+    cluster_palette,
     condition,
     figure_grid,
     footer,
@@ -19,7 +19,7 @@ from analysis.plots.style import (
 )
 
 
-def clustering_plot(assignments, destination, projection="pca"):
+def clustering_plot(assignments, destination, projection="pca", *, method="kmeans"):
     if assignments.empty:
         return None
     x, y = ("pc1", "pc2") if projection == "pca" else ("tsne1", "tsne2")
@@ -27,11 +27,12 @@ def clustering_plot(assignments, destination, projection="pca"):
     return _scatter(
         assignments,
         destination,
-        f"{name}: the fitted run clusters",
+        f"{method.title()}: run clusters in the {name} view",
         x,
         y,
         f"{name} dimension 1",
         f"{name} dimension 2",
+        label="cluster" if method == "kmeans" else f"{method}_cluster",
     )
 
 
@@ -41,6 +42,7 @@ def cluster_metrics_plot(runs, assignments, destination):
     values = assignments.merge(
         runs[["run_id", "p99_ms", "goodput_mbps"]], on="run_id", validate="one_to_one"
     )
+    values.attrs.update(assignments.attrs)
     return _scatter(
         values,
         destination,
@@ -52,12 +54,13 @@ def cluster_metrics_plot(runs, assignments, destination):
     )
 
 
-def _scatter(data, destination, title, x, y, xlabel, ylabel):
+def _scatter(data, destination, title, x, y, xlabel, ylabel, *, label="cluster"):
     groups = list(data.groupby(["requested_mbps", "flows"], sort=True))
     columns = min(2, len(groups))
     fig, axes, key = figure_grid(
         math.ceil(len(groups) / columns), columns, title, width=12 if columns > 1 else 9, height=3.8
     )
+    labels = sorted(data[label].unique())
     for axis, ((load, flows), rows) in zip(axes, groups, strict=False):
         for policy in POLICIES:
             points = rows[rows.policy == policy]
@@ -67,9 +70,9 @@ def _scatter(data, destination, title, x, y, xlabel, ylabel):
                 data=points,
                 x=x,
                 y=y,
-                hue="cluster",
-                hue_order=[0, 1],
-                palette=CLUSTERS,
+                hue=label,
+                hue_order=labels,
+                palette=cluster_palette(labels),
                 marker=MARKERS[policy],
                 s=105,
                 edgecolor="white",
@@ -86,12 +89,17 @@ def _scatter(data, destination, title, x, y, xlabel, ylabel):
         axis.set_visible(False)
     footer(
         key,
-        "Each marker is one loaded run. K-means uses six standardized metrics, not this 2D view.\n"
-        "Policy names are labels. t-SNE distances do not establish global structure.\n"
-        "Available fitted conditions only; no automatic exclusions or predictive validation.",
-        cluster_key(),
+        "Each marker is one run. Clustering uses six standardized metrics, not this 2D view.\n"
+        "Cluster IDs are local to each condition. DBSCAN noise stays visible; no exclusions.\n"
+        "t-SNE does not preserve global distances. Full cluster IDs are retained in the CSV.",
+        cluster_key(labels),
     )
-    return save_figure(fig, destination)
+    return save_figure(
+        fig,
+        destination,
+        measurement_kind=data.attrs.get("measurement_kind"),
+        transport=data.attrs.get("transport", "udp"),
+    )
 
 
 def cluster_profile_plot(assignments, model, destination):
@@ -158,4 +166,9 @@ def cluster_profile_plot(assignments, model, destination):
         "Right: every fitted run by policy and cluster. Constant features have zero variation.\n"
         "Two clusters were specified in advance. Groups are descriptive, not policy rankings.",
     )
-    return save_figure(fig, destination)
+    return save_figure(
+        fig,
+        destination,
+        measurement_kind=model.get("measurement_kind"),
+        transport=model.get("transport", "udp"),
+    )

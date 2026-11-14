@@ -9,6 +9,8 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from threadpoolctl import threadpool_limits
 
+from analysis.cluster_diagnostics import compare_partitions
+
 FEATURES = (
     "p99_ms",
     "goodput_mbps",
@@ -29,6 +31,8 @@ COLUMNS = (
     "pc2",
     "tsne1",
     "tsne2",
+    "agglomerative_cluster",
+    "dbscan_cluster",
 )
 
 
@@ -58,6 +62,9 @@ def _fit(group: pd.DataFrame, seed: int) -> tuple[list[dict], dict]:
         ).fit_transform(normalized)
     order = sorted(range(2), key=lambda i: tuple(model.cluster_centers_[i]))
     canonical = {label: index for index, label in enumerate(order)}
+    with threadpool_limits(limits=1):
+        canonical_kmeans = np.array([canonical[int(label)] for label in labels])
+        agglomerative, density, diagnostics = compare_partitions(normalized, canonical_kmeans)
     distances = np.linalg.norm(normalized - model.cluster_centers_[labels], axis=1)
     rows = []
     for index, row in enumerate(group.to_dict("records")):
@@ -70,10 +77,13 @@ def _fit(group: pd.DataFrame, seed: int) -> tuple[list[dict], dict]:
                 "pc2": float(points[index, 1]),
                 "tsne1": float(embedding[index, 0]),
                 "tsne2": float(embedding[index, 1]),
+                "agglomerative_cluster": int(agglomerative[index]),
+                "dbscan_cluster": int(density[index]),
             }
         )
     return rows, {
         "status": "exploratory_fit",
+        "diagnostics": diagnostics,
         "silhouette": silhouette,
         "standardization_mean": scaler.mean_.tolist(),
         "standardization_scale": scaler.scale_.tolist(),

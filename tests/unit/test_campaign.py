@@ -109,7 +109,7 @@ class CampaignTests(unittest.TestCase):
         plan = read_json(self.directory / "plan.json")
         for key, value in (
             ("kind", "primary"),
-            ("schema_version", 2),
+            ("schema_version", 3),
             ("schedule", {}),
             ("source", {}),
         ):

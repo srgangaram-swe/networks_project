@@ -60,7 +60,12 @@ def request_outcome_plot(runs, destination):
         "Counts describe these runs; requests are not independent replications.",
         [Patch(facecolor=color, label=label) for _, label, color in specifications],
     )
-    return save_figure(fig, destination)
+    return save_figure(
+        fig,
+        destination,
+        measurement_kind=runs.attrs.get("measurement_kind"),
+        transport=runs.attrs.get("transport", "udp"),
+    )
 
 
 def tail_quantile_plot(runs, destination):
@@ -117,4 +122,9 @@ def tail_quantile_plot(runs, destination):
         "Shared color scale. See the delivery plot for omissions and timeouts.\n"
         "High percentiles from a small pilot are descriptive. Primary collection is unapproved.",
     )
-    return save_figure(fig, destination)
+    return save_figure(
+        fig,
+        destination,
+        measurement_kind=runs.attrs.get("measurement_kind"),
+        transport=runs.attrs.get("transport", "udp"),
+    )

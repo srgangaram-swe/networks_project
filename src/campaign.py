@@ -23,7 +23,12 @@ PROGRESS_BYTES = 32 * 1024 * 1024
 
 
 def resolve_trials(
-    raw: dict, warmup_seconds: int, *, diagnostic_matrix: bool = False
+    raw: dict,
+    warmup_seconds: int,
+    *,
+    diagnostic_matrix: bool = False,
+    transport: str = "udp",
+    shadow_forecast: bool = False,
 ) -> tuple[dict, list[TrialConfig]]:
     config = ExperimentConfig.from_mapping(raw)
     bounded_integer(warmup_seconds, "warmup_seconds", 0, 60)
@@ -48,6 +53,8 @@ def resolve_trials(
             warmup_seconds=warmup_seconds,
             flows=cell["flows"],
             aggregate_bps=round(cell["load_fraction"] * 100_000_000),
+            transport=transport,
+            shadow_forecast=shadow_forecast,
         )
         for cell in schedule["cells"]
     ]
@@ -55,15 +62,29 @@ def resolve_trials(
 
 
 def create_campaign(
-    directory: Path, raw: dict, warmup_seconds: int = 10, *, diagnostic_matrix: bool = False
+    directory: Path,
+    raw: dict,
+    warmup_seconds: int = 10,
+    *,
+    diagnostic_matrix: bool = False,
+    transport: str = "udp",
+    shadow_forecast: bool = False,
 ) -> None:
-    schedule, _ = resolve_trials(raw, warmup_seconds, diagnostic_matrix=diagnostic_matrix)
+    schedule, _ = resolve_trials(
+        raw,
+        warmup_seconds,
+        diagnostic_matrix=diagnostic_matrix,
+        transport=transport,
+        shadow_forecast=shadow_forecast,
+    )
     source = source_identity(ROOT)
     directory.mkdir(mode=0o700)
     atomic_json(
         directory / "plan.json",
         {
-            "schema_version": 1,
+            "schema_version": 2,
+            "transport": transport,
+            "shadow_forecast": shadow_forecast,
             "kind": (
                 "virtual_testbed_diagnostic_matrix"
                 if diagnostic_matrix
@@ -91,9 +112,12 @@ def resolve_plan(plan: dict) -> tuple[dict, list[TrialConfig]]:
     if (
         not isinstance(plan, dict)
         or plan.keys()
-        != {"schema_version", "kind", "configuration", "warmup_seconds", "source", "schedule"}
+        != (
+            {"schema_version", "kind", "configuration", "warmup_seconds", "source", "schedule"}
+            | ({"transport", "shadow_forecast"} if plan.get("schema_version") == 2 else set())
+        )
         or type(plan["schema_version"]) is not int
-        or plan["schema_version"] != 1
+        or plan["schema_version"] not in (1, 2)
         or plan["kind"] not in {"virtual_testbed_pilot", "virtual_testbed_diagnostic_matrix"}
     ):
         raise ValueError("unsupported campaign plan")
@@ -101,6 +125,8 @@ def resolve_plan(plan: dict) -> tuple[dict, list[TrialConfig]]:
         plan["configuration"],
         plan["warmup_seconds"],
         diagnostic_matrix=plan["kind"] == "virtual_testbed_diagnostic_matrix",
+        transport=plan.get("transport", "udp"),
+        shadow_forecast=plan.get("shadow_forecast", False),
     )
     if plan["schedule"] != schedule:
         raise ValueError("retained schedule does not match the configuration")

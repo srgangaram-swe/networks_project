@@ -15,6 +15,10 @@ on:
         description: Run only the unloaded namespace setup check on a disposable Linux runner
         type: boolean
         default: false
+      physical_standin:
+        description: Check dedicated-interface ownership and UDP/TCP collection over isolated SSH
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -42,7 +46,7 @@ jobs:
           sudo apt-get update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iperf3
       - run: sh scripts/check.sh
-      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh scripts/setup_environment.sh
+      - run: shellcheck scripts/check.sh scripts/setup_nucbox.sh scripts/check_analysis.sh scripts/setup_environment.sh scripts/run_pipeline.sh
   analysis:
     name: analysis
     runs-on: ubuntu-24.04
@@ -176,5 +180,38 @@ jobs:
           path: |
             .local/hardware-inventory.json
             .local/nucbox-smoke
+          if-no-files-found: warn
+          retention-days: 30
+  physical-standin:
+    name: physical-standin
+    if: github.event_name == 'workflow_dispatch' && inputs.physical_standin
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - run: sh scripts/setup_environment.sh
+      - name: Install disposable testbed tools
+        run: |
+          sudo apt-get update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iproute2 iperf3 ethtool openssh-server kmod
+      - name: Exercise owned veth interfaces and private loopback SSH
+        run: sudo env NETWORKS_PHYSICAL_STANDIN=1 .venv/bin/python -m unittest tests.linux.test_physical_standin -v
+      - name: Make the aggregate check report readable
+        if: always()
+        run: |
+          if sudo test -d .local/physical-standin-evidence; then
+            sudo chmod -R a+rX .local/physical-standin-evidence
+          fi
+      - name: Retain the check report without SSH material or private profiles
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: physical-backend-standin-report
+          path: .local/physical-standin-evidence
           if-no-files-found: warn
           retention-days: 30

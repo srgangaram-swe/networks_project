@@ -5,6 +5,7 @@ from pathlib import Path
 
 from src.artifacts import atomic_json, digest, read_json
 from src.bundle_validation import validate_bundle, validate_capture
+from src.transport_summary import summarize_transport
 
 QUANTILES = {"p50_ms": 500, "p95_ms": 950, "p99_ms": 990, "p999_ms": 999}
 
@@ -26,6 +27,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
     bulk = read_json(directory / "bulk.json")
     environment = read_json(directory / "environment.json")
     cpu = read_json(directory / "cpu.json")
+    configuration = read_json(directory / "configuration.json")
     if environment["measurement_kind"] == "synthetic_fixture":
         raise ValueError("synthetic fixtures cannot be exported as observed diagnostics")
     warmup_count = capture["config"]["warmup_ms"] * capture["config"]["requests_per_second"] // 1000
@@ -45,6 +47,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
     summary = {
         "run_id": manifest["run_id"],
         "measurement_kind": environment["measurement_kind"],
+        "transport": configuration.get("transport", "udp"),
         "platform": environment["system"],
         "policy": manifest["policy"],
         "flows": bulk["actual_flows"],
@@ -72,6 +75,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
         "eligible_for_primary": False,
     }
     summary.update({name: nearest_rank(good, rank) for name, rank in QUANTILES.items()})
+    summary.update(summarize_transport(directory, manifest))
     rows = [
         {
             "run_id": manifest["run_id"],
