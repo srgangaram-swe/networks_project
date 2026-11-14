@@ -127,6 +127,14 @@ class TransportTests(unittest.TestCase):
             observer.observe(packet(outbound=False, ack=ack), index)
         self.assertEqual(observer.report()["windows"][0]["foreground_duplicate_ack_candidates"], 1)
 
+    def test_control_sequence_space_alone_is_not_outstanding_payload(self):
+        for flags in (1, 2):
+            observer = AckObserver("192.0.2.2", "198.51.100.2", 0)
+            observer.observe(packet(seq=100, flags=flags), 0)
+            observer.observe(packet(outbound=False, ack=100), 1)
+            observer.observe(packet(outbound=False, ack=100), 2)
+            self.assertNotIn("foreground_duplicate_ack_candidates", observer.report()["windows"][0])
+
     def test_atomic_fifo_writes_drop_without_blocking_and_reject_regular_files(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "events"

@@ -97,10 +97,10 @@ class AckObserver:
 
     @staticmethod
     def _sent(state, packet, counts, scope):
-        size = packet["payload_bytes"] + bool(packet["flags"] & 2) + bool(packet["flags"] & 1)
+        size = packet["payload_bytes"]
         if not size:
             return
-        end = (packet["sequence"] + size) % 2**32
+        end = (packet["sequence"] + bool(packet["flags"] & 2) + size) % 2**32
         if state["end"] is not None and not ahead(end, state["end"]):
             counts[f"{scope}_repeated_sequence_candidates"] += 1
         if state["end"] is None or ahead(end, state["end"]):
