@@ -24,10 +24,11 @@ def clustering_plot(assignments, destination, projection="pca", *, method="kmean
         return None
     x, y = ("pc1", "pc2") if projection == "pca" else ("tsne1", "tsne2")
     name = "PCA" if projection == "pca" else "t-SNE"
+    algorithm = {"kmeans": "K-means", "agglomerative": "Ward", "dbscan": "DBSCAN"}[method]
     return _scatter(
         assignments,
         destination,
-        f"{method.title()}: run clusters in the {name} view",
+        f"{algorithm}: run clusters in the {name} view",
         x,
         y,
         f"{name} dimension 1",

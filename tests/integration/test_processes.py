@@ -66,6 +66,14 @@ class ProcessTests(unittest.TestCase):
         with self.assertRaisesRegex(CommandError, "status 7"):
             run_command(command)
         self.assertEqual(run_command(command, check=False).returncode, 7)
+        diagnostic = [
+            sys.executable,
+            "-c",
+            "import sys; sys.stderr.write('reason:' + 'x'*2000); sys.exit(8)",
+        ]
+        with self.assertRaisesRegex(CommandError, "reason:") as caught:
+            run_command(diagnostic)
+        self.assertLess(len(str(caught.exception)), 1200)
 
     def test_deadline_and_output_are_bounded(self):
         for code, options in (

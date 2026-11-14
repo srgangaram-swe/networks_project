@@ -126,7 +126,7 @@ class PhysicalStandinTests(unittest.TestCase):
             f"Port {port}\nListenAddress 127.0.0.1\nHostKey {directory / 'host'}\n"
             f"AuthorizedKeysFile {authorization}\nPidFile {directory / 'sshd.pid'}\n"
             "PasswordAuthentication no\nKbdInteractiveAuthentication no\n"
-            "PermitRootLogin prohibit-password\nUsePAM no\nStrictModes yes\n"
+            "PermitRootLogin prohibit-password\nUsePAM yes\nStrictModes yes\n"
             "AllowUsers root\nLogLevel VERBOSE\n"
         )
         host = (directory / "host.pub").read_text().split()

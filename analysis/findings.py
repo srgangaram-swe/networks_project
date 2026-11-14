@@ -3,6 +3,10 @@
 from pathlib import Path
 
 
+def _number(value):
+    return "unavailable" if value is None else f"{value:.4g}"
+
+
 def write_findings(output: Path, runs, report):
     simulated = report["measurement_kind"] == "simulation"
     lines = ["Insights", ""]
@@ -15,8 +19,8 @@ def write_findings(output: Path, runs, report):
     for row in report["comparisons"]:
         lines.append(
             f"{row['policy']}, {row['requested_mbps']:g} Mb/s and {row['flows']} flow(s): "
-            f"added p99 {row['added_p99_ms']} ms; "
-            f"goodput retained {row['goodput_retention_pct']}%; "
+            f"added p99 {_number(row['added_p99_ms'])} ms; "
+            f"goodput retained {_number(row['goodput_retention_pct'])}%; "
             f"interval status {row['interval_status']}."
         )
     lines += [
@@ -34,8 +38,8 @@ def write_findings(output: Path, runs, report):
             for method, quality in group["diagnostics"]["partitions"].items():
                 lines.append(
                     f"{method}, {group['requested_mbps']:g} Mb/s/{group['flows']} flow(s): "
-                    f"{quality['clusters']} clusters, {quality['noise_runs']} noise runs, "
-                    f"silhouette {quality['silhouette']}."
+                    f"cluster count {quality['clusters']}, noise runs {quality['noise_runs']}, "
+                    f"silhouette {_number(quality['silhouette'])}."
                 )
     regression = report["regression"]
     lines += [
