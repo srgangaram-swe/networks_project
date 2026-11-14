@@ -2,6 +2,7 @@
 
 import os
 import platform
+import pwd
 import socket
 import tempfile
 import unittest
@@ -32,7 +33,12 @@ class PhysicalStandinTests(unittest.TestCase):
     def test_udp_tcp_ssh_retrieval_and_interface_restoration_for_every_policy(self):
         # All roles share one kernel in this check. It establishes implementation
         # behavior, not physical cable, NIC, USB adapter, or clock equivalence.
-        with tempfile.TemporaryDirectory(prefix="networks-ssh-") as temporary, ExitStack() as stack:
+        with (
+            tempfile.TemporaryDirectory(
+                prefix="networks-ssh-", dir=pwd.getpwuid(os.geteuid()).pw_dir
+            ) as temporary,
+            ExitStack() as stack,
+        ):
             directory = Path(temporary)
             profile = self.prepare(directory, stack)
             before = self.interfaces(profile)

@@ -1,0 +1,22 @@
+SIMULATED DATA: toy-model software validation only.
+Diagnostic experiment summary
+
+Observed runs: 48. Unobserved planned cells: 0.
+Measured request slots: 240000.
+Unsent slots: 967. Timeout/late outcomes: 108.
+Primary eligibility: false. These observations require calibration and protocol review.
+
+Loaded runs use the recorded same-policy, same-block unloaded baseline.
+Intervals use paired blocks, seed 562, and 10000 resamples.
+Fewer than three blocks has no interval. Unavailable ratios are not zero effects.
+
+cake_best_effort: 110 Mb/s requested, 1 flows, 6 blocks; added on-time p99 3.228 ms; added-p99 reduction 79.750%; goodput retained 94.312%.
+cake_bounded: 110 Mb/s requested, 1 flows, 6 blocks; added on-time p99 2.550 ms; added-p99 reduction 84.007%; goodput retained 95.772%.
+fifo: 110 Mb/s requested, 1 flows, 6 blocks; added on-time p99 15.942 ms; added-p99 reduction 0.000%; goodput retained 100.000%.
+fq_codel: 110 Mb/s requested, 1 flows, 6 blocks; added on-time p99 4.769 ms; added-p99 reduction 70.087%; goodput retained 98.750%.
+
+K-means describes standardized run metrics within each load/flow condition.
+PCA and t-SNE visualize those metrics; cluster labels are fitted in six dimensions.
+Clustering is exploratory and excludes no runs automatically. The separate Ridge/Lasso validation status is recorded in report.json.
+Use report.json for source identities, intervals, model settings, and artifact hashes.
+Keep missed slots, censoring, and unfavorable goodput in the final discussion.

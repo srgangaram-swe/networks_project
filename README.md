@@ -72,6 +72,19 @@ the data panels. Click an image to inspect the full figure.
 |---|---|
 | ![PCA view of the eight loaded diagnostic runs](analysis/plots/preliminary/run_clusters.png) | ![Seeded t-SNE view of the same eight loaded runs](analysis/plots/preliminary/run_clusters_tsne.png) |
 
+Ward agglomerative clustering gives the same two groups on these eight loaded
+runs. DBSCAN instead finds one dense group and marks four runs as noise at its
+fixed radius. The different partitions show how much the answer depends on the
+algorithm and its assumptions. All eight runs remain in the comparison.
+
+| Ward agglomerative | DBSCAN with noise retained |
+|---|---|
+| ![Ward assignments on the measured namespace pilot](analysis/plots/extended/run_clusters_agglomerative.png) | ![DBSCAN assignments and four noise runs on the measured namespace pilot](analysis/plots/extended/run_clusters_dbscan.png) |
+
+The [extended measured gallery](analysis/plots/extended) includes all twelve
+figure pairs, internal cluster metrics, source bindings and generated findings.
+The two-block reference leaves Ridge/Lasso unavailable.
+
 ### Delivery and latency diagnostics
 
 The delivery chart includes unsent slots, so low reported RTT cannot hide
@@ -135,6 +148,28 @@ evidence, including any missed targets, rather than treating this preview as
 the final experiment.
 
 ## Run the analysis on macOS or Linux
+
+### Software validation with more simulated rows
+
+The separate [simulation gallery](analysis/plots/simulation) uses six blocks,
+48 toy trials and 240,000 scheduled slots. Every figure carries its simulation
+label. The assumed policy factors make the regression problem deliberately
+simple, so small errors here validate the code path rather than a physical
+prediction claim. Whole blocks and their baselines stay outside training.
+
+![Ridge and Lasso predictions for held-out blocks of simulated data](analysis/plots/simulation/ridge_lasso_predictions.png)
+
+![Descriptive Ridge and Lasso coefficients from the simulated design](analysis/plots/simulation/ridge_lasso_coefficients.png)
+
+![Measured analysis stage wall and process CPU costs for the simulated example](analysis/plots/simulation/analysis_runtime.png)
+
+An alternating three-repeat collection check on this Mac had median wall times
+of 0.822 seconds with one worker and 0.273 seconds with four, about 3.01 times
+faster for this 240,000-slot software workload. The request tables were identical.
+The [timing record](analysis/plots/simulation/worker-benchmark.json) retains every
+repeat and source identity. This is not a network throughput benchmark.
+
+### Set up and rebuild the measured reference
 
 Prerequisites: Git and Python 3.12 or newer. Run the following from a terminal:
 
@@ -297,10 +332,11 @@ sequenceDiagram
             Trial->>Monitor: Start separate observers with bounded nonblocking events
             Monitor->>Monitor: Count ACK candidates and forecast future cohorts
         end
-        Trial->>Trial: Warmup, measure, drain and clean up
+        Trial->>Trial: Warmup, measure and drain
         Trial->>Files: Observations, counters and manifest
         Trial->>Monitor: Stop and join before topology cleanup
         Monitor->>Files: Capture quality, socket counters and advisory forecasts
+        Trial->>Trial: Validate and clean up exact owned resources
         Trial-->>Campaign: Validated bundle or failure
         Campaign->>Files: Retain attempt and manifest hash
     end

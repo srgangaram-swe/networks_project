@@ -1,0 +1,29 @@
+Insights
+
+SIMULATED DATA. These rows come from a toy queue model for software testing.
+The assumed policy parameters are not measurements of Linux queue behavior.
+
+cake_best_effort, 110 Mb/s and 1 flow(s): added p99 3.228 ms; goodput retained 94.31%; interval status available.
+cake_bounded, 110 Mb/s and 1 flow(s): added p99 2.55 ms; goodput retained 95.77%; interval status available.
+fifo, 110 Mb/s and 1 flow(s): added p99 15.94 ms; goodput retained 100%; interval status available.
+fq_codel, 110 Mb/s and 1 flow(s): added p99 4.769 ms; goodput retained 98.75%; interval status available.
+
+Findings
+
+48 runs retain 240,000 scheduled slots, including 967 unsent slots and 108 timeout/late outcomes.
+Unsent slots describe generator omissions. They are not estimates of transport packet loss.
+kmeans, 110 Mb/s/1 flow(s): cluster count 2, noise runs 0, silhouette 0.2117.
+agglomerative, 110 Mb/s/1 flow(s): cluster count 2, noise runs 0, silhouette 0.2117.
+dbscan, 110 Mb/s/1 flow(s): cluster count 1, noise runs 19, silhouette unavailable.
+Ridge/Lasso status: exploratory_fit; 6 recorded blocks.
+ridge: held-out-block MAE 0.0358 ms, RMSE 0.05072 ms, R2 0.9999; training-mean baseline MAE 4.659 ms.
+lasso: held-out-block MAE 0.04264 ms, RMSE 0.05811 ms, R2 0.9999; training-mean baseline MAE 4.659 ms.
+
+Conclusions
+
+Read latency, goodput, delivery outcomes, and uncertainty together. A low on-time p99 alone does not establish a successful treatment.
+K-means and agglomerative clustering use two groups. DBSCAN can mark noise or find a different number of groups. No run is excluded automatically.
+PCA and t-SNE are views of the fitted features, not additional clustering algorithms. Internal cluster scores measure geometry, not prediction accuracy.
+Ridge and Lasso use only design features. Whole blocks are held out, with scaling and alpha selection fitted inside the training folds. This evaluates interpolation among the observed designs.
+Finish device setup, timing and calibration checks, protocol review, and primary collection before drawing conclusions about the physical experiment.
+More simulated rows exercise the pipeline; they do not strengthen evidence about physical queue policies.

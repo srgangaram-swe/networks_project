@@ -1,0 +1,23 @@
+Insights
+
+cake_best_effort, 110 Mb/s and 1 flow(s): added p99 0.1061 ms; goodput retained 89.37%; interval status insufficient_blocks.
+cake_bounded, 110 Mb/s and 1 flow(s): added p99 0.09353 ms; goodput retained 89.18%; interval status insufficient_blocks.
+fifo, 110 Mb/s and 1 flow(s): added p99 18.98 ms; goodput retained 100%; interval status insufficient_blocks.
+fq_codel, 110 Mb/s and 1 flow(s): added p99 0.1042 ms; goodput retained 99.37%; interval status insufficient_blocks.
+
+Findings
+
+16 runs retain 80,000 scheduled slots, including 3,192 unsent slots and 0 timeout/late outcomes.
+Unsent slots describe generator omissions. They are not estimates of transport packet loss.
+kmeans, 110 Mb/s/1 flow(s): cluster count 2, noise runs 0, silhouette 0.4659.
+agglomerative, 110 Mb/s/1 flow(s): cluster count 2, noise runs 0, silhouette 0.4659.
+dbscan, 110 Mb/s/1 flow(s): cluster count 1, noise runs 4, silhouette unavailable.
+Ridge/Lasso status: unavailable_fewer_than_six_blocks; 2 recorded blocks.
+
+Conclusions
+
+Read latency, goodput, delivery outcomes, and uncertainty together. A low on-time p99 alone does not establish a successful treatment.
+K-means and agglomerative clustering use two groups. DBSCAN can mark noise or find a different number of groups. No run is excluded automatically.
+PCA and t-SNE are views of the fitted features, not additional clustering algorithms. Internal cluster scores measure geometry, not prediction accuracy.
+Ridge and Lasso use only design features. Whole blocks are held out, with scaling and alpha selection fitted inside the training folds. This evaluates interpolation among the observed designs.
+Finish device setup, timing and calibration checks, protocol review, and primary collection before drawing conclusions about the physical experiment.

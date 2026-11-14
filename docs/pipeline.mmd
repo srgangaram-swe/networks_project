@@ -18,10 +18,11 @@ sequenceDiagram
             Trial->>Monitor: Start separate observers with bounded nonblocking events
             Monitor->>Monitor: Count ACK candidates and forecast future cohorts
         end
-        Trial->>Trial: Warmup, measure, drain and clean up
+        Trial->>Trial: Warmup, measure and drain
         Trial->>Files: Observations, counters and manifest
         Trial->>Monitor: Stop and join before topology cleanup
         Monitor->>Files: Capture quality, socket counters and advisory forecasts
+        Trial->>Trial: Validate and clean up exact owned resources
         Trial-->>Campaign: Validated bundle or failure
         Campaign->>Files: Retain attempt and manifest hash
     end

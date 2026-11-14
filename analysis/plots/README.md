@@ -39,3 +39,25 @@ Rebuild from the repository root after setting up the environment:
 Use a new output directory each time. Source data, failed output, and the
 published reference remain intact. See [the analysis guide](../README.md)
 for pairing, uncertainty, censoring, and model settings.
+
+## Extended diagnostics
+
+The [extended gallery](extended) rebuilds the same immutable namespace input
+with Ward, DBSCAN and runtime figures. Its two-block data leave regression
+unavailable. The [simulation gallery](simulation) exercises the six-block model
+path on 48 toy trials and 240,000 slots. Its low regression errors describe an
+assumed toy mechanism, not performance on actual hardware.
+
+Both galleries include twelve PNG/SVG pairs, derived tables, readable insights
+and a manifest with clean generating source, input bindings, package versions,
+settings, exact output hashes and visual review. The simulated plan and worker
+benchmark are retained beside that gallery. No measured reference is replaced.
+
+Reproduce the simulated example in a new output directory:
+
+    sh scripts/run_pipeline.sh --topology local --transport udp \
+      --workers 4 --seed 561 --simulation-multiplier 3 --output runs/simulation-01
+
+The analysis output keeps plots in its own plots directory. The published
+galleries place their figure files directly beside the manifest. Coordinates
+can differ across numerical environments; the CSV retains every fitted point.
