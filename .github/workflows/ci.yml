@@ -19,6 +19,15 @@ on:
         description: Check dedicated-interface ownership and UDP/TCP collection over isolated SSH
         type: boolean
         default: false
+      foreground_transport:
+        description: Foreground protocol for the complete namespace campaign
+        type: choice
+        options: [udp, tcp]
+        default: udp
+      shadow_forecast:
+        description: Collect advisory future-window forecasts alongside namespace traffic
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -113,12 +122,20 @@ jobs:
       - name: Exercise all four namespace profiles
         run: sudo env NETWORKS_RUN_PRIVILEGED=1 NETWORKS_EVIDENCE_DIR=.local/evidence/policy-checks .venv/bin/python -m unittest discover -s tests/linux -v
       - name: Run the NucBox experiment through analysis and t-SNE
-        run: sudo .venv/bin/python scripts/nucbox_experiment.py run --output .local/experiment --authorized-isolated-host
+        env:
+          FOREGROUND_TRANSPORT: ${{ inputs.foreground_transport }}
+          SHADOW_FORECAST: ${{ inputs.shadow_forecast }}
+        run: |
+          options=(--transport "$FOREGROUND_TRANSPORT")
+          if [ "$SHADOW_FORECAST" = true ]; then
+            options+=(--shadow-forecast)
+          fi
+          sudo .venv/bin/python scripts/pipeline.py --topology namespace "${options[@]}" --output .local/experiment --authorized-isolated-host
       - name: Export all completed observations and attempt accounting
         if: always()
         run: |
-          if sudo test -f .local/experiment/campaign/plan.json && ! sudo test -d .local/experiment/export; then
-            sudo .venv/bin/python scripts/export_pilot.py .local/experiment/campaign --output .local/experiment/export
+          if sudo test -f .local/experiment/namespace/campaign/plan.json && ! sudo test -d .local/experiment/namespace/export; then
+            sudo .venv/bin/python scripts/export_pilot.py .local/experiment/namespace/campaign --output .local/experiment/namespace/export
           fi
           if sudo test -d .local/evidence; then
             sudo chmod -R a+rX .local/evidence
@@ -133,12 +150,18 @@ jobs:
           name: namespace-pilot-evidence
           path: |
             .local/evidence
-            .local/experiment/export
-            .local/experiment/analysis
+            .local/experiment/namespace/export
+            .local/experiment/namespace/analysis
             .local/experiment/status.json
-            .local/experiment/hardware.json
-            .local/experiment/campaign/plan.json
-            .local/experiment/campaign/progress.json
+            .local/experiment/timings.json
+            .local/experiment/events.jsonl
+            .local/experiment/namespace/status.json
+            .local/experiment/namespace/hardware.json
+            .local/experiment/namespace/campaign/plan.json
+            .local/experiment/namespace/campaign/progress.json
+            .local/experiment/namespace/campaign/attempt-*/foreground-transport.json
+            .local/experiment/namespace/campaign/attempt-*/tcp-observer.json
+            .local/experiment/namespace/campaign/attempt-*/shadow-forecast.json
           if-no-files-found: warn
           retention-days: 30
   nucbox-setup:
@@ -201,17 +224,18 @@ jobs:
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends iproute2 iperf3 ethtool openssh-server kmod
       - name: Exercise owned veth interfaces and private loopback SSH
         run: sudo env NETWORKS_PHYSICAL_STANDIN=1 .venv/bin/python -m unittest tests.linux.test_physical_standin -v
-      - name: Make the aggregate check report readable
+      - name: Export only the aggregate check report
         if: always()
         run: |
-          if sudo test -d .local/physical-standin-evidence; then
-            sudo chmod -R a+rX .local/physical-standin-evidence
+          if sudo test -f .local/physical-standin-evidence/report.json; then
+            mkdir -p artifacts/physical-standin
+            sudo cat .local/physical-standin-evidence/report.json > artifacts/physical-standin/report.json
           fi
       - name: Retain the check report without SSH material or private profiles
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: physical-backend-standin-report
-          path: .local/physical-standin-evidence
+          path: artifacts/physical-standin
           if-no-files-found: warn
           retention-days: 30

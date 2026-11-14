@@ -82,6 +82,7 @@ class PhysicalStandinTests(unittest.TestCase):
                         self.assertIsNone(namespace_identity(f"np-{token}-{role}"))
                     self.assertEqual(self.interfaces(profile), before)
                     rows.append({"policy": policy, "transport": transport, "state": "passed"})
+                    print(f"Physical SSH/veth check passed: {transport}, {policy}", flush=True)
             # Exercise the namespace backend with the new TCP observer as well.
             namespace = directory / "namespace-tcp"
             run_trial(
