@@ -10,6 +10,8 @@ run does not by itself settle calibration, workload timing or the study's target
 - project-presentation-reviewed.pptx has 12 main slides and five hidden analysis slides.
   Charts, tables and the topology diagram are editable. The appendix includes
   K-means, t-SNE, Ward, DBSCAN, Ridge and Lasso views.
+  Chart workbooks store values to six decimal places; the reference CSV files
+  retain the original precision.
 - The presentation's build files are local and are not tracked.
 
 ## Before the physical run
