@@ -1,6 +1,6 @@
 # Project completion checklist
 
-Repository review: November 14, 2026. The NucBox has not been set up yet.
+Repository review: November 21, 2026. The NucBox has not been set up yet.
 This checklist distinguishes a working initial software path from the evidence
 still needed to finish the experiment, report, and demonstration.
 
@@ -25,7 +25,7 @@ checks, and real-socket regressions are documented in
 | Explore ML | Standardized K-means, Ward and DBSCAN retain PCA/t-SNE views and geometry scores; Ridge/Lasso use nested held-out blocks when at least six blocks exist |
 | Observe TCP | src/tcp_observation.py and src/transport.py keep passive ACK candidates and Linux socket counters separate from application outcomes |
 | Forecast | Optional shadow ridge models predict future application RTT/timeout cohorts using past events and delayed labels, without changing policy |
-| Run together | scripts/run_pipeline.sh selects local simulation, namespaces or configured physical Linux roles, UDP/TCP and optional forecasts, then runs checked export and analysis |
+| Run together | scripts/run_pipeline.sh selects local simulation, namespaces, physical Linux roles or two MacBooks with a Linux router, then runs checked export and analysis |
 
 Use the [NucBox guide](nucbox-setup.md) after first boot. Keep the Mac as the
 development and control machine. No physical NIC is selected or reconfigured
@@ -43,7 +43,7 @@ and remain separate from measured evidence.
 1. Complete #2 and #3: verify the actual NucBox model, Linux, kernel, qdiscs,
    drivers, access, booking, and inventory. Review the candidate protocol with
    the team and record accepted tool versions and numerical tolerances. For a
-   physical three-machine layout, arrange the two Linux endpoint computers and
+   physical three-machine layout, configure the two MacBooks' wired adapters and
    verify physical-interface ownership and rollback on the chosen hardware. The two received
    cables cover the active links; the third requested cable was a spare.
 2. Finish #9's measurement timing. The iperf reporting workaround preserves
@@ -73,8 +73,11 @@ and remain separate from measured evidence.
 
 ## Finish the course deliverables
 
-Confirm the official rubric and report, presentation, and demonstration dates
-for #4. Milestone dates in GitHub are planning targets. Complete the sensitivity
+The supplied course instructions set presentation submission to December 1,
+10:59am, talks on December 1 or 3, and the report to December 8, 11:59pm.
+The [deliverables](../deliverables/README.md) include a compiled draft, its TeX
+sources and an editable presentation with simulated examples. Physical evidence,
+team review and rehearsal remain outstanding. Complete the sensitivity
 checks, priority-abuse validation, and independent replication in #15 through
 #17. Freeze the dataset and audit claims for #18, including unfavorable outcomes,
 timeouts, omitted send slots, and every failed attempt.

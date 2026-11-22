@@ -112,3 +112,17 @@ class LeaseTests(unittest.TestCase):
                 PhysicalLease.load(self.item, "router", "a" * 12)
         atomic_json(lease.directory / "lease.json", original)
         lease.cleanup()
+
+    def test_namespace_creation_and_interface_identification_fail_closed(self):
+        lease = self.prepare()
+        with self.assertRaises(FileExistsError):
+            lease._create_namespace(lease.state["namespace"])
+        with patch("src.physical_lease.namespace_identity", return_value=None):
+            with self.assertRaises(RuntimeError):
+                lease._create_namespace("np-aaaaaaaaaaaa-unused")
+        self.kernel.queues = [{"kind": "clsact"}, {"kind": "cake", "root": True, "handle": "1:"}]
+        lease._clear_queues("to-client")
+        self.assertTrue(any(c[-1] == "clsact" for c in self.kernel.calls))
+        self.assertTrue(any(c[-1] == "root" for c in self.kernel.calls))
+        self.kernel.queues = [{"kind": "noqueue", "handle": "0:"}]
+        lease.cleanup()

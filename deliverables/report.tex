@@ -1,0 +1,43 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern,microtype,enumitem,booktabs,tabularx,graphicx,xcolor,parskip}
+\usepackage[hidelinks]{hyperref}
+\definecolor{cherry}{HTML}{BA0C2F}
+\newif\ifshowguidance
+\showguidancefalse
+\newcommand{\guidance}[2]{\ifshowguidance{\small\itshape\color{gray}Suggested length: #1. #2}\par\fi}
+\setlist[itemize]{leftmargin=*,itemsep=2pt,topsep=3pt}
+\newcommand{\simlabel}{\textbf{Simulated example: software validation only.}}
+\begin{document}
+\begin{center}
+{\Large\textbf{CS 585: Computer Networks, Fall 2026}}\\[4pt]
+{\Large\textbf{Final Project Report: Working Draft}}\\[8pt]
+{\LARGE\color{cherry}\textbf{Protecting Tail Latency Under Contention}}\\[5pt]
+A feasibility study of Linux queue management for mixed workloads\\[8pt]
+Draft: November 21, 2026. Final report due December 8, 11:59pm.
+\end{center}
+
+\textbf{Evidence status.} We have completed software tests and a preliminary
+Linux namespace pilot. The figures labeled simulated come from our toy model.
+We have not yet collected the NucBox and MacBook experiment. This draft keeps
+those evidence types separate and identifies what the physical run must resolve.
+
+\section*{Team members}
+\begin{itemize}
+\item Saif Ryan Gangaram, Ph.D. student, Computer Science
+\item Jonathan Lloyd, Computer Science
+\item Christopher Ong, Computer Science
+\item Alejandro Magana Guillen, Computer Science
+\end{itemize}
+
+\input{sections/introduction}
+\input{sections/related-work}
+\input{sections/technical}
+\input{sections/cost}
+\input{sections/community}
+\input{sections/findings}
+\input{sections/conclusion}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

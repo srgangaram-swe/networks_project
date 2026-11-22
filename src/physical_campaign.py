@@ -15,6 +15,7 @@ from src.physical_profile import (
     check_inspections,
     host_command,
     payload,
+    profile_mode,
     validate_profile,
     worker_command,
 )
@@ -73,14 +74,16 @@ def preflight(profile: dict) -> dict:
     return identities
 
 
-def physical_plan(raw: dict, source: dict, *, transport="udp", shadow_forecast=False) -> dict:
+def physical_plan(
+    raw: dict, source: dict, *, transport="udp", shadow_forecast=False, mode="physical"
+) -> dict:
     schedule, _ = resolve_trials(
         raw, 10, diagnostic_matrix=True, transport=transport, shadow_forecast=shadow_forecast
     )
     if raw["measurement_seconds"] > 60:
         raise ValueError("physical diagnostics support at most 280 cells and 60 measured seconds")
     return {
-        "kind": "physical_testbed_diagnostics",
+        "kind": f"{mode}_testbed_diagnostics",
         "configuration": raw,
         "schedule": schedule,
         "source": source,
@@ -100,7 +103,7 @@ def collect_physical(
             raise InterruptedError("physical campaign cancelled before the next trial")
         token = uuid.uuid4().hex[:12]
         config = TrialConfig(
-            mode="physical",
+            mode=profile_mode(profile),
             policy=cell["policy"],
             measurement_seconds=plan["configuration"]["measurement_seconds"],
             warmup_seconds=10,
@@ -179,7 +182,7 @@ def _retrieve(local: Path, profile: dict, token: str):
         fetch(name)
     validate_bundle(local)
     actual = read_json(local / "manifest.json", 65536)["mode"]
-    if actual != "physical":
+    if actual != profile_mode(profile):
         raise ValueError("retrieved trial is not a physical measurement")
 
 

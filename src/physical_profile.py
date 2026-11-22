@@ -33,7 +33,8 @@ def _role(role: str, item: object) -> None:
     if (
         not isinstance(item, dict)
         or not {"host", "repository", "interfaces"} <= item.keys()
-        or not item.keys() <= {"host", "repository", "interfaces", "ssh_config"}
+        or not item.keys()
+        <= {"host", "repository", "interfaces", "ssh_config", "platform", "iperf3"}
     ):
         raise ValueError("each role needs host, repository, and interfaces")
     if not isinstance(item["host"], str) or not re.fullmatch(
@@ -45,7 +46,30 @@ def _role(role: str, item: object) -> None:
         raise ValueError("repository must be an absolute Unix path")
     if ".." in PurePosixPath(repository).parts or any(c in repository for c in ("\0", "\n", "\r")):
         raise ValueError("repository path must be normalized and single-line")
+    _platform_options(role, item)
     interfaces = item["interfaces"]
+    if not isinstance(interfaces, dict) or interfaces.keys() != INTERFACES[role]:
+        raise ValueError(f"incorrect interface roles for {role}")
+    for name in interfaces.values():
+        if (
+            not isinstance(name, str)
+            or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,14}", name)
+            or name in {"lo", "lo0"}
+        ):
+            raise ValueError("choose a dedicated Ethernet interface, not loopback")
+
+
+def _platform_options(role, item):
+    if item.get("platform", "linux") not in {"linux", "macos"}:
+        raise ValueError("role platform must be linux or macos")
+    if item.get("platform") == "macos":
+        executable = item.get("iperf3")
+        if (
+            role == "router"
+            or not isinstance(executable, str)
+            or not re.fullmatch(r"/[A-Za-z0-9_./-]{1,511}", executable)
+        ):
+            raise ValueError("macOS endpoints need an absolute iperf3 path; the router needs Linux")
     if "ssh_config" in item:
         path = item["ssh_config"]
         if (
@@ -55,15 +79,6 @@ def _role(role: str, item: object) -> None:
             or any(c in path for c in ("\0", "\r", "\n"))
         ):
             raise ValueError("SSH configuration must be an absolute, single-line path")
-    if not isinstance(interfaces, dict) or interfaces.keys() != INTERFACES[role]:
-        raise ValueError(f"incorrect interface roles for {role}")
-    for name in interfaces.values():
-        if (
-            not isinstance(name, str)
-            or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,14}", name)
-            or name == "lo"
-        ):
-            raise ValueError("choose a dedicated Linux interface, not loopback")
 
 
 def payload(value: dict) -> str:
@@ -114,16 +129,17 @@ def worker_command(profile: dict, role: str, action: str, token: str, **details)
     item = profile["roles"][role]
     root = PurePosixPath(item["repository"])
     request = {"role": role, "token": token, "item": item, **details}
+    macos = item.get("platform") == "macos"
     return host_command(
         item,
         (
             str(root / ".venv/bin/python"),
-            str(root / "scripts/physical_host.py"),
+            str(root / "scripts" / ("macos_host.py" if macos else "physical_host.py")),
             action,
             "--request",
             payload(request),
         ),
-        privileged=True,
+        privileged=not macos,
     )
 
 
@@ -142,3 +158,12 @@ def check_inspections(inspections):
             if identity in used:
                 raise ValueError("SSH aliases resolve to the same dedicated interface")
             used.add(identity)
+
+
+def profile_mode(profile):
+    platforms = {role: item.get("platform", "linux") for role, item in profile["roles"].items()}
+    if platforms == {"client": "macos", "router": "linux", "server": "macos"}:
+        return "macos"
+    if set(platforms.values()) == {"linux"}:
+        return "physical"
+    raise ValueError("choose three Linux hosts or two Mac endpoints and one Linux router")

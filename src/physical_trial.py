@@ -10,7 +10,7 @@ from threading import Event
 from src.artifacts import read_bytes
 from src.bundle_validation import ARTIFACTS, OPTIONAL_ARTIFACTS
 from src.physical_backend import PhysicalBackend
-from src.physical_profile import _role, decode_payload, validate_profile
+from src.physical_profile import _role, decode_payload, profile_mode, validate_profile
 from src.run_bundle import source_identity
 from src.topology import Topology
 from src.trial import ROOT, TrialConfig, run_trial
@@ -35,7 +35,7 @@ def act(action, request, cancel):
             raise ValueError("only validated trial artifact names can be retrieved")
         return read_bytes(output / name)
     config = TrialConfig(**request["configuration"])
-    if config.mode != "physical":
+    if config.mode != profile_mode(profile):
         raise ValueError("physical trial requires the physical mode")
     return run_trial(
         output,

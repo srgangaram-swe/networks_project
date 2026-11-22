@@ -12,13 +12,20 @@ one queue policy, generates paced foreground requests alongside bulk traffic,
 and retains the measurements and cleanup record. Analysis checks those exports,
 matches each loaded run to its unloaded baseline, compares policies within
 randomized blocks, and produces statistical tables and exploratory ML figures.
-The Mac supports development and analysis; the NucBox will run collection.
+The Mac supports development, analysis and physical endpoint workloads; the
+Linux NucBox applies the queue treatments.
 
 One launcher selects local simulation, one-host Linux namespaces, or three
-configured physical Linux roles. It also selects UDP or TCP foreground traffic
+configured physical Linux roles. Use --topology macos for two MacBook endpoints
+and a Linux NucBox router. It also selects UDP or TCP foreground traffic
 and can run a separate advisory model for future RTT and timeout outcomes.
 The [complete run guide](docs/topology-pipeline.md) covers setup, profiles,
 commands, outputs and recovery.
+
+The [MacBook setup guide](docs/macos-testbed.md) covers wired links, SSH,
+read-only preflight and the exact run command. The
+[course deliverables](deliverables/README.md) contain the preliminary report,
+LaTeX sources and editable PowerPoint, with simulated results marked for replacement.
 
     sh scripts/run_pipeline.sh --topology local --transport udp \
       --workers 4 --output runs/local-check-01
@@ -317,17 +324,27 @@ sequenceDiagram
     participant Pipeline
     participant Campaign
     participant Trial
+    participant Macs as macOS endpoints
+    participant Router as Linux router
     participant Monitor as TCP observation and shadow model
     participant Analysis as Export and analysis
     participant Files as Artifacts
     User->>Pipeline: Select topology, UDP or TCP, output and optional forecasts
     alt Local software check
         Pipeline->>Pipeline: Collect 48 seeded toy trials in bounded worker pool
-    else Linux namespace or physical testbed
+    else Namespace, Linux physical or macOS physical testbed
         Pipeline->>Pipeline: Check source, tools and isolated resource ownership
+        opt macOS endpoints
+            Pipeline->>Macs: Check dedicated Ethernet, peer route and separate management
+            Macs-->>Pipeline: Read-only evidence and native tool versions
+        end
     Pipeline->>Campaign: Save source, configuration, seed and schedule
     loop Each unfinished scheduled cell
         Campaign->>Trial: Run serially in owned namespaces or dedicated NIC roles
+        opt macOS endpoints
+            Trial->>Macs: Acquire endpoint leases and start bounded workloads
+            Trial->>Router: Apply queue policy and forward-path delay in owned namespace
+        end
         opt TCP telemetry or shadow forecasts
             Trial->>Monitor: Start separate observers with bounded nonblocking events
             Monitor->>Monitor: Count ACK candidates and forecast future cohorts

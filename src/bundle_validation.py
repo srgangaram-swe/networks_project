@@ -220,6 +220,7 @@ def _manifest_identity(manifest: dict) -> None:
         "loopback",
         "namespace",
         "physical",
+        "macos",
     }:
         raise ValueError("unsupported topology mode")
     expected = {"none"} if manifest["mode"] == "loopback" else POLICIES
@@ -394,6 +395,7 @@ def _supporting_artifacts(artifacts: dict, manifest: dict) -> None:
         "loopback": "loopback_diagnostic",
         "namespace": "virtual_testbed",
         "physical": "physical_testbed",
+        "macos": "macos_testbed",
     }[manifest["mode"]]
     if environment["measurement_kind"] not in {kind, "synthetic_fixture"}:
         raise ValueError("environment does not describe the selected testbed")
@@ -411,7 +413,12 @@ def _queues(artifacts: dict, mode: str, policy: str) -> None:
                 raw, {"kind", "attachment_checked", "calibrated", "snapshots"}, "queue evidence"
             )
             if (
-                raw["kind"] != ("physical_testbed" if mode == "physical" else "virtual_testbed")
+                raw["kind"]
+                != (
+                    {"physical": "physical_testbed", "macos": "macos_testbed"}.get(
+                        mode, "virtual_testbed"
+                    )
+                )
                 or raw["attachment_checked"] is not True
                 or raw["calibrated"] is not False
             ):

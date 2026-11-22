@@ -1,0 +1,39 @@
+\section{Related work}
+Persistent queues can make a busy link feel slow even when its throughput
+looks healthy. Gettys and Nichols describe this bufferbloat problem and why
+large buffers can hurt interactive traffic~\cite{bufferbloat}. Floyd and
+Jacobson's RED work established the value of responding to congestion before
+a queue overflows~\cite{red}. Nichols and Jacobson's CoDel instead uses packet
+sojourn time to distinguish a standing queue from a transient burst~\cite{codel}.
+These studies motivate our latency measurements and unloaded baselines.
+We evaluate the deployed FQ-CoDel combination, rather than claiming to isolate
+CoDel's contribution from flow scheduling.
+
+Buffer size and traffic aggregation also matter. Appenzeller, Keslassy and
+McKeown study how flow multiplexing changes router-buffer requirements~\cite{buffers}.
+Their backbone assumptions do not map directly to our small testbed, but they
+explain why the number of competing flows belongs in the design. We plan one
+and eight background flows while holding aggregate offered demand fixed.
+
+CAKE is the closest prior system to our experiment. H{\o}iland-J{\o}rgensen,
+T{\"a}ht and Morton combine shaping, queue management and traffic isolation
+for home gateways~\cite{cake}. We compare its best-effort mode with a bounded
+classification rule for our foreground replies. The classification budget
+matters because a priority policy that starves bulk traffic would fail our
+goodput criterion. Our workload and repeatability checks are a small feasibility
+study of these existing mechanisms, not a new queue-management algorithm.
+
+DCTCP examines small foreground work competing with large transfers in data
+centers~\cite{dctcp}. It changes endpoint congestion control using ECN, whereas
+our main treatments change the Linux router. Dean and Barroso explain why
+occasional slow responses can dominate a distributed service's user-visible
+latency~\cite{tail}. Together, these papers support looking beyond averages,
+but neither makes our 512-byte request stream a validated model of a complete
+production service.
+
+Finally, Flent shows why repeated network experiments need coordinated traffic,
+metadata and reproducible analysis~\cite{flent}. Our collector follows that
+measurement concern with retained attempts, hashes and explicit request
+accounting. We use a custom foreground program and iperf3 rather than claiming
+that our current pipeline runs Flent. Its methodology remains a useful
+independent cross-check for the final study.

@@ -54,6 +54,8 @@ class PipelineTests(unittest.TestCase):
         self.plan = {"kind": "local_simulation", "source": source()}
 
     def test_plan_switches_modes_and_rejects_ambiguous_profiles(self):
+        with self.assertRaises(ValueError):
+            pipeline.plan("local", shadow_forecast=True)
         local = pipeline.plan("local")
         self.assertEqual(len(local["schedule"]["cells"]), 48)
         self.assertEqual(local["measurement_slots"], 240000)
@@ -137,6 +139,7 @@ class PipelineTests(unittest.TestCase):
         for arguments, expected in (
             (["--topology", "local", "--plan"], 0),
             (["--topology", "local"], 2),
+            (["--topology", "local", "--preflight"], 2),
         ):
             with (
                 patch.object(sys, "argv", ["pipeline", *arguments]),

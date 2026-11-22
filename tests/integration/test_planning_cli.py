@@ -42,13 +42,15 @@ class PlanningCliTests(unittest.TestCase):
     def test_branch_floor_cannot_be_hidden_by_high_line_coverage(self):
         with tempfile.TemporaryDirectory() as temporary:
             report = Path(temporary) / "coverage.json"
-            for covered, expected in ((89, 1), (90, 0)):
+            for covered, lines, expected in ((94, 99, 1), (95, 95, 0), (99, 94, 1)):
                 report.write_text(
                     json.dumps(
                         {
                             "totals": {
                                 "covered_branches": covered,
                                 "num_branches": 100,
+                                "covered_lines": lines,
+                                "num_statements": 100,
                                 "percent_covered": 99,
                             }
                         }

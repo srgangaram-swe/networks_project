@@ -74,6 +74,8 @@ class RunBundle:
                 "python": sys.version.split()[0],
                 "measurement_kind": "loopback_diagnostic"
                 if configuration["mode"] == "loopback"
+                else "macos_testbed"
+                if configuration["mode"] == "macos"
                 else "physical_testbed"
                 if configuration["mode"] == "physical"
                 else "virtual_testbed",

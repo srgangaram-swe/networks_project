@@ -13,6 +13,7 @@ from unittest.mock import patch
 from src.artifacts import parse_json, read_json
 from src.bundle_validation import validate_bundle
 from src.experiment_config import POLICIES
+from src.physical_commands import macos_delay
 from src.processes import CommandError, run_command
 from src.queue_policy import counter_delta
 from src.testbed_backend import Backend
@@ -37,6 +38,26 @@ def root_queue(bundle: Path, name: str) -> dict:
     "requires root on isolated Linux and NETWORKS_RUN_PRIVILEGED=1; issues #3, #5, #6, #11",
 )
 class NamespaceTests(unittest.TestCase):
+    def test_macos_router_delay_preserves_return_queue(self):
+        with tempfile.TemporaryDirectory() as directory:
+            backend = Backend("namespace", "cake_bounded", Path(directory))
+            try:
+                backend.setup()
+                run_command(macos_delay(backend.topology))
+                queues = parse_json(
+                    run_command(backend.command("router", ("tc", "-j", "qdisc", "show"))).stdout
+                )
+                forward = next(q for q in queues if q.get("dev") == "to-server")
+                self.assertEqual(forward["kind"], "netem")
+                self.assertEqual(forward["handle"], "20:")
+                self.assertAlmostEqual(forward["options"]["delay"]["delay"], 0.020)
+                self.assertTrue(
+                    any(q["kind"] == "cake" and q["dev"] == "to-client" for q in queues)
+                )
+            finally:
+                backend.close()
+            self.assertEqual(read_json(Path(directory) / "topology/ownership.json")["owned"], {})
+
     def test_every_queue_profile_runs_and_leaves_no_owned_namespace(self):
         with tempfile.TemporaryDirectory() as directory:
             for policy in sorted(POLICIES):

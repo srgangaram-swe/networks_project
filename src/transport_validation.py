@@ -98,7 +98,7 @@ def validate_transport_artifacts(artifacts):
         capture = artifacts["foreground.json"]
         if capture["bind"] != [CLIENT_ADDRESS, 42001] or capture["peer"] != [SERVER_ADDRESS, 42000]:
             raise ValueError("foreground endpoints differ from the isolated topology")
-        if transport == "tcp":
+        if transport == "tcp" and config["mode"] != "macos":
             _observer(artifacts.get("tcp-observer.json", {}))
     if config.get("shadow_forecast", False):
         _forecast(artifacts.get("shadow-forecast.json", {}))

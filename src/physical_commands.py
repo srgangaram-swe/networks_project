@@ -16,6 +16,7 @@ def split_command(command: tuple[str, ...], topology: Topology) -> tuple[str, tu
 def allowed_kernel_commands(role: str, token: str) -> set[tuple[str, ...]]:
     topology = Topology(token)
     commands = configuration_commands(topology) + list(inspection_commands(topology).values())
+    commands.append(macos_delay(topology))
     for policy in ("fifo", "fq_codel", "cake_best_effort", "cake_bounded"):
         commands.extend(policy_commands(topology, policy))
         commands.extend(policy_commands(topology, policy, transport="tcp"))
@@ -25,3 +26,23 @@ def allowed_kernel_commands(role: str, token: str) -> set[tuple[str, ...]]:
         for found, args in [split_command(command, topology)]
         if found == role
     }
+
+
+def macos_delay(topology):
+    """Put 20 ms of base delay on forward egress; return AQM stays unchanged."""
+    return topology.command(
+        "router",
+        "tc",
+        "qdisc",
+        "add",
+        "dev",
+        "to-server",
+        "root",
+        "handle",
+        "20:",
+        "netem",
+        "limit",
+        "10000",
+        "delay",
+        "20ms",
+    )

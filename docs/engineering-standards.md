@@ -74,12 +74,19 @@ Do not substitute offered demand for achieved throughput or an asymptotic bound
 for a measurement. Profile before optimizing, state the input size and workload,
 and preserve correctness and failure behavior in the comparison.
 
+macOS endpoint checks scan at most 16 KiB per command in O(B) time and auxiliary
+space for B output bytes. Each probe has a five-second deadline. Trial and
+worker locks wait at most five seconds; workloads have a 180-second deadline,
+one MiB output cap, 64 arguments and 8,192 argument bytes. Parallel simulation
+does not parallelize traffic on the shared physical bottleneck.
+
 ## Verification
 
 The baseline check runs formatting, lint, unit tests, CLI integration tests,
 branch coverage, and repository hygiene. Branch coverage must remain at least
-90% for the Python core. A separate check enforces that floor on branch coverage
-itself, so a high statement count cannot hide untested decisions. Coverage is a
+95% for both Python core and analysis. A separate check enforces that floor
+independently on statements and branches, so a high statement count cannot hide
+untested decisions. Coverage is a
 floor, not evidence that every case is correct.
 
 Add corruption, timeout, malformed-input, cleanup, and partial-output cases where

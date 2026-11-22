@@ -88,7 +88,7 @@ def validate_summaries(frame, *, allow_simulated=False):
 
 
 def _measurement_kinds(allow_simulated):
-    observed = ("virtual_testbed", "loopback_diagnostic", "physical_testbed")
+    observed = ("virtual_testbed", "loopback_diagnostic", "physical_testbed", "macos_testbed")
     return observed + (("simulation",) if allow_simulated else ())
 
 
