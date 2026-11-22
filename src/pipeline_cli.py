@@ -16,7 +16,12 @@ from src.simulation import ROOT, default_workers
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--topology", choices=("local", "namespace", "physical"), required=True)
+    parser.add_argument(
+        "--topology", choices=("local", "namespace", "physical", "macos"), required=True
+    )
+    parser.add_argument(
+        "--preflight", action="store_true", help="check hardware without collecting"
+    )
     parser.add_argument("--plan", action="store_true")
     parser.add_argument("--transport", choices=("udp", "tcp"), default="udp")
     parser.add_argument("--shadow-forecast", action="store_true")
@@ -36,7 +41,7 @@ def main():
     }
     try:
         profile = read_json(args.profile, 16384) if args.profile else None
-        if args.plan:
+        if args.plan or args.preflight:
             result = plan(
                 args.topology,
                 args.simulation_multiplier,
@@ -46,6 +51,12 @@ def main():
                 transport=args.transport,
                 shadow_forecast=args.shadow_forecast,
             )
+            if args.preflight:
+                if args.topology not in {"physical", "macos"}:
+                    raise ValueError("--preflight requires physical or macos topology")
+                from src.physical_campaign import preflight
+
+                result["host_checks"] = preflight(profile)
         else:
             if args.output is None:
                 raise ValueError("execution requires a fresh --output directory")

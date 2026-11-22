@@ -1,0 +1,21 @@
+\section{Introduction and motivation}
+Our question is whether Linux queue management can protect a small
+request-response flow when bulk TCP traffic competes for the same bottleneck.
+We compare FIFO, FQ-CoDel, CAKE best-effort, and CAKE with bounded classification.
+The goal is to reduce added foreground p99 latency by at least 50\% relative
+to FIFO while retaining at least 90\% of FIFO's background goodput.
+These thresholds are our feasibility criteria, not established results.
+
+We proposed a three-node Linux testbed, repeated randomized trials, and a
+comparison of latency against throughput. Hardware availability changed the
+endpoint plan: we now intend to use two MacBooks with a Linux NucBox router.
+We also developed a namespace path for controlled software checks and a local
+simulation for exercising the analysis. These paths answer different questions.
+The physical experiment will test the available equipment; the simulation
+cannot tell us which Linux queue policy performs best.
+
+Our preliminary namespace pilot gives a reason to evaluate both goals together.
+FQ-CoDel and both CAKE configurations had much lower observed added p99 than
+FIFO. Both CAKE variants also retained less than 90\% of FIFO goodput. With only
+two paired blocks, generator omissions and unresolved timing checks, we treat
+this as a diagnostic result that guides the next experiment.

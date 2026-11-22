@@ -192,7 +192,7 @@ def save_figure(fig, destination: Path, *, measurement_kind="virtual_testbed", t
                 fontweight="bold",
                 color="#172B42",
             )
-        elif measurement_kind == "physical_testbed":
+        elif measurement_kind in {"physical_testbed", "macos_testbed"}:
             fig.suptitle(
                 "Physical testbed diagnostics\n" + fig._suptitle.get_text(),
                 fontsize=16,

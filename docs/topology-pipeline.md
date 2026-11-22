@@ -52,6 +52,10 @@ diagnostic until the protocol, calibration and timing checks are accepted.
 
 ## Separate physical Linux endpoints
 
+For a Linux NucBox with two MacBooks, use --topology macos and the
+[mixed-platform setup guide](macos-testbed.md). The physical option below
+requires Linux on all three roles.
+
 Use the [profile example](../configs/physical-profile.example.json) as a template
 for a private profile under .local. Install the same tested source revision,
 Python environment, iproute2, iperf3, ethtool and sudo on every Linux host.

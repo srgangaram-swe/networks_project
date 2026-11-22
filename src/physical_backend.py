@@ -1,10 +1,10 @@
-"""Use the same queue plan across three explicitly configured Linux roles."""
+"""Apply Linux router queues with explicitly configured Linux or macOS endpoints."""
 
 from pathlib import Path
 
 from src.artifacts import parse_json
-from src.physical_commands import split_command
-from src.physical_profile import check_inspections, validate_profile, worker_command
+from src.physical_commands import macos_delay, split_command
+from src.physical_profile import check_inspections, profile_mode, validate_profile, worker_command
 from src.processes import run_command
 from src.queue_policy import check_queue_kinds, policy_commands
 from src.topology import (
@@ -20,6 +20,7 @@ from src.topology import (
 class PhysicalBackend:
     def __init__(self, profile: dict, token: str, policy: str, *, transport="udp"):
         self.profile = validate_profile(profile)
+        self.mode = profile_mode(profile)
         self.topology = Topology(token)
         self.policy = policy
         self.transport = transport
@@ -48,9 +49,13 @@ class PhysicalBackend:
                 worker_command(self.profile, role, "prepare", self.topology.token), timeout=45
             )
             self.prepared.append(role)
-        for command in configuration_commands(self.topology) + policy_commands(
+        commands = configuration_commands(self.topology) + policy_commands(
             self.topology, self.policy, transport=self.transport
-        ):
+        )
+        if self.mode == "macos":
+            commands = [c for c in commands if split_command(c, self.topology)[0] == "router"]
+            commands.append(macos_delay(self.topology))
+        for command in commands:
             role, args = split_command(command, self.topology)
             run_command(self.command(role, args), timeout=30)
 
@@ -64,16 +69,30 @@ class PhysicalBackend:
                 str(root / "scripts" / Path(args[1]).name),
                 *args[2:],
             )
+        if args[0] == "iperf3" and self.profile["roles"][role].get("platform") == "macos":
+            args = (self.profile["roles"][role]["iperf3"], *args[1:])
         return worker_command(self.profile, role, "exec", self.topology.token, args=list(args))
 
     def snapshot(self):
         snapshots = {}
         for name, command in inspection_commands(self.topology).items():
             role, args = split_command(command, self.topology)
-            snapshots[name] = parse_json(run_command(self.command(role, args), timeout=30).stdout)
+            if self.mode == "macos" and role != "router":
+                snapshots[name] = [
+                    parse_json(
+                        run_command(
+                            worker_command(self.profile, role, "inspect", self.topology.token),
+                            timeout=30,
+                        ).stdout
+                    )
+                ]
+            else:
+                snapshots[name] = parse_json(
+                    run_command(self.command(role, args), timeout=30).stdout
+                )
         check_queue_kinds(snapshots["router_queues"], self.policy)
         return {
-            "kind": "physical_testbed",
+            "kind": "macos_testbed" if self.mode == "macos" else "physical_testbed",
             "attachment_checked": True,
             "calibrated": False,
             "snapshots": snapshots,

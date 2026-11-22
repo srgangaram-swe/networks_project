@@ -87,6 +87,30 @@ jobs:
         with:
           persist-credentials: false
       - run: python3 scripts/branch_policy.py
+  macos:
+    name: macos
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - run: brew install iperf3 shellcheck
+      - run: sh scripts/setup_environment.sh
+      - run: sh scripts/check.sh
+      - run: sh scripts/check_analysis.sh
+      - name: Retain separate statement and branch coverage reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: macos-coverage
+          path: |
+            .local/coverage.json
+            .local/analysis-branch-report.json
+          retention-days: 14
   cpp-prototype:
     name: cpp-prototype
     runs-on: ubuntu-24.04
@@ -104,6 +128,29 @@ jobs:
       - run: ctest --test-dir build/cpp-network-probe --output-on-failure
       - run: clang-format --dry-run --Werror experiments/cpp_network_testing/server_host.cpp experiments/cpp_network_testing/server_client.cpp
       - run: shellcheck experiments/cpp_network_testing/timing.sh scripts/setup_environment.sh
+  deliverables:
+    name: deliverables
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install report tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends texlive-latex-extra texlive-fonts-recommended texlive-publishers lmodern ripgrep
+      - run: shellcheck scripts/build_report.sh
+      - run: sh scripts/build_report.sh
+      - name: Retain the compiled course deliverables
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: course-deliverables
+          path: |
+            deliverables/report.pdf
+            deliverables/project-presentation-reviewed.pptx
+          if-no-files-found: error
+          retention-days: 30
   linux-namespaces:
     name: linux-namespaces
     if: github.event_name == 'workflow_dispatch' && inputs.linux_namespaces

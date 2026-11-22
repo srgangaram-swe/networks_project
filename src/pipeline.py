@@ -7,7 +7,7 @@ from threading import Event
 from src.artifacts import atomic_json, read_json
 from src.experiment_config import bounded_integer
 from src.physical_campaign import collect_physical, physical_plan, preflight
-from src.physical_profile import validate_profile
+from src.physical_profile import profile_mode, validate_profile
 from src.run_bundle import source_identity
 from src.simulation import ROOT, collect_simulation, simulation_plan
 from src.table_export import export_run_tables
@@ -36,12 +36,18 @@ def plan(
         return namespace_plan(
             diagnostic_matrix, transport=transport, shadow_forecast=shadow_forecast
         )
-    if topology != "physical" or profile is None:
+    if topology not in {"physical", "macos"} or profile is None:
         raise ValueError("physical mode requires an explicit private --profile")
     validate_profile(profile)
+    if profile_mode(profile) != topology:
+        raise ValueError("profile platforms differ from the selected topology")
     raw = read_json(ROOT / "configs" / ("primary.json" if diagnostic_matrix else "pilot.json"))
     return physical_plan(
-        raw, source_identity(ROOT), transport=transport, shadow_forecast=shadow_forecast
+        raw,
+        source_identity(ROOT),
+        transport=transport,
+        shadow_forecast=shadow_forecast,
+        mode=topology,
     )
 
 
@@ -128,7 +134,7 @@ def _execute(output, topology, resolved, profile, workers, authorized, matrix, c
             shadow_forecast=resolved["shadow_forecast"],
         )
         return
-    if topology == "physical":
+    if topology in {"physical", "macos"}:
         with trace.stage("physical_preflight"):
             identities = preflight(profile)
             resolved["source"] = identities["client"]

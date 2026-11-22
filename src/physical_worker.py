@@ -118,7 +118,7 @@ def action(name: str, request: dict, cancel: Event):
     return lease.state
 
 
-def main():
+def main(handler=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("inspect", "prepare", "exec", "cleanup"))
     parser.add_argument("--request", required=True)
@@ -129,7 +129,7 @@ def main():
         for number in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
     }
     try:
-        result = action(args.action, decode_payload(args.request), cancel)
+        result = (handler or action)(args.action, decode_payload(args.request), cancel)
         if args.action == "exec":
             return result
         print(json.dumps(result, sort_keys=True))

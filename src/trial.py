@@ -48,8 +48,8 @@ class TrialConfig:
         elif type(self.flows) is not int or type(self.aggregate_bps) is not int:
             raise ValueError("unloaded trials require integer zero flows and demand")
         self.foreground_plan()
-        if self.mode not in {"loopback", "namespace", "physical"}:
-            raise ValueError("mode must be loopback, namespace, or physical")
+        if self.mode not in {"loopback", "namespace", "physical", "macos"}:
+            raise ValueError("mode must be loopback, namespace, physical, or macos")
         if self.mode == "loopback" and self.policy != "none":
             raise ValueError("loopback measurements have no queue policy")
         if self.mode != "loopback" and self.foreground_port != 42000:
@@ -155,7 +155,7 @@ def _collect_workloads(
 ) -> None:
     with ExitStack() as services, ThreadPoolExecutor(max_workers=2) as pool:
         responder = _start_services(services, config, backend)
-        start = time.monotonic_ns() + 250_000_000
+        start = time.monotonic_ns() + (3_000_000_000 if config.mode == "macos" else 250_000_000)
         measurement = start + config.warmup_seconds * 1_000_000_000
         drain = measurement + config.measurement_seconds * 1_000_000_000
         end = drain + 2_000_000_000
@@ -213,7 +213,7 @@ def _submit_bulk(pool, config: TrialConfig, backend: Backend, deadline: int, can
             backend.client_address,
             backend.server_address,
             config.bulk_port,
-            linux=isolated,
+            linux=isolated and config.mode != "macos",
             allow_isolated=isolated,
         ),
     )
@@ -258,7 +258,7 @@ def run_trial(
     primary_error = None
     try:
         bundle.transition("preflight")
-        if config.flows:
+        if config.flows and config.mode != "macos":
             run_command(("iperf3", "--version"), limit=16384)
         bundle.transition("setup")
         backend.setup()

@@ -31,7 +31,7 @@ def observers(bundle, config, backend):
                     timeout=duration + 3,
                 )
             )
-        if config.transport == "tcp" and config.mode != "loopback":
+        if config.transport == "tcp" and config.mode not in {"loopback", "macos"}:
             args = (
                 sys.executable,
                 str(root / "scripts/tcp_observer.py"),
@@ -51,7 +51,7 @@ def observers(bundle, config, backend):
             )
         yield
     bundle.register("foreground-transport.json")
-    if config.transport == "tcp" and config.mode != "loopback":
+    if config.transport == "tcp" and config.mode not in {"loopback", "macos"}:
         bundle.register("tcp-observer.json")
     if config.shadow_forecast:
         forecast = read_json(bundle.directory / "shadow-forecast.json")

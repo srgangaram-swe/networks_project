@@ -1,0 +1,20 @@
+\section{Community analysis}
+The immediate audience is students and small-network operators who need to
+understand why a fast bulk transfer can coexist with poor interactive response.
+The bufferbloat and CAKE literature documents this problem in access networks
+and motivates evaluating latency alongside throughput~\cite{bufferbloat,cake}.
+Our contribution is a small reproducible comparison with visible measurement
+limits, rather than a claim that we have identified a universal best policy.
+
+A useful result would help someone decide what to measure before changing a
+gateway: unloaded latency, contention behavior, delivered goodput and failures.
+We have not interviewed users or measured a campus or household deployment.
+Our conclusions will therefore apply to the tested workload and equipment.
+Wi-Fi contention, multiple households, encrypted application classification
+and fairness between real users remain outside this experiment.
+
+Bounded priority also has a community consequence. Improving one selected
+flow can reduce service for others. We retain bulk goodput in the success
+criteria and keep the unfavorable CAKE pilot results visible. Before proposing
+deployment, we would need stronger fairness and abuse checks and evidence
+from representative traffic.
