@@ -19,7 +19,6 @@ NS_PER_SECOND = 1_000_000_000
 MAX_SEND_LAG_NS = 1_000_000
 MAX_EVENTS = 4096
 
-
 @dataclass(frozen=True)
 class Workload:
     warmup_ms: int = 10_000

@@ -25,6 +25,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
     capture = read_json(directory / "foreground.json")
     bulk = read_json(directory / "bulk.json")
     environment = read_json(directory / "environment.json")
+    is_unloaded = bulk.get("kind") == "unloaded_baseline"
     if environment["measurement_kind"] == "synthetic_fixture":
         raise ValueError("synthetic fixtures cannot be exported as observed diagnostics")
     warmup_count = capture["config"]["warmup_ms"] * capture["config"]["requests_per_second"] // 1000
@@ -46,7 +47,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
         "measurement_kind": environment["measurement_kind"],
         "platform": environment["system"],
         "policy": manifest["policy"],
-        "flows": bulk["actual_flows"],
+        "flows": 0 if is_unloaded else bulk["actual_flows"],
         "scheduled": len(records),
         "sent": sent,
         "on_time": counts["on_time"],
@@ -59,13 +60,14 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
         "jitter_ms": _median_ms(jitter),
         "send_lag_p99_ms": nearest_rank(lags, 990),
         "requested_mbps": bulk["requested"]["aggregate_bps"] / 1_000_000,
-        "goodput_mbps": bulk["goodput_mbps"],
+        "goodput_mbps": None if is_unloaded else bulk["goodput_mbps"],
         "p99_censored": timeouts / sent > 0.01 if sent else True,
         "source_commit": manifest["source"]["commit"],
         "source_tree_sha256": manifest["source"]["tree_sha256"],
         "source_dirty": manifest["source"]["dirty"],
         "manifest_sha256": digest(directory / "manifest.json"),
         "eligible_for_primary": False,
+        "transport": bulk["requested"]["transport"],
     }
     summary.update({name: nearest_rank(good, rank) for name, rank in QUANTILES.items()})
     rows = [

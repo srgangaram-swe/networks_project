@@ -155,4 +155,9 @@ def inspection_commands(topology: Topology) -> dict[str, tuple[str, ...]]:
     commands["classification"] = topology.command(
         "router", "tc", "-j", "-s", "filter", "show", "dev", "to-server", "ingress"
     )
+    commands["bounded_classification"] = topology.command(
+        "router",
+        "tc", "-j", "-s", "filter", "show",
+        "dev", "to-client", "parent", "1:",
+    )
     return commands

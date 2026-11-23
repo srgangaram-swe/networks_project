@@ -12,11 +12,18 @@ class Cell:
     policy: str
     load_fraction: float
     flows: int
+    transport: str
 
     @property
     def cell_id(self) -> str:
+        if self.transport == "none":
+            return self.baseline_id
+
         load = int(self.load_fraction * 100)
-        return f"b{self.block:03d}-{self.policy}-l{load:03d}-f{self.flows:02d}"
+        return (
+            f"b{self.block:03d}-{self.policy}-"
+            f"{self.transport}-l{load:03d}-f{self.flows:02d}"
+        )
 
     @property
     def baseline_id(self) -> str:
@@ -32,18 +39,40 @@ def make_schedule(config: ExperimentConfig) -> dict:
     for block in range(1, config.repetitions + 1):
         policies = list(config.policies)
         randomizer.shuffle(policies)
+
         for policy in policies:
             conditions = [(0.0, 0)] + [
                 (load, flows)
                 for load in config.background_load_fractions
                 for flows in config.background_flow_counts
             ]
+
             randomizer.shuffle(conditions)
+
             for load, flows in conditions:
-                cell = Cell(block, policy, load, flows)
-                cells.append(
-                    {**asdict(cell), "cell_id": cell.cell_id, "baseline_id": cell.baseline_id}
-                )
+                if flows == 0:
+                    transports = ["none"]
+                else:
+                    transports = list(config.transports)
+                    randomizer.shuffle(transports)
+
+                for transport in transports:
+                    cell = Cell(
+                        block=block,
+                        policy=policy,
+                        load_fraction=load,
+                        flows=flows,
+                        transport=transport,
+                    )
+
+                    cells.append(
+                        {
+                            **asdict(cell),
+                            "cell_id": cell.cell_id,
+                            "baseline_id": cell.baseline_id,
+                        }
+                    )
+
     if len({cell["cell_id"] for cell in cells}) != len(cells):
         raise ValueError("load values collide in percentage-based cell identifiers")
-    return {"schema_version": 1, "seed": config.random_seed, "cells": cells}
+    return {"schema_version": 2, "seed": config.random_seed, "cells": cells}

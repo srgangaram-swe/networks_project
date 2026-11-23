@@ -214,6 +214,20 @@ def check_queue_kinds(snapshot: object, policy: str) -> None:
         leaf = "bfifo" if policy == "fifo" else "fq_codel"
         if not any(row.get("kind") == leaf and row.get("parent") == "1:10" for row in rows):
             raise ValueError("selected leaf queue is not attached")
+    else:
+        cake_rows = [
+            row for row in rows
+            if row.get("kind") == "cake" and row.get("handle") == "1:"
+        ]
+
+        if len(cake_rows) != 1:
+            raise ValueError("expected exactly one CAKE root queue")
+
+        expected_mode = "diffserv3" if policy == "cake_bounded" else "besteffort"
+        options = cake_rows[0].get("options")
+
+        if not isinstance(options, dict) or options.get("diffserv") != expected_mode:
+            raise ValueError("CAKE diffserv mode does not match the selected policy")
 
 
 def counter_delta(before: dict, after: dict) -> dict[str, int]:

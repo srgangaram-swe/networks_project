@@ -1,4 +1,4 @@
-"""Paced reverse TCP streams and checked receiver goodput from iperf3."""
+"""Paced reverse TCP/SCTP transfers and checked receiver goodput from iperf3."""
 
 from dataclasses import asdict, dataclass
 from typing import Any
@@ -13,8 +13,11 @@ class BulkPlan:
     flows: int
     measurement_seconds: int
     warmup_seconds: int = 0
+    transport: str = "tcp"
 
     def __post_init__(self) -> None:
+        if self.transport not in {"tcp", "sctp"}:
+            raise ValueError("unsupported transport")
         bounded_integer(self.aggregate_bps, "aggregate_bps", 8, 200_000_000)
         if type(self.flows) is not int or self.flows not in (1, 8):
             raise ValueError("bulk traffic requires one or eight flows")
@@ -66,7 +69,11 @@ def client_command(
         "--connect-timeout",
         "2000",
     )
-    return command + (("-C", "cubic") if linux else ())
+    return (
+            command
+            + (("--sctp",) if plan.transport == "sctp" else ())
+            + (("-C", "cubic") if linux and plan.transport == "tcp" else ())
+    )
 
 
 def server_command(bind: str, port: int, *, allow_isolated: bool = False) -> tuple[str, ...]:
@@ -84,7 +91,7 @@ def _stream_summary(raw: dict, plan: BulkPlan) -> tuple[dict, dict]:
     if not isinstance(settings, dict):
         raise ValueError("iperf3 test settings must be an object")
     expected = {
-        "protocol": "TCP",
+        "protocol": plan.transport.upper(),
         "num_streams": plan.flows,
         "reverse": 1,
         "duration": plan.measurement_seconds,
@@ -94,7 +101,7 @@ def _stream_summary(raw: dict, plan: BulkPlan) -> tuple[dict, dict]:
         type(settings.get(key)) is not type(value) or settings[key] != value
         for key, value in expected.items()
     ):
-        raise ValueError("iperf3 settings do not match the requested TCP workload")
+        raise ValueError("iperf3 settings do not match the requested transport workload")
     if settings.get("target_bitrate") != plan.per_flow_bps:
         raise ValueError("iperf3 per-flow pacing target does not match the request")
     if not isinstance(start["connected"], list) or not isinstance(end["streams"], list):

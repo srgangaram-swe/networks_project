@@ -117,7 +117,8 @@ def run_command(
     try:
         result = _collect(child, timeout, limit, observe, stop)
         if check and result.returncode:
-            raise CommandError(f"{args[0]} exited with status {result.returncode}")
+            detail = (result.stderr or result.stdout).decode("utf-8", errors="replace").strip()[:500]
+            raise CommandError(f"{' '.join(args)} exited with status {result.returncode}: {detail}")
         return result
     except BaseException as exc:
         primary_error = exc

@@ -3,7 +3,6 @@
 import platform
 from pathlib import Path
 
-
 def parse_cpu(line: str) -> tuple[int, ...]:
     fields = line.split()
     if not 9 <= len(fields) <= 11 or fields[0] != "cpu":

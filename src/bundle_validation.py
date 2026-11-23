@@ -267,43 +267,101 @@ def _cross_checks(artifacts: dict, manifest: dict) -> None:
     phases["end_ns"] = foreground["planned_end_ns"]
     if manifest["phases"] != phases:
         raise ValueError("manifest phase boundaries differ from the capture")
-    bulk = exact_fields(
-        artifacts["bulk.json"],
-        {
-            "requested",
-            "per_flow_bps",
-            "actual_flows",
-            "receiver_bytes",
-            "receiver_seconds",
-            "goodput_mbps",
-            "intervals",
-            "tool_version",
-            "exit_status",
-            "window",
-            "foreground_window_aligned",
-        },
-        "bulk summary",
-    )
-    requested = {
-        field.name: getattr(plan.bulk_plan(), field.name) for field in fields(plan.bulk_plan())
-    }
-    if (
-        bulk.get("requested") != requested
-        or bulk.get("actual_flows") != plan.flows
-        or bulk.get("exit_status") != 0
-    ):
-        raise ValueError("bulk flow set or requested load differs from the trial")
-    _bulk_numbers(bulk)
-    if abs(bulk["receiver_seconds"] - plan.measurement_seconds) > 0.25:
-        raise ValueError("bulk receiver duration differs from the configured measurement")
-    bounded_integer(bulk["actual_flows"], "actual flow count", plan.flows, plan.flows)
-    bounded_integer(bulk["exit_status"], "bulk exit status", 0, 0)
-    bounded_integer(
-        bulk["per_flow_bps"],
-        "per-flow pacing",
-        plan.bulk_plan().per_flow_bps,
-        plan.bulk_plan().per_flow_bps,
-    )
+
+    bulk = artifacts["bulk.json"]
+    if plan.is_unloaded:
+        # Unloaded baseline: no iperf3 process or receiver measurements.
+        exact_fields(
+            bulk,
+            {"kind", "requested"},
+            "unloaded bulk artifact",
+        )
+
+        if bulk["kind"] != "unloaded_baseline":
+            raise ValueError("expected unloaded baseline evidence")
+
+        expected_requested = {
+            "transport": "none",
+            "aggregate_bps": 0,
+            "flows": 0,
+            "measurement_seconds": plan.measurement_seconds,
+            "warmup_seconds": plan.warmup_seconds,
+        }
+
+        exact_fields(
+            bulk["requested"],
+            set(expected_requested),
+            "unloaded bulk configuration",
+        )
+
+        if bulk["requested"] != expected_requested:
+            raise ValueError(
+                "unloaded baseline configuration differs from trial"
+            )
+
+    else:
+        # Loaded trial: retain the existing strict iperf3 validation.
+        bulk = exact_fields(
+            bulk,
+            {
+                "requested",
+                "per_flow_bps",
+                "actual_flows",
+                "receiver_bytes",
+                "receiver_seconds",
+                "goodput_mbps",
+                "intervals",
+                "tool_version",
+                "exit_status",
+                "window",
+                "foreground_window_aligned",
+            },
+            "bulk summary",
+        )
+
+        requested = {
+            field.name: getattr(plan.bulk_plan(), field.name)
+            for field in fields(plan.bulk_plan())
+        }
+
+        if (
+                bulk.get("requested") != requested
+                or bulk.get("actual_flows") != plan.flows
+                or bulk.get("exit_status") != 0
+        ):
+            raise ValueError(
+                "bulk flow set or requested load differs from the trial"
+            )
+
+        _bulk_numbers(bulk)
+
+        if abs(
+                bulk["receiver_seconds"] - plan.measurement_seconds
+        ) > 0.25:
+            raise ValueError(
+                "bulk receiver duration differs from the configured measurement"
+            )
+
+        bounded_integer(
+            bulk["actual_flows"],
+            "actual flow count",
+            plan.flows,
+            plan.flows,
+        )
+
+        bounded_integer(
+            bulk["exit_status"],
+            "bulk exit status",
+            0,
+            0,
+        )
+
+        bounded_integer(
+            bulk["per_flow_bps"],
+            "per-flow pacing",
+            plan.bulk_plan().per_flow_bps,
+            plan.bulk_plan().per_flow_bps,
+        )
 
 
 def _bulk_numbers(bulk: dict) -> None:
@@ -390,6 +448,21 @@ def _queues(artifacts: dict, mode: str, policy: str) -> None:
             if any(not isinstance(value, list) or len(value) > 512 for value in snapshots.values()):
                 raise ValueError("namespace snapshots must be bounded lists")
             check_queue_kinds(snapshots["router_queues"], policy)
+            filters = snapshots["bounded_classification"]
+            if policy == "cake_bounded":
+                if not any(
+                        isinstance(row, dict) and row.get("kind") == "flower"
+                        for row in filters
+                ):
+                    raise ValueError("bounded policy is missing its flower filter")
+                if not any(
+                        isinstance(row, dict) and row.get("kind") == "matchall"
+                        for row in filters
+                ):
+                    raise ValueError("bounded policy is missing its fallback filter")
+            elif filters:
+                raise ValueError("unexpected bounded classification filters")
+
 
 
 def validate_contents(directory: Path, manifest: dict) -> dict:
