@@ -49,6 +49,23 @@ trials. Linux cleanup verifies resource identity before returning interfaces.
 The pipeline proceeds automatically from successful collection to checked
 export, analysis, plots and a text interpretation.
 
+Chris's RPC workload runs as an optional companion after the foreground phase.
+It uses UDP CALL, RESULT and ACK messages, bounded retries and an in-memory
+reply cache. The runner schedules 500 calls per second with 32 workers and
+records each call's duration, outcome, retry count and start delay. A separate
+background transfer uses the same offered-load condition. RPC traffic remains
+best effort outside the foreground classifier. Its application-call durations
+therefore remain separate from foreground RTT and policy-effect estimates.
+The server finishes before the SSH connection closes so its final counters
+reach the retained bundle. The cache does not provide exactly-once execution
+after a restart.
+
+The pipeline can start on the NucBox or either configured controller. When
+the client is remote, every role uses an explicit SSH alias that also resolves
+from the client Mac. The client still coordinates each trial on its own
+monotonic clock. A separate loopback mode collects four real socket trials
+without changing interfaces, routes or queue policies.
+
 \subsection{Analysis and verification}
 We calculate per-run latency percentiles and match loaded runs to their
 unloaded baseline in the same block. Added p99 is loaded p99 minus unloaded
@@ -65,8 +82,8 @@ scaling and penalty selection use only training folds. At least six blocks
 are required. These models describe observed designs and do not establish
 causality or transfer to new hardware.
 
-Jonathan's original comparison workflow and Chris's C++ networking prototype
-remain in the repository with their authorship intact. The C++ probe is a
+Jonathan's original comparison workflow, Chris's RPC implementation and his
+C++ networking prototype remain in the repository with their authorship intact. The C++ probe is a
 separate workload check, not the source of the main foreground metric. Our
 unit and integration checks cover data validation, real sockets, subprocess
 failures and cleanup. CI enforces 95\% statement and branch coverage separately

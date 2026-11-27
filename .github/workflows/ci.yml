@@ -28,6 +28,10 @@ on:
         description: Collect advisory future-window forecasts alongside namespace traffic
         type: boolean
         default: false
+      rpc_diagnostics:
+        description: Collect the separate RPC phase alongside the namespace campaign
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -155,7 +159,7 @@ jobs:
     name: linux-namespaces
     if: github.event_name == 'workflow_dispatch' && inputs.linux_namespaces
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -172,10 +176,14 @@ jobs:
         env:
           FOREGROUND_TRANSPORT: ${{ inputs.foreground_transport }}
           SHADOW_FORECAST: ${{ inputs.shadow_forecast }}
+          RPC_DIAGNOSTICS: ${{ inputs.rpc_diagnostics }}
         run: |
           options=(--transport "$FOREGROUND_TRANSPORT")
           if [ "$SHADOW_FORECAST" = true ]; then
             options+=(--shadow-forecast)
+          fi
+          if [ "$RPC_DIAGNOSTICS" = true ]; then
+            options+=(--rpc-diagnostics)
           fi
           sudo .venv/bin/python scripts/pipeline.py --topology namespace "${options[@]}" --output .local/experiment --authorized-isolated-host
       - name: Export all completed observations and attempt accounting
@@ -199,6 +207,7 @@ jobs:
             .local/evidence
             .local/experiment/namespace/export
             .local/experiment/namespace/analysis
+            .local/experiment/namespace/rpc-analysis
             .local/experiment/status.json
             .local/experiment/timings.json
             .local/experiment/events.jsonl
@@ -209,6 +218,7 @@ jobs:
             .local/experiment/namespace/campaign/attempt-*/foreground-transport.json
             .local/experiment/namespace/campaign/attempt-*/tcp-observer.json
             .local/experiment/namespace/campaign/attempt-*/shadow-forecast.json
+            .local/experiment/namespace/campaign/attempt-*/rpc*.json
           if-no-files-found: warn
           retention-days: 30
   nucbox-setup:

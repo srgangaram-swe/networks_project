@@ -19,7 +19,13 @@ from src.topology_runtime import require_linux  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def plan(diagnostic_matrix: bool = False, *, transport="udp", shadow_forecast=False) -> dict:
+def plan(
+    diagnostic_matrix: bool = False,
+    *,
+    transport="udp",
+    shadow_forecast=False,
+    rpc_diagnostics=False,
+) -> dict:
     name = "primary.json" if diagnostic_matrix else "pilot.json"
     configuration = read_json(ROOT / "configs" / name, 65536)
     schedule, _ = resolve_trials(
@@ -28,6 +34,7 @@ def plan(diagnostic_matrix: bool = False, *, transport="udp", shadow_forecast=Fa
         diagnostic_matrix=diagnostic_matrix,
         transport=transport,
         shadow_forecast=shadow_forecast,
+        rpc_diagnostics=rpc_diagnostics,
     )
     return {
         "schema_version": 1,
@@ -38,6 +45,7 @@ def plan(diagnostic_matrix: bool = False, *, transport="udp", shadow_forecast=Fa
         "configuration": configuration,
         "transport": transport,
         "shadow_forecast": shadow_forecast,
+        "rpc_diagnostics": rpc_diagnostics,
         "trials": len(schedule["cells"]),
         "setup": smoke_plan(),
         "warmup_seconds": 10,
@@ -56,6 +64,7 @@ def run(
     telemetry: Telemetry | None = None,
     transport="udp",
     shadow_forecast=False,
+    rpc_diagnostics=False,
 ) -> dict:
     if not authorized:
         raise PermissionError("execution requires --authorized-isolated-host")
@@ -63,7 +72,12 @@ def run(
     from analysis.policy_comparison import analyze
     from scripts.export_pilot import export
 
-    resolved = plan(diagnostic_matrix, transport=transport, shadow_forecast=shadow_forecast)
+    resolved = plan(
+        diagnostic_matrix,
+        transport=transport,
+        shadow_forecast=shadow_forecast,
+        rpc_diagnostics=rpc_diagnostics,
+    )
     if cancel.is_set():
         raise InterruptedError("experiment cancelled before setup")
     directory.mkdir(mode=0o700)
@@ -86,6 +100,7 @@ def run(
                 diagnostic_matrix=diagnostic_matrix,
                 transport=transport,
                 shadow_forecast=shadow_forecast,
+                rpc_diagnostics=rpc_diagnostics,
             )
             execute_campaign(directory / "campaign", cancel=cancel)
         _stage(directory, report, "export", cancel)
@@ -94,6 +109,19 @@ def run(
         _stage(directory, report, "analysis", cancel)
         with trace.stage("analysis"):
             analyze([directory / "export"], directory / "analysis")
+        if rpc_diagnostics:
+            from analysis.diagnostic_report import analyze_rpc
+
+            with trace.stage("rpc_analysis"):
+                progress = read_json(directory / "campaign/progress.json")
+                analyze_rpc(
+                    [
+                        directory / "campaign" / item["directory"]
+                        for item in progress["attempts"]
+                        if item["status"] == "completed"
+                    ],
+                    directory / "rpc-analysis",
+                )
         _stage(directory, report, "completed", cancel)
         report.update(state="completed", stage="completed")
         atomic_json(directory / "status.json", report)
@@ -124,6 +152,7 @@ def main() -> int:
     parser.add_argument("--diagnostic-matrix", action="store_true")
     parser.add_argument("--transport", choices=("udp", "tcp"), default="udp")
     parser.add_argument("--shadow-forecast", action="store_true")
+    parser.add_argument("--rpc-diagnostics", action="store_true")
     args = parser.parse_args()
     cancel = Event()
     previous = {
@@ -137,6 +166,7 @@ def main() -> int:
                 args.diagnostic_matrix,
                 transport=args.transport,
                 shadow_forecast=args.shadow_forecast,
+                rpc_diagnostics=args.rpc_diagnostics,
             )
             if args.action == "plan"
             else run(
@@ -146,6 +176,7 @@ def main() -> int:
                 diagnostic_matrix=args.diagnostic_matrix,
                 transport=args.transport,
                 shadow_forecast=args.shadow_forecast,
+                rpc_diagnostics=args.rpc_diagnostics,
             )
         )
         print(json.dumps(result, indent=2, sort_keys=True))

@@ -141,8 +141,11 @@ def workload(item, args):
         raise ValueError("endpoint command exceeds its argument budget")
     if args[0] == item["iperf3"]:
         return tuple(args)
-    if args[:2] != [str(root / ".venv/bin/python"), str(root / "scripts/foreground.py")]:
-        raise PermissionError("only the foreground workload and configured iperf3 are allowed")
+    if tuple(args[:2]) not in {
+        (str(root / ".venv/bin/python"), str(root / "scripts" / name))
+        for name in ("foreground.py", "rpc.py")
+    }:
+        raise PermissionError("only the foreground/RPC workloads and configured iperf3 are allowed")
     return tuple(args)
 
 

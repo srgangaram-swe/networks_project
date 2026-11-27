@@ -161,8 +161,8 @@ and [t-SNE](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.T
 Run sh scripts/check_analysis.sh. Tests include hand-computed policy effects,
 an exhaustive small block-bootstrap reference, malformed exports, pairing errors,
 zero denominators, failure persistence, row-order invariance, and real CLI/plot
-execution. Ruff enforces the existing McCabe limit and analysis branch coverage
-has its own unchanged 90% floor. Synthetic fixtures stay in tests.
+execution. Ruff enforces the existing McCabe limit and analysis statement and branch coverage
+each have a separately enforced 95% floor. Synthetic fixtures stay in tests.
 
 CSV reading uses at most 32 MiB per file and 200,000 request rows per input.
 The published reference uses requests.csv.gz to keep the repository compact.
@@ -174,3 +174,12 @@ O(B R C), with at most 10,000 resamples, 400 run rows, and bounded conditions.
 Clustering fits at most 400 rows and six features; K-means has ten starts and
 100 iterations, and t-SNE has a 1,000-iteration limit. Silhouette uses O(R^2)
 distance work. The fixed bounds are for offline analysis, not real-time operation.
+
+## Separate RPC and loopback reports
+
+The main launcher writes descriptive reports for --topology loopback and
+--rpc-diagnostics through analysis/diagnostic_report.py. Loopback has no queue
+treatment. RPC call durations include retries and local processing, so they
+never enter the foreground RTT estimator or its policy comparisons. Both
+reports keep omitted and failed work visible beside successful-call latency.
+See [the RPC guide](../docs/rpc-diagnostics.md) for files and reproduction.

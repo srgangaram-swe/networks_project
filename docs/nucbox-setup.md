@@ -261,9 +261,12 @@ and new export document the recovery. No command promotes observations to
 primary evidence. Exact workload timing, calibration, and protocol review
 remain necessary before the primary experiment.
 
-## When two Linux endpoint computers become available
+## Physical endpoints and launch location
 
-The intended physical wiring is:
+The current plan uses two MacBooks with dedicated wired adapters. Follow
+[MacBook setup](macos-testbed.md) for addresses, routes and an SSH profile that
+can launch from either the client Mac or the NucBox. The all-Linux option
+remains supported with this wiring:
 
     Linux client -> USB Ethernet adapter -> Cat6 -> NucBox port 1
     NucBox port 2 -> Cat6 -> USB Ethernet adapter -> Linux server
@@ -279,12 +282,11 @@ delivered adapter. Use USB 3.0 or faster for the intended 2.5 Gb/s connection.
 Check negotiated speed, driver, MTU, and effective offloads on each endpoint.
 Each underlying link must exceed the planned 100 Mb/s shaped bottleneck.
 
-The current automatic backend deliberately accepts no host NIC names and does
-not deploy a distributed physical topology. Before adding that backend, record
-approved test interfaces and management interfaces, implement physical-device
-ownership and rollback, and have the team review the mapping. Simply renaming
-the namespace interfaces to physical NIC names is not a supported deployment.
-The Mac can remain the development and management computer throughout.
+The namespace mode accepts no host NIC names. Physical mode uses a reviewed
+private profile and checks dedicated-interface ownership before changing
+anything. Its helpers restore only their own resources. The MacBook mode
+leaves endpoint configuration to the operator and applies queues only on Linux.
+See [the topology guide](topology-pipeline.md) for preflight and cleanup.
 
 ## Acceptance still needed
 

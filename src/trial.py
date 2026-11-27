@@ -36,9 +36,12 @@ class TrialConfig:
     bulk_port: int = 5201
     transport: str = "udp"
     shadow_forecast: bool = False
+    rpc_diagnostics: bool = False
 
     def __post_init__(self) -> None:
         validate_transport(self.transport)
+        if type(self.rpc_diagnostics) is not bool:
+            raise ValueError("rpc_diagnostics must be a boolean")
         if type(self.shadow_forecast) is not bool:
             raise ValueError("shadow_forecast must be a boolean")
         bounded_integer(self.measurement_seconds, "measurement_seconds", 1, 120)
@@ -265,6 +268,10 @@ def run_trial(
         bundle.artifact("queues-before.json", backend.snapshot())
         with observers(bundle, config, backend):
             _collect_workloads(bundle, config, backend, cancel)
+        if config.rpc_diagnostics:
+            from src.rpc_trial import collect_rpc
+
+            collect_rpc(bundle, config, backend, cancel)
         bundle.artifact("queues-after.json", backend.snapshot())
         bundle.transition("validation")
         validate_contents(bundle.directory, bundle.manifest)

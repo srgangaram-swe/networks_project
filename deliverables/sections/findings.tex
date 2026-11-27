@@ -3,7 +3,9 @@
 \simlabel{} The current example has six blocks, 48 trials and 240,000 scheduled
 slots. Its policy factors are assumptions built into the model. Table~\ref{tab:sim}
 shows the 110 Mb/s, one-flow condition. The results demonstrate the reporting
-path; they do not validate Linux queue behavior.
+path; they do not validate Linux queue behavior. We reran the full example on
+November 26 with four worker processes at clean source e0d8dc8. Its counts and
+policy estimates reproduce the retained simulation example.
 
 \begin{table}[htbp]\centering
 \caption{Simulated example. Six paired blocks per policy.}\label{tab:sim}
@@ -55,6 +57,41 @@ lower observed on-time p99. FQ-CoDel meets both point-estimate targets here,
 but the small sample, omitted sends and shared-host environment prevent a
 strong recommendation. We cannot infer that a missing request would have
 experienced the same latency as a request that was sent.
+
+\subsection{Real Mac loopback and RPC measurements}
+On November 26, clean source e0d8dc8 completed four ten-second UDP foreground
+trials on 127.0.0.1: two unloaded and two with a 110 Mb/s requested TCP
+background transfer. Each trial also ran a separate ten-second RPC phase.
+The foreground phases scheduled 20,000 slots and recorded 19,947 on-time
+replies, 53 unsent slots (0.265\%) and no timeout or late outcomes.
+Loaded foreground-phase receiver goodput was about 109.995 Mb/s.
+
+\begin{table}[htbp]\centering
+\caption{Real Mac loopback diagnostics. Each row has 5,000 foreground slots and
+5,000 separate RPC calls. No shaped bottleneck.}\label{tab:loopback}
+\begin{tabular}{lrrrr}\toprule
+Trial & Background target & Foreground p99 & Unsent & RPC p99\\
+ & (Mb/s) & (ms) & slots & (ms)\\\midrule
+1 & 110 & 0.240 & 2 & 0.736\\
+2 & 0 & 0.296 & 6 & 0.916\\
+3 & 110 & 0.306 & 33 & 1.093\\
+4 & 0 & 0.269 & 12 & 0.941\\\bottomrule
+\end{tabular}
+\end{table}
+
+All 20,000 RPC calls completed without recorded retransmissions, capacity
+omissions or I/O failures. Successful-call p99 ranged from 0.736 to 1.093 ms.
+Those durations include local RPC processing and use a different measurement
+boundary from foreground RTT. The maximum RPC start delay ranged from
+9.058 to 12.855 ms across the four trials, so completion alone does not prove
+perfect pacing. The collector retains these delays alongside every call.
+
+The larger lesson is that scheduling omissions can occur even when traffic
+never leaves the computer. We cannot attribute the earlier namespace
+omissions entirely to a network queue. These two loopback blocks verify
+execution and accounting, but they provide no physical NIC comparison or
+queue-policy effect. The reviewed tables and figures are retained under
+\path{data/reference/mac-loopback-2026-11-26}.
 
 \subsection{What the physical run must establish}
 The NucBox/MacBook run must first establish the actual link path, base RTT,

@@ -29,8 +29,8 @@ From the repository root:
     sh scripts/check.sh
 
 The check runs formatting, lint, McCabe complexity, unit tests, real socket and
-subprocess integration tests, and coverage. Combined coverage and branch
-coverage each have a 90% floor. Linux namespace tests are listed as skipped
+subprocess integration tests, and coverage. Statement coverage and branch
+coverage each have a 95% floor, enforced separately. Linux namespace tests are listed as skipped
 unless explicitly enabled on an authorized host. An absent iperf3 causes the
 TCP integration cases to report a skip; install it before treating local
 verification as complete. CI installs iperf3 and runs those cases.
@@ -183,3 +183,13 @@ statistics, K-means assignments, PCA and t-SNE figures, and a hashed report.
 See [the analysis guide](../analysis/README.md) for estimators and limits.
 For the complete initial NucBox path, use
 [the one-command pilot](nucbox-setup.md#run-the-complete-initial-experiment).
+
+## Complete real loopback run with RPC
+
+    sh scripts/run_pipeline.sh --topology loopback --transport udp \
+      --rpc-diagnostics --output runs/loopback-rpc-01
+
+This command retains four real loopback trials, exports foreground requests
+and produces separate foreground and RPC reports. It does not configure a
+queue policy. For MacBooks and a NucBox, follow [the physical setup guide](macos-testbed.md).
+The NucBox can launch that pipeline after the SSH profile is configured.

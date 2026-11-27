@@ -22,6 +22,19 @@ and can run a separate advisory model for future RTT and timeout outcomes.
 The [complete run guide](docs/topology-pipeline.md) covers setup, profiles,
 commands, outputs and recovery.
 
+Use --topology loopback for real traffic on this computer without a router.
+Add --rpc-diagnostics to a measured run to include Chris's RPC workload as a
+separate phase with retained call records, retries and descriptive analysis.
+The [RPC and loopback guide](docs/rpc-diagnostics.md) explains the commands and
+measurement limits. The NucBox can also launch the two-MacBook experiment once
+the dedicated links and SSH aliases in the MacBook guide are configured.
+
+The [November 26 Mac loopback reference](data/reference/mac-loopback-2026-11-26/README.md)
+retains 20,000 foreground slots and 20,000 separate RPC calls. The foreground
+generator omitted 53 slots; every sent request returned on time. All RPC calls
+completed without retries. These local checks do not establish physical
+queue-policy performance.
+
 The [MacBook setup guide](docs/macos-testbed.md) covers wired links, SSH,
 read-only preflight and the exact run command. The
 [course deliverables](deliverables/README.md) contain the preliminary report,
@@ -326,26 +339,31 @@ sequenceDiagram
     participant Trial
     participant Macs as macOS endpoints
     participant Router as Linux router
+    participant RPC as RPC companion
     participant Monitor as TCP observation and shadow model
     participant Analysis as Export and analysis
     participant Files as Artifacts
-    User->>Pipeline: Select topology, UDP or TCP, output and optional forecasts
+    User->>Pipeline: Select topology, UDP or TCP, output, forecasts and optional RPC
     alt Local software check
         Pipeline->>Pipeline: Collect 48 seeded toy trials in bounded worker pool
-    else Namespace, Linux physical or macOS physical testbed
-        Pipeline->>Pipeline: Check source, tools and isolated resource ownership
-        opt macOS endpoints
-            Pipeline->>Macs: Check dedicated Ethernet, peer route and separate management
-            Macs-->>Pipeline: Read-only evidence and native tool versions
+    else Measured traffic
+        alt Real loopback check
+            Pipeline->>Pipeline: Plan four real socket trials without shaping
+        else Namespace, Linux physical or macOS physical testbed
+            Pipeline->>Pipeline: Check source, tools and isolated resource ownership
+            opt macOS endpoints
+                Pipeline->>Macs: Check dedicated Ethernet, peer route and separate management
+                Macs-->>Pipeline: Read-only evidence and native tool versions
+            end
         end
     Pipeline->>Campaign: Save source, configuration, seed and schedule
     loop Each unfinished scheduled cell
-        Campaign->>Trial: Run serially in owned namespaces or dedicated NIC roles
+        Campaign->>Trial: Run serially on loopback, namespaces or dedicated NIC roles
         opt macOS endpoints
             Trial->>Macs: Acquire endpoint leases and start bounded workloads
             Trial->>Router: Apply queue policy and forward-path delay in owned namespace
         end
-        opt TCP telemetry or shadow forecasts
+        opt Supported TCP telemetry or shadow forecasts
             Trial->>Monitor: Start separate observers with bounded nonblocking events
             Monitor->>Monitor: Count ACK candidates and forecast future cohorts
         end
@@ -353,6 +371,10 @@ sequenceDiagram
         Trial->>Files: Observations, counters and manifest
         Trial->>Monitor: Stop and join before topology cleanup
         Monitor->>Files: Capture quality, socket counters and advisory forecasts
+        opt RPC diagnostics
+            Trial->>RPC: Fresh bounded RPC and background phase on retained topology
+            RPC->>Files: Call records, retry counts, responder and bulk evidence
+        end
         Trial->>Trial: Validate and clean up exact owned resources
         Trial-->>Campaign: Validated bundle or failure
         Campaign->>Files: Retain attempt and manifest hash
@@ -362,13 +384,14 @@ sequenceDiagram
     alt Collection completed
         Pipeline->>Analysis: Export observations and full attempt ledger
         Analysis->>Analysis: Check hashes, counts and recorded pairings
-        Analysis->>Analysis: Paired bootstrap, K-means, Ward, DBSCAN, PCA and t-SNE
-        Analysis->>Analysis: Ridge and Lasso with held-out blocks
+        Analysis->>Analysis: Policy schedule: bootstrap, K-means, Ward, DBSCAN, PCA and t-SNE
+        Analysis->>Analysis: Policy schedule: Ridge and Lasso with held-out blocks
+        Analysis->>Analysis: Separate descriptive loopback and RPC reports when selected
         Analysis->>Files: CSV tables, Seaborn plots, insights, timings and LaTeX table
         Pipeline-->>User: Completed diagnostic results
     else Failure or cancellation
         Pipeline->>Files: Keep failed stage and partial evidence
-        Pipeline-->>User: Inspect and resume with an explicit reason
+        Pipeline-->>User: Inspect retained evidence before another attempt
     end
     Note over Pipeline,Files: No overwritten runs or automatic retries. Primary eligibility remains false.
 ~~~
@@ -379,8 +402,9 @@ sequenceDiagram
     sh scripts/check_analysis.sh
 
 Install iperf3 before the TCP integration tests; the NucBox installer does this.
-The core and analysis suites each require at least 90% branch coverage. The
-workflow also checks C++ builds, sanitizers, real sockets, and the Docker rebuild.
+The core and analysis suites each require at least 95% statement coverage and
+95% branch coverage, checked separately. The workflow checks Linux and macOS,
+C++ builds and sanitizers, real sockets, the Docker rebuild and report compilation.
 Privileged Linux checks are a separate explicit workflow input; a skipped
 hardware test is not a passed experiment.
 
@@ -399,8 +423,9 @@ validated milestone candidates progress from dev to prod to main. Follow
 ## Team
 
 Saif Ryan Gangaram, Christopher Ong, Alejandro Magana Guillen, and Jonathan Lloyd.
-Jonathan's policy-comparison workflow and Chris's C++ prototype are retained in
-the combined pipeline. The [C++ guide](experiments/cpp_network_testing/README.md)
+Jonathan's policy-comparison workflow, Chris's RPC workload and Chris's C++
+prototype are retained with their original histories. The
+[C++ guide](experiments/cpp_network_testing/README.md)
 explains its separate loopback TCP measurement.
 
 This is a course project using synthetic traffic on equipment we control.

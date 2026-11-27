@@ -180,10 +180,17 @@ def audit_layout(fig):
     }
 
 
-def save_figure(fig, destination: Path, *, measurement_kind="virtual_testbed", transport="udp"):
+def save_figure(
+    fig,
+    destination: Path,
+    *,
+    measurement_kind="virtual_testbed",
+    transport="udp",
+    transport_label="Foreground transport",
+):
     try:
         fig._suptitle.set_text(
-            fig._suptitle.get_text() + f"\nForeground transport: {transport.upper()}"
+            fig._suptitle.get_text() + f"\n{transport_label}: {transport.upper()}"
         )
         if measurement_kind == "simulation":
             fig.suptitle(

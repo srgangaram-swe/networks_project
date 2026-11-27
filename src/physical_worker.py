@@ -31,10 +31,10 @@ def execute(request: dict, cancel: Event):
         raise ValueError("physical command requires NUL-free arguments")
     args = tuple(args)
     root = Path(request["item"]["repository"])
-    workload = args[0] == "iperf3" or args[:2] == (
-        str(root / ".venv/bin/python"),
-        str(root / "scripts/foreground.py"),
-    )
+    workload = args[0] == "iperf3" or args[:2] in {
+        (str(root / ".venv/bin/python"), str(root / "scripts" / name))
+        for name in ("foreground.py", "rpc.py")
+    }
     observer = args[:2] == (str(root / ".venv/bin/python"), str(root / "scripts/tcp_observer.py"))
     if observer:
         _observer_paths(request, args, root)

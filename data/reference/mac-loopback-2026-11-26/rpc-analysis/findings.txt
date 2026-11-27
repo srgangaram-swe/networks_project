@@ -1,0 +1,3 @@
+We scheduled 20,000 RPC calls across 4 runs. Of these, 20,000 completed, 0 timed out, and 0 were omitted because all workers were busy.
+The clients recorded 0 retransmissions. Successful-call percentiles exclude failed calls; the table keeps those failures visible.
+These runs check the RPC workload and its integration. They do not establish an exactly-once guarantee after a server restart or a benefit from queue classification.

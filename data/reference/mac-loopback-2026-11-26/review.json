@@ -1,0 +1,113 @@
+{
+  "analysis_module_sha256": {
+    "analysis/diagnostic_report.py": "47d18be435db31cdb1c8cb74cb3d4c6d5b66171c4f9b6fbbb7a4a5e172f85272",
+    "analysis/plots/style.py": "58d4c70fa09ef2d90c04754e7838e20a5541c81d1f759c8fa8331bc558f21a52"
+  },
+  "blocks": 2,
+  "collection_date_local": "2026-11-26",
+  "collector_commit": "e0d8dc8a480e18de9539c193a53c69db99a4e641",
+  "collector_dirty": false,
+  "eligible_for_primary": false,
+  "foreground_transport": "udp",
+  "measurement_kind": "loopback_diagnostic",
+  "publication_scope": "Synthetic loopback requests and RPC records only. No private host profile or packet capture.",
+  "raw_bundle_retention": "Original complete bundles retained locally with the collection output.",
+  "runs": [
+    {
+      "artifacts": {
+        "bulk-raw.json": "988e13f45c38f249324b69a05308348bf20307560f8431b23f790586d9069701",
+        "bulk.json": "5eaad4b96ebd4678605c5a5590e090c7eb248b68d757dec8876e387f8028ec83",
+        "configuration.json": "65273c1a96089ac793b50b2bdd56160749662076ef03d9be9b260bb48df07cac",
+        "cpu.json": "e59406da08a13b5094a31af925e2278ecc40f1453dadc6fa7479ffcce6f2656d",
+        "environment.json": "38b63b6e0430c1d3dfb4f273bb35e69dfaf7dad709278d7c158782f7725b4c28",
+        "foreground-transport.json": "22c1b5877660138dd0cf0a980a52313b8743fc19cb1ce75d7cc32dc18c9f0e50",
+        "foreground.json": "defb84d10ddb1ff96dcd805d323480642308a3f8bb23a938dd565fea6d517104",
+        "queues-after.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "queues-before.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "rpc-bulk-raw.json": "3ad421bd4bbc83b82998881f8952d581a32f5a97550e47f3d1ecaf1268280087",
+        "rpc-bulk.json": "4106af80089ddfb607271bc320f0da5bdf69a397070388d71e176981a333f741",
+        "rpc-server.json": "e05804d08481b42252d953a6d69ac4a44099e2b8a4b1c7ea3307a6b2c7433ff5",
+        "rpc.json": "3530b4fe8adb18923a308edf30999cde6554a540aced0f3d22717c41beae6739"
+      },
+      "manifest_sha256": "528286743dc5ecfd8ad81f0df61b170fe6b749726f463b963466693e0471c33f",
+      "source": {
+        "commit": "e0d8dc8a480e18de9539c193a53c69db99a4e641",
+        "dirty": false,
+        "tree_sha256": "6f1384b140bb17a7fdec8b514a4b71fa7f78fe136b6d8d5b4f896db3c71d31c5"
+      },
+      "started_utc": "2026-11-27T05:00:24.128498+00:00",
+      "trial": "trial-001"
+    },
+    {
+      "artifacts": {
+        "bulk.json": "2d8395de2a4f298fb6097376fef10141d04c5bfa01664d64ba0af638b31142c4",
+        "configuration.json": "1e87f55f33f2a8a1544fe372715a8faca0f38202069fe7e873dd33ed9e1a38fe",
+        "cpu.json": "e59406da08a13b5094a31af925e2278ecc40f1453dadc6fa7479ffcce6f2656d",
+        "environment.json": "38b63b6e0430c1d3dfb4f273bb35e69dfaf7dad709278d7c158782f7725b4c28",
+        "foreground-transport.json": "22c1b5877660138dd0cf0a980a52313b8743fc19cb1ce75d7cc32dc18c9f0e50",
+        "foreground.json": "ab8b4144d6708712cdf61d8d22f010b48e83dabcdbd79af5a61b9f6ab3e23aec",
+        "queues-after.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "queues-before.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "rpc-bulk.json": "1dca6638b002cc28a1d5ce68137c28f0e99370ae9cca08f93ca468eab33d6574",
+        "rpc-server.json": "e05804d08481b42252d953a6d69ac4a44099e2b8a4b1c7ea3307a6b2c7433ff5",
+        "rpc.json": "d7931ddc9be3089e7289bed7e1b0a9a11cdc59a728adc9b283075b1d308fb9e7"
+      },
+      "manifest_sha256": "82754a237b27a8c8b9e3acf6192dfb7f2757a07ad44c9181d7f5a096cdb9e0ac",
+      "source": {
+        "commit": "e0d8dc8a480e18de9539c193a53c69db99a4e641",
+        "dirty": false,
+        "tree_sha256": "6f1384b140bb17a7fdec8b514a4b71fa7f78fe136b6d8d5b4f896db3c71d31c5"
+      },
+      "started_utc": "2026-11-27T05:00:48.872492+00:00",
+      "trial": "trial-002"
+    },
+    {
+      "artifacts": {
+        "bulk-raw.json": "77fc974218a8ebf47d74fb4df4a4347bd1e29fbd4f9ea52c80d00f28894fba6e",
+        "bulk.json": "af00980153ce4ef20726dc4f758f293542570e09ea2de92c1431bad4ee3a9c63",
+        "configuration.json": "65273c1a96089ac793b50b2bdd56160749662076ef03d9be9b260bb48df07cac",
+        "cpu.json": "e59406da08a13b5094a31af925e2278ecc40f1453dadc6fa7479ffcce6f2656d",
+        "environment.json": "38b63b6e0430c1d3dfb4f273bb35e69dfaf7dad709278d7c158782f7725b4c28",
+        "foreground-transport.json": "22c1b5877660138dd0cf0a980a52313b8743fc19cb1ce75d7cc32dc18c9f0e50",
+        "foreground.json": "8c93cd1c90742e3cea31df3b5cd23d952bd3dfed195998ffed63b60368e5a318",
+        "queues-after.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "queues-before.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "rpc-bulk-raw.json": "daf38966a294c50f2a30be5a50ea6f66051308ddcdd155f5e92c4eff075baf24",
+        "rpc-bulk.json": "fea11a0837a1cfbc16861daab623f6050085c9bc23728ad72a9faa26d51d407e",
+        "rpc-server.json": "e05804d08481b42252d953a6d69ac4a44099e2b8a4b1c7ea3307a6b2c7433ff5",
+        "rpc.json": "884a96d48decf2941ba0c59907c082498e4dc1a6e44363f4919ca597adde80ea"
+      },
+      "manifest_sha256": "f0435282900c3e925a10901444961f5e58a85f873be4ff77d6906cdd17de4948",
+      "source": {
+        "commit": "e0d8dc8a480e18de9539c193a53c69db99a4e641",
+        "dirty": false,
+        "tree_sha256": "6f1384b140bb17a7fdec8b514a4b71fa7f78fe136b6d8d5b4f896db3c71d31c5"
+      },
+      "started_utc": "2026-11-27T05:01:13.563939+00:00",
+      "trial": "trial-003"
+    },
+    {
+      "artifacts": {
+        "bulk.json": "2d8395de2a4f298fb6097376fef10141d04c5bfa01664d64ba0af638b31142c4",
+        "configuration.json": "1e87f55f33f2a8a1544fe372715a8faca0f38202069fe7e873dd33ed9e1a38fe",
+        "cpu.json": "e59406da08a13b5094a31af925e2278ecc40f1453dadc6fa7479ffcce6f2656d",
+        "environment.json": "38b63b6e0430c1d3dfb4f273bb35e69dfaf7dad709278d7c158782f7725b4c28",
+        "foreground-transport.json": "22c1b5877660138dd0cf0a980a52313b8743fc19cb1ce75d7cc32dc18c9f0e50",
+        "foreground.json": "67350ab50f07106552489ee3bbe5ec7bd2dd735bb5cb89ffb77c669a41ad8ebe",
+        "queues-after.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "queues-before.json": "48d86d596543b47b5cc1a9e0e5c798225d75bd8ecf650e724deb557f7b7a9012",
+        "rpc-bulk.json": "1dca6638b002cc28a1d5ce68137c28f0e99370ae9cca08f93ca468eab33d6574",
+        "rpc-server.json": "e05804d08481b42252d953a6d69ac4a44099e2b8a4b1c7ea3307a6b2c7433ff5",
+        "rpc.json": "379ee12eb8fc0dcbaba2bd3b2cf70917ddd71e05e19d7555a7731291d70b0fa0"
+      },
+      "manifest_sha256": "8401421c3c6aea5ea9db5eb50b5f2f7be3ba6b3f3902424d590b9baa6311df94",
+      "source": {
+        "commit": "e0d8dc8a480e18de9539c193a53c69db99a4e641",
+        "dirty": false,
+        "tree_sha256": "6f1384b140bb17a7fdec8b514a4b71fa7f78fe136b6d8d5b4f896db3c71d31c5"
+      },
+      "started_utc": "2026-11-27T05:01:38.352519+00:00",
+      "trial": "trial-004"
+    }
+  ]
+}

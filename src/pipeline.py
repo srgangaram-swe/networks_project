@@ -23,10 +23,17 @@ def plan(
     *,
     transport="udp",
     shadow_forecast=False,
+    rpc_diagnostics=False,
 ):
+    if topology == "loopback":
+        from src.loopback_campaign import loopback_plan
+
+        if diagnostic_matrix or shadow_forecast:
+            raise ValueError("loopback uses its four-run diagnostic plan without live forecasts")
+        return loopback_plan(transport, rpc_diagnostics, seed)
     if topology == "local":
-        if shadow_forecast:
-            raise ValueError("live shadow forecasts require namespace or physical traffic")
+        if shadow_forecast or rpc_diagnostics:
+            raise ValueError("live diagnostics require a measured topology, not simulation")
         if diagnostic_matrix:
             raise ValueError("local mode uses its explicit simulation multiplier")
         return simulation_plan(multiplier, seed, transport=transport)
@@ -34,7 +41,10 @@ def plan(
         from scripts.nucbox_experiment import plan as namespace_plan
 
         return namespace_plan(
-            diagnostic_matrix, transport=transport, shadow_forecast=shadow_forecast
+            diagnostic_matrix,
+            transport=transport,
+            shadow_forecast=shadow_forecast,
+            rpc_diagnostics=rpc_diagnostics,
         )
     if topology not in {"physical", "macos"} or profile is None:
         raise ValueError("physical mode requires an explicit private --profile")
@@ -47,6 +57,7 @@ def plan(
         source_identity(ROOT),
         transport=transport,
         shadow_forecast=shadow_forecast,
+        rpc_diagnostics=rpc_diagnostics,
         mode=topology,
     )
 
@@ -64,6 +75,7 @@ def run(
     cancel=None,
     transport="udp",
     shadow_forecast=False,
+    rpc_diagnostics=False,
 ):
     bounded_integer(workers, "workers", 1, 8)
     resolved = plan(
@@ -74,8 +86,9 @@ def run(
         diagnostic_matrix,
         transport=transport,
         shadow_forecast=shadow_forecast,
+        rpc_diagnostics=rpc_diagnostics,
     )
-    if topology != "local" and not authorized:
+    if topology not in {"local", "loopback"} and not authorized:
         raise PermissionError("testbed collection requires --authorized-isolated-host")
     cancel = cancel if cancel is not None else Event()
     if cancel.is_set():
@@ -121,6 +134,11 @@ def run(
 
 
 def _execute(output, topology, resolved, profile, workers, authorized, matrix, cancel, trace):
+    if topology == "loopback":
+        from src.loopback_campaign import collect_loopback
+
+        collect_loopback(output, resolved, cancel, trace)
+        return
     if topology == "namespace":
         from scripts.nucbox_experiment import run as namespace_run
 
@@ -132,6 +150,7 @@ def _execute(output, topology, resolved, profile, workers, authorized, matrix, c
             telemetry=trace,
             transport=resolved["transport"],
             shadow_forecast=resolved["shadow_forecast"],
+            rpc_diagnostics=resolved.get("rpc_diagnostics", False),
         )
         return
     if topology in {"physical", "macos"}:
@@ -161,6 +180,13 @@ def _execute(output, topology, resolved, profile, workers, authorized, matrix, c
 
     with trace.stage("analysis"):
         analyze([output / "export"], output / "analysis", allow_simulated=topology == "local")
+    if resolved.get("rpc_diagnostics"):
+        from analysis.diagnostic_report import analyze_rpc
+
+        with trace.stage("rpc_analysis"):
+            analyze_rpc(
+                [output / "collection" / t["directory"] for t in trials], output / "rpc-analysis"
+            )
 
 
 def configure_logging(verbose=False):

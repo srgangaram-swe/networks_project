@@ -62,7 +62,7 @@ class PhysicalBackend:
     def command(self, role: str, args: tuple[str, ...]) -> tuple[str, ...]:
         if role not in self.prepared:
             raise RuntimeError("physical role has not been prepared")
-        if len(args) > 1 and Path(args[1]).name in {"foreground.py", "tcp_observer.py"}:
+        if len(args) > 1 and Path(args[1]).name in {"foreground.py", "tcp_observer.py", "rpc.py"}:
             root = Path(self.profile["roles"][role]["repository"])
             args = (
                 str(root / ".venv/bin/python"),

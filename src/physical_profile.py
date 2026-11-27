@@ -26,6 +26,12 @@ def validate_profile(raw: object) -> dict:
             if identity in used:
                 raise ValueError("an interface cannot belong to two roles")
             used.add(identity)
+    if raw["roles"]["client"]["host"] != "local" and any(
+        item["host"] == "local" for item in raw["roles"].values()
+    ):
+        raise ValueError(
+            "a remote client needs SSH aliases for every role, including the controller"
+        )
     return raw
 
 

@@ -26,6 +26,7 @@ HARDWARE = (
 
 def mac_profile(root):
     value = profile(root)
+    value["roles"]["router"]["host"] = "lab-router"
     for role in ("client", "server"):
         value["roles"][role].update(
             host=f"lab-{role}",

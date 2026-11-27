@@ -17,6 +17,8 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--mode", choices=("loopback", "namespace"), default="loopback")
     parser.add_argument("--policy", default="none")
+    parser.add_argument("--transport", choices=("udp", "tcp"), default="udp")
+    parser.add_argument("--rpc-diagnostics", action="store_true")
     parser.add_argument("--seconds", type=int, default=2)
     parser.add_argument("--warmup-seconds", type=int, default=0)
     parser.add_argument("--flows", type=int, choices=(0, 1, 8), default=1)
@@ -42,6 +44,8 @@ def main() -> int:
             args.aggregate_bps,
             args.foreground_port,
             args.bulk_port,
+            transport=args.transport,
+            rpc_diagnostics=args.rpc_diagnostics,
         )
         result = run_trial(args.output, config, cancel)
         print(

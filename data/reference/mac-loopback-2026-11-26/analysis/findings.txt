@@ -1,0 +1,2 @@
+We collected 20,000 scheduled request slots on this host. 19,947 replies arrived on time, 0 missed the deadline, and 53 slots were not sent.
+Loopback bypasses the NucBox, Ethernet adapters and shaped queue. It verifies that real sockets, retained records and the analysis work together. It cannot answer which queue policy performs best on the physical testbed.
