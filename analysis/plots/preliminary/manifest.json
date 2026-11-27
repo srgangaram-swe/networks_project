@@ -1,0 +1,383 @@
+{
+  "analysis_source": {
+    "commit": "91df580be81e2079c5571217a2b9c9ff610aa185",
+    "dirty": false,
+    "module_sha256": {
+      "analysis/plot_artifacts.py": "390f48eb4b3d68b0811264679c50aa05c44503700e82bde385b090abac040403",
+      "analysis/plots/__init__.py": "4123ea592b2b4346a23f1740ce24baa9d8d82faf184496fd94d9a50995ab391b",
+      "analysis/plots/clusters.py": "d3dac8da80edbd126d94793490e498b4037319b7722302849619fe79477d7ac9",
+      "analysis/plots/comparisons.py": "6a4eac36120432edc751c0bb7cd857d40dc2ccfa05bb41647f059789abe1e690",
+      "analysis/plots/diagnostics.py": "809b12bce11f0dae943172f5bb5a62409e8f7e50f60dac5af1c13b09bddafa06",
+      "analysis/plots/style.py": "4808691c60f14c1a51e0863485db3eed610df1e38763fdf5c8ec41c46ea7dff8",
+      "analysis/policy_comparison.py": "1ba3c92c300f029ad32ecfc08e99c46743b3c155ecad6c92559710909fa8d981",
+      "analysis/run_clustering.py": "cbfda3820748f2e56da41bdb83a72dd11544caa4df34783fb807a299b0646df6",
+      "analysis/utils/compare_policies.py": "f83cc1d085b4c7577b991eaefd434018e94a74f90e154abf644673745067ef8d",
+      "analysis/utils/load_data.py": "ea8f1e2fa5148144189a8ce4d0803ea4d8065ffca2adfab27c83c201a863dead",
+      "analysis/utils/match_baselines.py": "7bc6079b4838e4ab71c006f11d47c3fe4cfb0a51f4a35052fd91d123c0b44034",
+      "analysis/utils/summarize_runs.py": "a2f4381bae61cb9a54812645a7a313503dcdb3f1926ea5a883293a54c243b1b9",
+      "analysis/utils/validate_data.py": "6fcb2e19f6625352a206a6368b3b156ee96a5740ecbdf22ca68f7a61ccf753d2",
+      "analysis/writeup.py": "54cfa936832e81201bbed16839fec5de0c56a95bd4edd8159e951b94c7357b18"
+    },
+    "tree_sha256": "a8e524b04038bb87511ca535afd2352bd2a236f7c2ad0b75eb7ba653c21387d5"
+  },
+  "bootstrap_seed": 562,
+  "collection_source_commit": "e3ddafff30add309df4d75fc5fde8f4e99bbe34a",
+  "collection_workflow": "https://github.com/srgangaram-swe/networks_project/actions/runs/43111991762",
+  "comparisons": [
+    {
+      "added_p99_ms": 0.106128500000001,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 83.70944558957743,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 89.37105051890309,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 18.8710235,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 99.44075644227331,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": false,
+      "policy": "cake_best_effort",
+      "requested_mbps": 110.0
+    },
+    {
+      "added_p99_ms": 0.0935275,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 83.53393664634751,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 89.18367120320646,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 18.8836245,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 99.5071573437363,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": false,
+      "policy": "cake_bounded",
+      "requested_mbps": 110.0
+    },
+    {
+      "added_p99_ms": 18.977152,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 93.6650572009018,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 99.99999999999999,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 0.0,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 0.0,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": false,
+      "policy": "fifo",
+      "requested_mbps": 110.0
+    },
+    {
+      "added_p99_ms": 0.104150499999999,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 93.07313778955938,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 99.36804670916625,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 18.8730015,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 99.45117950259343,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": true,
+      "policy": "fq_codel",
+      "requested_mbps": 110.0
+    }
+  ],
+  "eligible_for_primary": false,
+  "gallery_schema_version": 1,
+  "inputs": [
+    {
+      "attempts_sha256": "8cc512fad72ad01bf42d673850924ab5e3a8e2ec1c39abe2a3861afe24741ad2",
+      "design_bound_to_export": true,
+      "design_sha256": "8cc512fad72ad01bf42d673850924ab5e3a8e2ec1c39abe2a3861afe24741ad2",
+      "eligible_for_primary": false,
+      "export_provenance_sha256": "9700231a1caa09be3188780050c762d9153d65c2f0aa7532618246dda37d6555",
+      "noncompleted_attempts": 0,
+      "planned_cells": 16,
+      "purpose": "development_diagnostics",
+      "request_count": 80000,
+      "requests_sha256": "2db1e83fb8e13e02e80cd6980784b9261ade27b4267fcb77ada090e3e429b7ea",
+      "run_count": 16,
+      "schema_version": 1,
+      "summary_sha256": "9a06e9fead7f75bd66550cf5c926d9f1067cef929cc9d3f5257703f9f6f43475"
+    }
+  ],
+  "layout_checks": {
+    "cluster_profiles": {
+      "data_panels": 2,
+      "height_px": 515,
+      "legend_overlap_count": 0,
+      "legends": 0,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "policy_comparisons": {
+      "data_panels": 3,
+      "height_px": 525,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "request_outcomes": {
+      "data_panels": 2,
+      "height_px": 525,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "run_clusters": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "run_clusters_metrics": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "run_clusters_tsne": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "tail_quantiles": {
+      "data_panels": 2,
+      "height_px": 515,
+      "legend_overlap_count": 0,
+      "legends": 0,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    }
+  },
+  "measurement_kind": "virtual_testbed",
+  "ml": {
+    "automatic_exclusions": false,
+    "clusters": 2,
+    "eligible_for_primary": false,
+    "features": [
+      "p99_ms",
+      "goodput_mbps",
+      "jitter_ms",
+      "send_lag_p99_ms",
+      "timeout_rate",
+      "not_sent_rate"
+    ],
+    "groups": [
+      {
+        "centroids_original_units": [
+          [
+            20.204528,
+            83.62169111796247,
+            0.03469925,
+            1.0059895,
+            0.0,
+            0.032850000000000004
+          ],
+          [
+            29.63815275,
+            93.36909749523059,
+            0.022663875,
+            1.0081025,
+            0.0,
+            0.045399999999999996
+          ]
+        ],
+        "flows": 1,
+        "iterations": 2,
+        "pca_explained_variance_ratio": [
+          0.5823533192735484,
+          0.258649819096481
+        ],
+        "requested_mbps": 110.0,
+        "runs": 8,
+        "silhouette": 0.4658872331957455,
+        "standardization_mean": [
+          24.921340375,
+          88.49539430659652,
+          0.0286815625,
+          1.0070459999999999,
+          0.0,
+          0.039125
+        ],
+        "standardization_scale": [
+          8.170789029940972,
+          4.878672511226629,
+          0.00662943148692584,
+          0.002528675048320764,
+          1.0,
+          0.012305664346145639
+        ],
+        "status": "exploratory_fit",
+        "tsne": {
+          "init": "pca",
+          "learning_rate": "auto",
+          "max_iter": 1000,
+          "perplexity": 2.3333333333333335,
+          "purpose": "visualization_only",
+          "seed": 561
+        }
+      }
+    ],
+    "max_iter": 100,
+    "method": "standardized_kmeans",
+    "n_init": 10,
+    "predictive_validation": "not_performed",
+    "purpose": "exploratory_description_only",
+    "seed": 561
+  },
+  "png_dimensions": {
+    "cluster_profiles.png": [
+      2400,
+      1030
+    ],
+    "policy_comparisons.png": [
+      2400,
+      1050
+    ],
+    "request_outcomes.png": [
+      2400,
+      1050
+    ],
+    "run_clusters.png": [
+      1800,
+      1130
+    ],
+    "run_clusters_metrics.png": [
+      1800,
+      1130
+    ],
+    "run_clusters_tsne.png": [
+      1800,
+      1130
+    ],
+    "tail_quantiles.png": [
+      2400,
+      1030
+    ]
+  },
+  "reference_directory": "data/reference/namespace-pilot-2026-11-11",
+  "reference_manifest_sha256": "9286014578b89b342d80042d645cc2800e0bb138ca74ab470ec497dd171980d7",
+  "rendered_files_sha256": {
+    "cluster_profiles.png": "835d14955effdf2c37d8b76c0971a5aefa22976a54a1b62d5f14c74d21744019",
+    "cluster_profiles.svg": "256acd9c67ca4df6c6affe46fbbca3e12490381813e2deb46d6ea40c14d4e3c2",
+    "policy_comparisons.png": "bbffc27b6b23c7309b439b75dd862352c30e7433b5c7c1dd2ebeb21f6e21be84",
+    "policy_comparisons.svg": "2f3f24a9e4d04f3e9f6f55799ddc80557f48e572561a67415b29c2a7d40f7c19",
+    "request_outcomes.png": "ea70ff32b1767bbd90fbc88646aec09e386373a95ece8d091167fb30e29d83d5",
+    "request_outcomes.svg": "7aa3403e9d276c1c862347edcd438b797db0a2acb70779c1aa7821b1d2b2fd89",
+    "run_clusters.csv": "096d0656d4af364a0d568e878eeba4448a5ce8e68ebca9256b52f821a3ad7bbb",
+    "run_clusters.png": "17e93887cb82ab7fb885ba04d1b751343112d344372d6bc85dc50a2dabc270a3",
+    "run_clusters.svg": "0c162917e694a59348d504cd77832ee86ff2c9bd66d9f26eb257f3c934bfbf5c",
+    "run_clusters_metrics.png": "9869369524fa510185ada4a0a15377eb17cbe304474b442faad304bf43dceaeb",
+    "run_clusters_metrics.svg": "3714dc20ba0e9160feaa87840fd02bdb921f9d56f133d1ceec888a875f5bd276",
+    "run_clusters_tsne.png": "0b5864cbef820bca62693c2ea9847a3e5bd0b78c60c70d091926dceb358de22c",
+    "run_clusters_tsne.svg": "a62a08f320967ee32cb6234e0270fbe38984acad5bfb9a697bfbe72c3025ece0",
+    "tail_quantiles.png": "51e0f0a5fe934ce864700c1a83dd0e5bc1274d6f9fa4f0cf976ec3411f5ee9ad",
+    "tail_quantiles.svg": "5b5e67b3ff215b194685b502b89c1375169c1ad7d0612cf6e5d5a9becb5ad76c"
+  },
+  "resamples": 10000,
+  "runtime": {
+    "machine": "arm64",
+    "python": "3.14.3",
+    "system": "Darwin"
+  },
+  "versions": {
+    "matplotlib": "3.11.2",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "seaborn": "0.13.2"
+  },
+  "visual_review": {
+    "checks": [
+      "Keys outside data panels",
+      "Readable units and policy labels",
+      "No clipped titles or captions",
+      "Heatmap annotations and color scales readable",
+      "Consistent policy shapes and cluster colors"
+    ],
+    "date": "2026-11-11",
+    "figures_reviewed": [
+      "cluster_profiles.png",
+      "policy_comparisons.png",
+      "request_outcomes.png",
+      "run_clusters.png",
+      "run_clusters_metrics.png",
+      "run_clusters_tsne.png",
+      "tail_quantiles.png"
+    ],
+    "method": "Rendered PNG visual inspection",
+    "notes": "Nearby run markers overlap in physical units; coordinates are not jittered. The membership heatmap and assignment CSV retain all eight loaded runs. Seeded t-SNE coordinates can differ across numerical environments; these figures use the recorded runtime and assignments.",
+    "png_hashes_match_reviewed_render": true,
+    "result": "passed"
+  }
+}

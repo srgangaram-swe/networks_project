@@ -1,0 +1,99 @@
+\section{Technical implementation}
+\subsection{Topology and treatments}
+The intended physical path is client MacBook, Linux NucBox router, then server
+MacBook, with dedicated wired links and separate Wi-Fi management. The client
+uses 10.203.0.2/30 and the server uses 10.203.0.6/30. Each has an explicit host
+route to its peer through the router. Our preflight refuses a selected Mac
+default-route interface, incorrect address or mask, or mismatched source revision.
+Each workload also requires an active Ethernet link after router setup.
+The Mac helpers inspect existing network settings
+without changing them. The Linux helper owns a private router namespace and
+temporarily attaches only the two explicitly selected, unused Ethernet ports.
+
+The shaped return path is 100 Mb/s. FIFO uses a 250,000-byte queue below HTB;
+FQ-CoDel uses the same shaper with its own queue. The CAKE treatments shape
+directly at 100 Mb/s. The bounded variant classifies only the designated
+foreground reply flow and applies a 5 Mb/s policing budget. Incoming DS fields
+are cleared before our own classification. These are documented candidate
+settings that still need team acceptance on the final hardware.
+
+In the mixed topology, NetEm adds 20 ms on router egress toward the server.
+The Linux-only topology instead adds 10 ms on each endpoint's ingress.
+Both target about 20 ms of added base RTT, but the queue placement differs.
+We record the mixed topology separately and do not pool its results with the
+namespace or all-Linux physical runs. The Mac endpoints retain native TCP
+behavior. Linux TCP\_INFO and AF\_PACKET measurements are unavailable there.
+
+\subsection{Workloads and lifecycle}
+The candidate foreground workload sends 512-byte messages at 500 requests per
+second using the client's monotonic clock. UDP is the main planned transport;
+TCP is a separately labeled sensitivity experiment with fixed framing and
+TCP\_NODELAY. Reverse TCP iperf3 traffic supplies background demand at 50\%,
+90\% or 110\% of the shaped rate, split across one or eight flows. Offered
+demand above capacity does not imply delivered throughput above capacity.
+
+The pilot has two blocks, four policies, unloaded baselines and a 110 Mb/s
+single-flow condition: 16 trials. The larger plan has ten 60-second trials
+for each loaded condition and ten unloaded trials per policy: 280 trials.
+Policy order is randomized within recorded blocks. Physical collection is
+serial because simultaneous trials would share the bottleneck and invalidate
+the comparison. Local simulation uses up to eight worker processes; its
+default six blocks produce 48 trials and 240,000 scheduled slots, three times
+the pilot volume.
+
+Each trial records its source, configuration, lifecycle, observations and
+artifact hashes in a fresh directory. Failed attempts remain available.
+Commands have deadlines and bounded output. Cancellation stops owned child
+processes and preserves cleanup errors. Endpoint leases prevent overlapping
+trials. Linux cleanup verifies resource identity before returning interfaces.
+The pipeline proceeds automatically from successful collection to checked
+export, analysis, plots and a text interpretation.
+
+Chris's RPC workload runs as an optional companion after the foreground phase.
+It uses UDP CALL, RESULT and ACK messages, bounded retries and an in-memory
+reply cache. The runner schedules 500 calls per second with 32 workers and
+records each call's duration, outcome, retry count and start delay. A separate
+background transfer uses the same offered-load condition. RPC traffic remains
+best effort outside the foreground classifier. Its application-call durations
+therefore remain separate from foreground RTT and policy-effect estimates.
+The server finishes before the SSH connection closes so its final counters
+reach the retained bundle. The cache does not provide exactly-once execution
+after a restart.
+
+The pipeline can start on the NucBox or either configured controller. When
+the client is remote, every role uses an explicit SSH alias that also resolves
+from the client Mac. The client still coordinates each trial on its own
+monotonic clock. A separate loopback mode collects four real socket trials
+without changing interfaces, routes or queue policies.
+
+\subsection{Analysis and verification}
+We calculate per-run latency percentiles and match loaded runs to their
+unloaded baseline in the same block. Added p99 is loaded p99 minus unloaded
+p99. Policy comparisons use paired block resampling for 95\% bootstrap
+intervals; individual requests are not independent replications. The pipeline
+retains generator omissions, timeouts and late replies. A low on-time p99
+without those outcomes can be misleading.
+
+Our exploratory analysis standardizes six run metrics and fits K-means, Ward
+agglomerative clustering and DBSCAN. PCA and t-SNE display those metrics;
+t-SNE itself is not a clustering algorithm. Noise points remain in all
+comparisons. Ridge and Lasso use design features with entire blocks held out;
+scaling and penalty selection use only training folds. At least six blocks
+are required. These models describe observed designs and do not establish
+causality or transfer to new hardware.
+
+Jonathan's original comparison workflow, Chris's RPC implementation and his
+C++ networking prototype remain in the repository with their authorship intact. The C++ probe is a
+separate workload check, not the source of the main foreground metric. Our
+unit and integration checks cover data validation, real sockets, subprocess
+failures and cleanup. CI enforces 95\% statement and branch coverage separately
+for core and analysis, with a separate Linux job for privileged testbed checks.
+Hardware acceptance remains a separate activity.
+
+For $N$ requests, per-run sorting costs $O(N\log N)$ time and $O(N)$ auxiliary
+memory. Analysis bounds each export batch at 200,000 request rows and keeps
+at most 400 run summaries for the offline models. Ward and DBSCAN can require
+$O(R^2)$ work or storage for $R$ runs; the fixed run cap bounds that cost.
+Foreground accounting bounds active requests at 1,024. Ruff enforces McCabe
+complexity at most 10 per function. These limits support review and predictable
+failure behavior; coverage and complexity scores do not certify correctness.

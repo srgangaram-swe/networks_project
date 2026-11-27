@@ -1,0 +1,28 @@
+{
+  "attempts": [
+    {
+      "block": 1,
+      "directory": "trial-001",
+      "manifest_sha256": "528286743dc5ecfd8ad81f0df61b170fe6b749726f463b963466693e0471c33f",
+      "state": "completed"
+    },
+    {
+      "block": 1,
+      "directory": "trial-002",
+      "manifest_sha256": "82754a237b27a8c8b9e3acf6192dfb7f2757a07ad44c9181d7f5a096cdb9e0ac",
+      "state": "completed"
+    },
+    {
+      "block": 2,
+      "directory": "trial-003",
+      "manifest_sha256": "f0435282900c3e925a10901444961f5e58a85f873be4ff77d6906cdd17de4948",
+      "state": "completed"
+    },
+    {
+      "block": 2,
+      "directory": "trial-004",
+      "manifest_sha256": "8401421c3c6aea5ea9db5eb50b5f2f7be3ba6b3f3902424d590b9baa6311df94",
+      "state": "completed"
+    }
+  ]
+}

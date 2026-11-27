@@ -1,11 +1,12 @@
 # Semester roadmap
 
-Dates below are planning targets based on the proposal's semester sequence, not
-confirmed course deadlines. Issue #4 records the rubric and official dates.
+Milestone dates below are internal planning targets from the proposal. The
+presentation is due December 1 at 10:59am and the report December 8 at 11:59pm.
+Issue #4 records the supplied rubric and its remaining team review.
 Do not compress verification to meet a target; revise the plan with the team.
 
-The [requirements checklist](docs/course-requirements.md) holds placeholders
-until the instructor provides the final rubric and deadlines. The
+The [requirements checklist](docs/course-requirements.md) records the supplied
+final rubric and deadlines. The
 [related-work comparison](docs/related-work.md) supports the report's rationale.
 
 | Milestone | Planning target | Completion outcome |
@@ -71,7 +72,8 @@ the issues.
 
 ## Release rule
 
-One work item becomes one MR into dev. Only a completed milestone advances from
-dev to prod, then from prod to main after release-candidate validation. Every
+One work item becomes one MR into dev. A completed milestone advances from dev to prod, then from prod to main after
+release-candidate validation. An owner-authorized software release may follow
+the same checked promotion path while scientific acceptance issues stay open. Every
 milestone ends with a completion summary and reviewable evidence. A failed
 feasibility target is a reportable result, not a failed course project by itself.

@@ -6,9 +6,9 @@ primary evidence. Changing the frozen protocol requires a decision record.
 
 The [candidate v1 contract](decisions/0001-measurement-contract.md) supplies
 concrete workload, metric, queue, and scheduling choices for team review.
-It is not yet accepted. Equipment and access remain unconfirmed in the
-[inventory](equipment-inventory.md); do not start collection from the planning
-configuration alone.
+It is not yet accepted. Received equipment and outstanding Linux and access
+checks are recorded in the [inventory](equipment-inventory.md); do not start
+collection from the planning configuration alone.
 
 ## Research question and treatments
 
@@ -71,7 +71,7 @@ to the main p99 comparison. Report their uncertainty and all validity exclusions
 - Definition of jitter, loss, achieved-load tolerances, and a valid versus invalid run.
 - Randomized block design, baseline matching, confidence-interval estimator, and bootstrap seed.
 - One-factor sensitivity values for link rate, base delay, and foreground message size.
-- The grading rubric and official final deadlines, which are not supplied in the proposal.
+- Team review of the supplied grading rubric and final deadlines in course-requirements.md.
 
 Do not start the full matrix until the pilot acceptance criteria pass.
 Invalid runs remain in the manifest with reasons. Targeted reruns are additional
@@ -86,3 +86,13 @@ purchase is authorized by this plan.
 
 Existing 1-GbE hardware can support the proposed 100 Mb/s bottleneck. A namespace
 fallback can test queue behavior but cannot establish physical NIC performance.
+
+## Additional diagnostic paths
+
+The core policy comparison still uses the workload above. The MacBook topology
+records its different delay placement and native endpoint TCP in a separate
+measurement kind. Real loopback collection checks local sockets without shaping.
+The optional RPC companion measures application calls in a separate phase,
+with best-effort classification and its own background transfer. See
+[RPC diagnostics](rpc-diagnostics.md) and [MacBook setup](macos-testbed.md).
+These paths do not silently change the primary research question.

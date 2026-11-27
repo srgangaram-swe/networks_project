@@ -1,0 +1,26 @@
+\section{Conclusion and next steps}
+We have a repeatable software path for collecting, checking and analyzing the
+queue-policy experiment, with a separate macOS endpoint configuration for the
+equipment now available. The simulated example exercises that path. The
+namespace pilot suggests a substantial latency difference under contention,
+but it also shows why our conclusion needs both latency and goodput: both
+CAKE variants missed the proposed throughput-retention target.
+
+The new Mac loopback run completed collection and analysis with real sockets.
+It also exercised Chris's RPC workload, which completed 20,000 calls without
+retries. The foreground path still omitted 53 scheduled slots. We therefore
+need to check generator behavior on the physical setup even if every sent
+request returns successfully.
+
+Our strongest current lesson concerns measurement. A low on-time percentile
+can coexist with unsent requests, and a favorable latency result can coexist
+with an unfavorable goodput result. We need those quantities together before
+deciding whether a policy helped.
+
+Next we will verify the Ethernet setup, run the physical pilot, inspect its
+quality checks and agree on the remaining protocol choices. We will then
+collect the larger design if the pilot supports it, update the figures and
+conclusions, and rehearse the four-person presentation. The open question for
+the class is how much throughput loss is acceptable for interactive traffic
+and what workload would make that tradeoff meaningful. The final report is
+due December 8; no physical result is claimed in this working draft.

@@ -1,0 +1,36 @@
+services:
+  analysis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: networks-analysis:local
+    user: "${LOCAL_UID:?Set LOCAL_UID to your user ID}:${LOCAL_GID:?Set LOCAL_GID to your group ID}"
+    working_dir: /workspace
+    read_only: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 2g
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    volumes:
+      - type: bind
+        source: .
+        target: /workspace
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: "${INPUT_DIR:?Set INPUT_DIR to the existing export directory}"
+        target: /inputs/export
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: "${OUTPUT_DIR:?Set OUTPUT_DIR to an existing output parent}"
+        target: /outputs
+        bind:
+          create_host_path: false
+    command: [/inputs/export, --output, /outputs/analysis]

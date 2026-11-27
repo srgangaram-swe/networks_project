@@ -16,8 +16,18 @@ atomically; a second attempt cannot reuse the directory.
 | bulk.json | iperf3 version, requested aggregate and per-stream rates, actual receiver flow set, bytes, receiver duration, intervals, and goodput |
 | cpu.json | Linux shared-host busy and I/O-wait percentages, or explicit unavailable values on unsupported systems |
 | queues-before.json and queues-after.json | Namespace inspection and qdisc snapshots, or an explicit unchanged-loopback record |
+| foreground-transport.json | Foreground transport, event-stream quality and available Linux TCP_INFO counters |
+| tcp-observer.json | Linux TCP trials: passive header/ACK candidates, timing windows and capture quality |
+| shadow-forecast.json | Optional future-window advisory predictions and delayed outcomes |
+| bulk-raw.json | Loaded trials: retained iperf3 receiver evidence used to reconstruct bulk.json |
+| rpc.json and rpc-server.json | Optional separate RPC phase: call records, admission counts, retry counters and responder status |
+| rpc-bulk.json and rpc-bulk-raw.json | Background receiver summary and loaded-phase raw evidence for RPC only |
 
-The manifest hashes exactly these seven artifacts. Hashes detect changes; they
+The original seven artifacts remain required. New configuration records also
+require foreground transport evidence, Linux TCP observation where applicable,
+and shadow output when requested. Only those documented optional artifact names
+are permitted. Legacy UDP bundles without the new fields remain readable.
+Hashes detect changes; they
 do not authenticate who collected the observations. The independent validator
 also checks exact schemas, units, source identifiers, timestamp ordering, phase
 arithmetic, request identifiers, event totals, flow allocation, receiver byte
@@ -53,6 +63,13 @@ remain prerequisites for primary collection.
 Use the [operating guide](running-experiments.md) to collect, validate, export,
 and plot a run. The invented captures in tests/fixtures are validator examples,
 not network measurements.
+
+The RPC option is explicit in current trial configurations and schema-v3
+campaign plans. Readers still accept the earlier configurations and campaign
+versions. Source content hashes include nested Python modules, including the
+RPC package. The [RPC guide](rpc-diagnostics.md) defines its separate call metric,
+best-effort classification and additional runtime. RPC records never replace
+foreground request rows or imply aligned measurement windows.
 
 The fixture instructions also generate complete valid and invalid bundle
 examples. Their environment record uses synthetic_fixture, which prevents

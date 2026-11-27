@@ -6,12 +6,13 @@ from pathlib import Path
 from src.artifacts import parse_json
 from src.processes import run_command
 from src.queue_policy import check_queue_kinds, policy_commands
+from src.testbed_contract import verify_contract
 from src.topology import CLIENT_ADDRESS, SERVER_ADDRESS, Topology, inspection_commands
 from src.topology_runtime import OwnedTopology, require_linux
 
 
 class Backend:
-    def __init__(self, mode: str, policy: str, directory: Path):
+    def __init__(self, mode: str, policy: str, directory: Path, *, transport="udp"):
         if mode not in {"loopback", "namespace"}:
             raise ValueError("unsupported backend")
         if mode == "loopback" and policy != "none":
@@ -19,6 +20,7 @@ class Backend:
         self.mode = mode
         self.policy = policy
         self.directory = directory
+        self.transport = transport
         self.lease: OwnedTopology | None = None
         self.topology = Topology(uuid.uuid4().hex[:12])
         self.client_address = "127.0.0.1" if mode == "loopback" else CLIENT_ADDRESS
@@ -28,8 +30,9 @@ class Backend:
         if self.mode == "loopback":
             return
         require_linux()
+        verify_contract()
         # Check the policy before creating any resources.
-        commands = policy_commands(self.topology, self.policy)
+        commands = policy_commands(self.topology, self.policy, transport=self.transport)
         self.lease = OwnedTopology.create(self.directory / "topology", self.topology)
         self.lease.setup()
         for command in commands:

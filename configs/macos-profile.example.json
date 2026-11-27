@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "roles": {
+    "client": {
+      "host": "local",
+      "platform": "macos",
+      "repository": "/Users/REPLACE_ME/networks_project",
+      "iperf3": "/opt/homebrew/bin/iperf3",
+      "interfaces": {"eth0": "en7"}
+    },
+    "router": {
+      "host": "experiment-router",
+      "repository": "/home/REPLACE_ME/networks_project",
+      "interfaces": {"to-client": "enp1s0", "to-server": "enp2s0"}
+    },
+    "server": {
+      "host": "experiment-server",
+      "platform": "macos",
+      "repository": "/Users/REPLACE_ME/networks_project",
+      "iperf3": "/opt/homebrew/bin/iperf3",
+      "interfaces": {"eth0": "en7"}
+    }
+  }
+}

@@ -42,19 +42,31 @@ class PlanningCliTests(unittest.TestCase):
     def test_branch_floor_cannot_be_hidden_by_high_line_coverage(self):
         with tempfile.TemporaryDirectory() as temporary:
             report = Path(temporary) / "coverage.json"
-            for covered, expected in ((89, 1), (90, 0)):
+            for covered, lines, expected in ((94, 99, 1), (95, 95, 0), (99, 94, 1)):
                 report.write_text(
                     json.dumps(
                         {
                             "totals": {
                                 "covered_branches": covered,
                                 "num_branches": 100,
+                                "covered_lines": lines,
+                                "num_statements": 100,
                                 "percent_covered": 99,
                             }
                         }
                     )
                 )
                 self.assertEqual(self.call("check_branch_coverage.py", report).returncode, expected)
+
+    def test_full_matrix_plan_is_portable_and_does_not_authorize_primary_collection(self):
+        result = self.call("nucbox_experiment.py", "plan", "--diagnostic-matrix")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        plan = json.loads(result.stdout)
+        self.assertEqual(plan["trials"], 280)
+        self.assertTrue(plan["diagnostic_matrix"])
+        self.assertFalse(plan["eligible_for_primary"])
+        self.assertFalse(plan["physical_interfaces_modified"])
+        self.assertEqual(plan["configuration"]["measurement_seconds"], 60)
 
 
 if __name__ == "__main__":

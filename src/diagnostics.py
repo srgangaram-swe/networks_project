@@ -5,6 +5,7 @@ from pathlib import Path
 
 from src.artifacts import atomic_json, digest, read_json
 from src.bundle_validation import validate_bundle, validate_capture
+from src.transport_summary import summarize_transport
 
 QUANTILES = {"p50_ms": 500, "p95_ms": 950, "p99_ms": 990, "p999_ms": 999}
 
@@ -25,6 +26,8 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
     capture = read_json(directory / "foreground.json")
     bulk = read_json(directory / "bulk.json")
     environment = read_json(directory / "environment.json")
+    cpu = read_json(directory / "cpu.json")
+    configuration = read_json(directory / "configuration.json")
     if environment["measurement_kind"] == "synthetic_fixture":
         raise ValueError("synthetic fixtures cannot be exported as observed diagnostics")
     warmup_count = capture["config"]["warmup_ms"] * capture["config"]["requests_per_second"] // 1000
@@ -44,6 +47,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
     summary = {
         "run_id": manifest["run_id"],
         "measurement_kind": environment["measurement_kind"],
+        "transport": configuration.get("transport", "udp"),
         "platform": environment["system"],
         "policy": manifest["policy"],
         "flows": bulk["actual_flows"],
@@ -60,6 +64,9 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
         "send_lag_p99_ms": nearest_rank(lags, 990),
         "requested_mbps": bulk["requested"]["aggregate_bps"] / 1_000_000,
         "goodput_mbps": bulk["goodput_mbps"],
+        "cpu_scope": cpu["scope"],
+        "cpu_busy_percent": cpu["busy_percent"],
+        "cpu_iowait_percent": cpu["iowait_percent"],
         "p99_censored": timeouts / sent > 0.01 if sent else True,
         "source_commit": manifest["source"]["commit"],
         "source_tree_sha256": manifest["source"]["tree_sha256"],
@@ -68,6 +75,7 @@ def summarize(directory: Path) -> tuple[dict, list[dict]]:
         "eligible_for_primary": False,
     }
     summary.update({name: nearest_rank(good, rank) for name, rank in QUANTILES.items()})
+    summary.update(summarize_transport(directory, manifest))
     rows = [
         {
             "run_id": manifest["run_id"],

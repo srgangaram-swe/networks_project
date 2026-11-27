@@ -1,0 +1,469 @@
+{
+  "analysis_source": {
+    "commit": "7bf62aacf1c592ece3b9f9610ff57b9ce41d142e",
+    "dirty": false,
+    "module_sha256": {
+      "analysis/cluster_diagnostics.py": "f4ae030c543186eaedea4ea6087e052c144a632bdf881b50f7bc8ddb37fed762",
+      "analysis/findings.py": "1b8f481b95f213dd8c0d65e84a7c277e8d3205b7ec1b71e4072ca9c80370edbb",
+      "analysis/plot_artifacts.py": "41553fd04c8e832727f44810e0e9f1a108bce769e4cb1995c928608377df75f3",
+      "analysis/plots/__init__.py": "c05aed4ac17d2e23a8e1e8426b07499942197066a22d47bd5d2b8243046c0594",
+      "analysis/plots/clusters.py": "507d78f301897da5d96dae59c62fe06dbd2e41086a973c65c8807975dba6befe",
+      "analysis/plots/comparisons.py": "2fe8ecaa49491db39be80e17951c4a5a0ddb46cbd53fa6238f6551845bf225ba",
+      "analysis/plots/diagnostics.py": "7e6986b6ad64f1a48df0c2c3e1d069408f45133390c407571fd8f78918da39d3",
+      "analysis/plots/models.py": "2ec45ee2aa3fdd2486ccabdc6799b884a53e0bb15fed226b0a29578c080ece5c",
+      "analysis/plots/style.py": "eee59da8696e0f8760a97d655e5dcd3e1c0f1678443fa432a682863b5c480f6b",
+      "analysis/policy_comparison.py": "852efedf9be1f1d08458044f32e81c23437ef457262b260ff267badc6574471f",
+      "analysis/regression.py": "be8e2574e568a14d7010f7a09dd274a2bbfe891df1b2779473ec4bbaf827b2f6",
+      "analysis/run_clustering.py": "817c75b27235e03aedc7001daac7417475969caba27182f70d0f09f490764a0f",
+      "analysis/utils/compare_policies.py": "f83cc1d085b4c7577b991eaefd434018e94a74f90e154abf644673745067ef8d",
+      "analysis/utils/load_data.py": "2352312007e6ec0a5065b8cfa3466573c40217fbb8b3d848e2719b5d65c7265b",
+      "analysis/utils/match_baselines.py": "7bc6079b4838e4ab71c006f11d47c3fe4cfb0a51f4a35052fd91d123c0b44034",
+      "analysis/utils/summarize_runs.py": "a2f4381bae61cb9a54812645a7a313503dcdb3f1926ea5a883293a54c243b1b9",
+      "analysis/utils/validate_data.py": "396a332d82025d698f2a002a2ac8e9a029062952a76ee2c3a5428714b114d0c5",
+      "analysis/writeup.py": "d227daeafe6b9aa6824c9023f06145f6d947bb407c0f4ec9617085edfe453cf8"
+    },
+    "tree_sha256": "ab0926509739e653eb780930256e397a0cafaf91715f7b740a5a9a4361beddcd"
+  },
+  "artifacts": {
+    "analysis_runtime.png": "403c2b4fd7475c7f89cfb9a4865b6add3082ea8fea9dfe6c9cff214b9bb2f15c",
+    "analysis_runtime.svg": "1a015185f0ca579fe92d90a6e6b59ab6ff5ab12d6ceafa854e1e533ed021a98c",
+    "cluster_diagnostics.csv": "e28f82beca59fddcfa84afd02c618c034f2cea3274247ef84c96ac2d349467d5",
+    "cluster_profiles.png": "be15dc939c82047e35d85d0f61028b2767dfb9a7dfc488f7d3308d9ca0b186b1",
+    "cluster_profiles.svg": "aac775a12401706f99cc5ff42552955480c1129b714eebaff0dc9a4b3c12d7bc",
+    "diagnostic_summary.txt": "d7323380e90648f9a41efe75c07f01b2d8ac6478a33b091e1913c304f02a8879",
+    "insights.txt": "c1ba4f7b74141a911744e2de8f1037392897704bd2449000e9e749836c51d300",
+    "matched_baselines.csv": "39a07d41e5383bc7c9b1280990d76bde1ac4b4c9d61c20a54f273b40e047c0e1",
+    "policy_comparisons.csv": "8310a9ff16ff7b091be683d37e038cb94ef32b93ebe76157839d6cd25140b298",
+    "policy_comparisons.png": "8517356fdf6b6b8d10b81f0417e77db144c6d2a3dfd6bb6f5ba973095eebfe0b",
+    "policy_comparisons.svg": "05ad676d3bf161e9149b133a30af9780338e65dcdba44674f60ede2b48420744",
+    "regression_predictions.csv": "c84e47127845121d68f61fed261e42bc8fd14280e0c015d1e43da4f782ba66d4",
+    "request_outcomes.png": "a6ec6a22bbe9e39597b461e35b4408b96d77ad3edf73e475b9234554762ac8a0",
+    "request_outcomes.svg": "5ab69868c4f3e6f6b444ad9d912709715d631394ea84d41486509afbe3dcdb2b",
+    "ridge_lasso_coefficients.png": "723e92b751c9e3b2ed01cf65930e4db0f4d4be513a1eb15141f53bc50a7baf8f",
+    "ridge_lasso_coefficients.svg": "4f9de2fee59d687e082dbc9e1741bc2e28aa6d1655bdb4f6758ea43500ec5e14",
+    "ridge_lasso_predictions.png": "cbaab37953f5821537d4fa221f37f174b33b13183b8dc1365c175f55bd17e3f9",
+    "ridge_lasso_predictions.svg": "596e0d8212c69b2a19e0cbc48a1cc817de647d2557c319dcc93f3fc137d49b6f",
+    "run_clusters.csv": "542931be6472af66a9aa7d8484cec7bc04cd17053be8d971b1c49ffc8745acf6",
+    "run_clusters.png": "94c7f80f5acd84a30bbbb5687186071d745d7f97901c166d3aaf87abdb9f5fce",
+    "run_clusters.svg": "9945c0ffd63fb00c1e0d7315323f63a96a7f07730674f0843f1b6929c5054006",
+    "run_clusters_agglomerative.png": "cf54209484366116462db877857aafcd4d94203679b81364f9b8c374e12e0a80",
+    "run_clusters_agglomerative.svg": "ce4287ab457d3301eb7f262f82193e68106425fda3639ef46dcbc61d1c81bd0c",
+    "run_clusters_dbscan.png": "2f1bf622452de108b352aa33791a2b9570f870e5c4a8a5f52f371c9edfcf02ec",
+    "run_clusters_dbscan.svg": "8e8459d78fe47a8ab0c93774962441eff8bede5dda8e0f3b3f612845c0ba6a30",
+    "run_clusters_metrics.png": "2c0cff3a0684aaff0be68b0ec5868333ddc3cd69d924658d6bf5a5cf9ec59c15",
+    "run_clusters_metrics.svg": "074ed40e808fe0793818f0c184fd65aebdf868f913ab31dfbca033e12b66e961",
+    "run_clusters_tsne.png": "fcaac169bd69c0e2b0fd61ebadc858f6bb227a32d2f9f576067c45ead15dd3e8",
+    "run_clusters_tsne.svg": "41ba6112f86aef1627ec55bf06a1360eb3137c50f685853ec8f6690dfa3ab723",
+    "run_statistics.csv": "282ea4b0eb912d7564f516ccdea028bf813a256f7aeab82246d75602e73d9cbe",
+    "runs.csv": "0940a420100cd992cfb8625c12dd3aac53b0545c513cf305aa924c898cf377a9",
+    "tail_quantiles.png": "d0e3a1cca75d4301ea3715552ce1b483147d1d9de8cfdaff0af2af6639602906",
+    "tail_quantiles.svg": "eea1d92892301de51baecb4136287c77ae975b778b935749b0b209f944d9964d",
+    "writeup_table.tex": "5fb368cc86a6b62bddedba59b44355fc8d3a97d3c2da9ae28144951ee522c0ed"
+  },
+  "comparisons": [
+    {
+      "added_p99_ms": 0.106128500000001,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 83.70944558957743,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 89.37105051890309,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 18.8710235,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 99.44075644227331,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": false,
+      "policy": "cake_best_effort",
+      "requested_mbps": 110.0
+    },
+    {
+      "added_p99_ms": 0.0935275,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 83.53393664634751,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 89.18367120320646,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 18.8836245,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 99.5071573437363,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": false,
+      "policy": "cake_bounded",
+      "requested_mbps": 110.0
+    },
+    {
+      "added_p99_ms": 18.977152,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 93.6650572009018,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 99.99999999999999,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 0.0,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 0.0,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": false,
+      "policy": "fifo",
+      "requested_mbps": 110.0
+    },
+    {
+      "added_p99_ms": 0.104150499999999,
+      "added_p99_ms_ci_lower": null,
+      "added_p99_ms_ci_upper": null,
+      "added_p99_ms_interval_status": "insufficient_blocks",
+      "blocks": 2,
+      "eligible_for_primary": false,
+      "flows": 1,
+      "goodput_mbps": 93.07313778955938,
+      "goodput_mbps_ci_lower": null,
+      "goodput_mbps_ci_upper": null,
+      "goodput_mbps_interval_status": "insufficient_blocks",
+      "goodput_retention_pct": 99.36804670916625,
+      "goodput_retention_pct_ci_lower": null,
+      "goodput_retention_pct_ci_upper": null,
+      "goodput_retention_pct_interval_status": "insufficient_blocks",
+      "interval_status": "insufficient_blocks",
+      "latency_advantage_ms": 18.8730015,
+      "latency_advantage_ms_ci_lower": null,
+      "latency_advantage_ms_ci_upper": null,
+      "latency_advantage_ms_interval_status": "insufficient_blocks",
+      "p99_reduction_pct": 99.45117950259343,
+      "p99_reduction_pct_ci_lower": null,
+      "p99_reduction_pct_ci_upper": null,
+      "p99_reduction_pct_interval_status": "insufficient_blocks",
+      "point_targets_met": true,
+      "policy": "fq_codel",
+      "requested_mbps": 110.0
+    }
+  ],
+  "foreground_transport": "udp",
+  "inputs": [
+    {
+      "attempts_sha256": "8cc512fad72ad01bf42d673850924ab5e3a8e2ec1c39abe2a3861afe24741ad2",
+      "design_bound_to_export": true,
+      "design_sha256": "8cc512fad72ad01bf42d673850924ab5e3a8e2ec1c39abe2a3861afe24741ad2",
+      "eligible_for_primary": false,
+      "export_provenance_sha256": "9700231a1caa09be3188780050c762d9153d65c2f0aa7532618246dda37d6555",
+      "noncompleted_attempts": 0,
+      "planned_cells": 16,
+      "purpose": "development_diagnostics",
+      "request_count": 80000,
+      "requests_sha256": "2db1e83fb8e13e02e80cd6980784b9261ade27b4267fcb77ada090e3e429b7ea",
+      "run_count": 16,
+      "schema_version": 1,
+      "summary_sha256": "9a06e9fead7f75bd66550cf5c926d9f1067cef929cc9d3f5257703f9f6f43475"
+    }
+  ],
+  "measurement_kind": "virtual_testbed",
+  "ml": {
+    "automatic_exclusions": false,
+    "clusters": 2,
+    "eligible_for_primary": false,
+    "features": [
+      "p99_ms",
+      "goodput_mbps",
+      "jitter_ms",
+      "send_lag_p99_ms",
+      "timeout_rate",
+      "not_sent_rate"
+    ],
+    "groups": [
+      {
+        "centroids_original_units": [
+          [
+            20.204528,
+            83.62169111796247,
+            0.03469925,
+            1.0059895,
+            0.0,
+            0.032850000000000004
+          ],
+          [
+            29.63815275,
+            93.36909749523059,
+            0.022663875,
+            1.0081025,
+            0.0,
+            0.045399999999999996
+          ]
+        ],
+        "diagnostics": {
+          "agglomerative": {
+            "clusters": 2,
+            "linkage": "ward"
+          },
+          "dbscan": {
+            "eps": 1.5,
+            "min_samples": 3,
+            "noise_label": -1
+          },
+          "interpretation": "internal geometry and algorithm agreement, not predictive accuracy",
+          "partitions": {
+            "agglomerative": {
+              "adjusted_rand_agreement_with_kmeans": 1.0,
+              "calinski_harabasz": 6.446913118592185,
+              "clusters": 2,
+              "davies_bouldin": 0.8112310808122385,
+              "noise_fraction": 0.0,
+              "noise_runs": 0,
+              "score_scope": "non_noise_runs_in_standardized_feature_space",
+              "silhouette": 0.46588723319574554
+            },
+            "dbscan": {
+              "adjusted_rand_agreement_with_kmeans": 1.0,
+              "calinski_harabasz": null,
+              "clusters": 1,
+              "davies_bouldin": null,
+              "noise_fraction": 0.5,
+              "noise_runs": 4,
+              "score_scope": "non_noise_runs_in_standardized_feature_space",
+              "silhouette": null
+            },
+            "kmeans": {
+              "adjusted_rand_agreement_with_kmeans": 1.0,
+              "calinski_harabasz": 6.446913118592185,
+              "clusters": 2,
+              "davies_bouldin": 0.8112310808122385,
+              "noise_fraction": 0.0,
+              "noise_runs": 0,
+              "score_scope": "non_noise_runs_in_standardized_feature_space",
+              "silhouette": 0.46588723319574554
+            }
+          }
+        },
+        "flows": 1,
+        "iterations": 2,
+        "pca_explained_variance_ratio": [
+          0.5823533192735484,
+          0.258649819096481
+        ],
+        "requested_mbps": 110.0,
+        "runs": 8,
+        "silhouette": 0.4658872331957455,
+        "standardization_mean": [
+          24.921340375,
+          88.49539430659652,
+          0.0286815625,
+          1.0070459999999999,
+          0.0,
+          0.039125
+        ],
+        "standardization_scale": [
+          8.170789029940972,
+          4.878672511226629,
+          0.00662943148692584,
+          0.002528675048320764,
+          1.0,
+          0.012305664346145639
+        ],
+        "status": "exploratory_fit",
+        "tsne": {
+          "init": "pca",
+          "learning_rate": "auto",
+          "max_iter": 1000,
+          "perplexity": 2.3333333333333335,
+          "purpose": "visualization_only",
+          "seed": 561
+        }
+      }
+    ],
+    "max_iter": 100,
+    "measurement_kind": "virtual_testbed",
+    "method": "standardized_kmeans",
+    "n_init": 10,
+    "predictive_validation": "not_performed",
+    "purpose": "exploratory_description_only",
+    "seed": 561,
+    "transport": "udp"
+  },
+  "plot_layout": {
+    "analysis_runtime": {
+      "data_panels": 1,
+      "height_px": 535,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 1000
+    },
+    "cluster_profiles": {
+      "data_panels": 2,
+      "height_px": 515,
+      "legend_overlap_count": 0,
+      "legends": 0,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "policy_comparisons": {
+      "data_panels": 3,
+      "height_px": 525,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "request_outcomes": {
+      "data_panels": 2,
+      "height_px": 525,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "ridge_lasso_coefficients": {
+      "data_panels": 2,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 0,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "ridge_lasso_predictions": {
+      "data_panels": 2,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 0,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    },
+    "run_clusters": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "run_clusters_agglomerative": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "run_clusters_dbscan": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "run_clusters_metrics": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "run_clusters_tsne": {
+      "data_panels": 1,
+      "height_px": 565,
+      "legend_overlap_count": 0,
+      "legends": 1,
+      "text_overflow_count": 0,
+      "width_px": 900
+    },
+    "tail_quantiles": {
+      "data_panels": 2,
+      "height_px": 515,
+      "legend_overlap_count": 0,
+      "legends": 0,
+      "text_overflow_count": 0,
+      "width_px": 1200
+    }
+  },
+  "purpose": "reviewed_diagnostic_gallery",
+  "regression": {
+    "alphas": [
+      0.01,
+      0.1,
+      1.0,
+      10.0
+    ],
+    "blocks": 2,
+    "eligible_for_primary": false,
+    "features": [
+      "policy",
+      "requested_mbps",
+      "flows"
+    ],
+    "inner_split": "GroupKFold_by_training_block",
+    "minimum_blocks": 6,
+    "outer_split": "GroupKFold_by_recorded_block",
+    "purpose": "exploratory_design_interpolation",
+    "status": "unavailable_fewer_than_six_blocks",
+    "target": "added_p99_ms"
+  },
+  "runtime": {
+    "machine": "arm64",
+    "python": "3.14.3",
+    "system": "Darwin"
+  },
+  "schema_version": 1,
+  "source_report_sha256": "284f8747cbdd47ae8ec15a8358c57ccccb3deb18e8ad1ad5ee18eb562dd17e89",
+  "versions": {
+    "matplotlib": "3.11.2",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "seaborn": "0.13.2"
+  },
+  "visual_review": {
+    "checks": [
+      "readable axes and units",
+      "keys outside data",
+      "unobscured marks",
+      "truthful measurement labels"
+    ],
+    "clipped_labels_observed": false,
+    "completed": true,
+    "date": "2026-11-14",
+    "legend_obscures_data": false,
+    "reviewed_png_count": 12
+  }
+}

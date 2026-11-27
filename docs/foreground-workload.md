@@ -20,6 +20,11 @@ packet was lost, or even prove packet loss: a delayed reply can miss the same
 deadline. This workload measures small synthetic control messages, not a
 reliable RPC implementation.
 
+The diagnostic launcher also supports --transport tcp with explicit fixed-size
+stream framing and separate TCP telemetry. The schedule and application outcome
+definitions remain the same. See [TCP measurements](tcp-measurements.md) for
+the transport option, passive ACK observer and optional shadow forecasts.
+
 ## Wire format and timing
 
 Every request and reply is exactly 512 bytes of UDP payload. The first 24 bytes
@@ -92,6 +97,10 @@ The output file is published only after its JSON is complete, using a hard link
 that refuses to replace an existing destination. Choose a local filesystem
 that supports hard links. The CLI does not create parent directories. Raw
 output belongs under the ignored runs directory.
+
+The client also writes transport evidence beside the capture, using its basename
+plus -transport.json. A foreground-smoke.json capture therefore gets a separate
+foreground-smoke-transport.json file. Both destinations must be unused.
 
 ## Bounds and safety
 

@@ -2,113 +2,431 @@
 
 CS 585 Computer Networks, University of New Mexico, Fall 2026.
 
-We are comparing Linux queue-management policies when short request-response
-messages share a bottleneck with bulk TCP traffic. The question is whether we
-can reduce long waits for the small messages without giving up much bulk
-goodput.
+We compare FIFO, FQ-CoDel, CAKE best-effort, and CAKE with bounded classification
+when short request-response messages share a bottleneck with bulk TCP traffic.
+The question is how much foreground delay each policy can avoid while retaining
+bulk goodput.
 
-The planned treatments are FIFO, FQ-CoDel, CAKE in best-effort mode, and CAKE
-with bounded traffic classification. The primary experiment uses a 100 Mb/s
-bottleneck, 20 ms base round-trip time, and 512-byte foreground messages at
-500 requests per second. We will test three aggregate background load targets
-with one or eight TCP flows. See the [experiment protocol](docs/experiment-protocol.md)
-for the full matrix and the decisions we still need to make.
+The pipeline creates an isolated Linux client-router-server topology, applies
+one queue policy, generates paced foreground requests alongside bulk traffic,
+and retains the measurements and cleanup record. Analysis checks those exports,
+matches each loaded run to its unloaded baseline, compares policies within
+randomized blocks, and produces statistical tables and exploratory ML figures.
+The Mac supports development, analysis and physical endpoint workloads; the
+Linux NucBox applies the queue treatments.
 
-## Current state
+One launcher selects local simulation, one-host Linux namespaces, or three
+configured physical Linux roles. Use --topology macos for two MacBook endpoints
+and a Linux NucBox router. It also selects UDP or TCP foreground traffic
+and can run a separate advisory model for future RTT and timeout outcomes.
+The [complete run guide](docs/topology-pipeline.md) covers setup, profiles,
+commands, outputs and recovery.
 
-The repository runs bounded UDP/TCP diagnostics on macOS and Linux. It includes
-an independent run-bundle validator, randomized schedule generation, per-run
-summaries, and plotting. A separate Linux adapter creates and cleans up owned
-network namespaces and applies the four candidate queue profiles.
+Use --topology loopback for real traffic on this computer without a router.
+Add --rpc-diagnostics to a measured run to include Chris's RPC workload as a
+separate phase with retained call records, retries and descriptive analysis.
+The [RPC and loopback guide](docs/rpc-diagnostics.md) explains the commands and
+measurement limits. The NucBox can also launch the two-MacBook experiment once
+the dedicated links and SSH aliases in the MacBook guide are configured.
 
-Start with [the operating guide](docs/running-experiments.md). The
-[work-item status](docs/implementation-status.md) lists what is implemented and
-what still needs equipment, calibration, or scientific review. A separate manual
-check passed all four namespace profiles on a disposable Ubuntu runner.
-Diagnostic runs are explicitly
-ineligible for the primary experiment, and there are no queue-policy results yet.
+The [November 26 Mac loopback reference](data/reference/mac-loopback-2026-11-26/README.md)
+retains 20,000 foreground slots and 20,000 separate RPC calls. The foreground
+generator omitted 53 slots; every sent request returned on time. All RPC calls
+completed without retries. These local checks do not establish physical
+queue-policy performance.
 
-The [local diagnostic report](docs/pilot-readiness.md) includes six real loopback
-runs, their plot, and the remaining criteria for starting the Linux pilot.
+The [MacBook setup guide](docs/macos-testbed.md) covers wired links, SSH,
+read-only preflight and the exact run command. The
+[course deliverables](deliverables/README.md) contain the preliminary report,
+LaTeX sources and editable PowerPoint, with simulated results marked for replacement.
 
-The [candidate measurement contract](docs/decisions/0001-measurement-contract.md)
-is ready for team review, with tests for request records and deadline handling.
-The [equipment checklist](docs/equipment-inventory.md) explains the read-only
-local inspection command. Hardware availability and permissions are still
-unconfirmed; neither the contract tests nor inspection certify a testbed.
+    sh scripts/run_pipeline.sh --topology local --transport udp \
+      --workers 4 --output runs/local-check-01
 
-The proposal's target is a 50% reduction in foreground p99 added latency under
-saturating load while retaining at least 90% of FIFO's bulk goodput. These are
-feasibility targets. We will report results that miss them as carefully as
-results that meet them.
+This local check generates 48 trials and 240,000 slots from a clearly labeled
+toy model, then exports, analyzes and plots them. These simulated rows exercise
+the software; the measured preliminary results below still come from Linux.
 
-## Get started
+[Run the pipeline](#run-the-analysis-on-macos-or-linux) |
+[NucBox collection](#collect-on-the-nucbox) |
+[Docker and YAML](#run-analysis-with-docker-compose) |
+[Pipeline UML](#pipeline-uml-sequence-diagram) |
+[Analysis definitions](analysis/README.md) |
+[Remaining work](docs/project-completion.md)
 
-Use Python 3.12 or newer. Development checks run on macOS or Linux; the actual
-queue-management experiments need an isolated Linux testbed.
+## Analysis: preliminary namespace results
+
+This preview comes from [Linux workflow 43111991762](https://github.com/srgangaram-swe/networks_project/actions/runs/43111991762),
+source e3ddaff. It contains 16 randomized namespace trials and 80,000 measured
+request slots. Of those slots, 3,192 were unsent (3.99%); there were no timeout
+or late outcomes. Every policy has two paired blocks, so confidence intervals
+are unavailable. These are virtual testbed diagnostics, not primary results
+or measurements of the NucBox's Ethernet adapters.
+
+| Policy | Mean added on-time p99 | TCP goodput retained vs FIFO |
+|---|---:|---:|
+| FIFO | 18.977 ms | 100.00% |
+| FQ-CoDel | 0.104 ms | 99.37% |
+| CAKE best-effort | 0.106 ms | 89.37% |
+| CAKE bounded | 0.094 ms | 89.18% |
+
+The proposed targets are a 50% reduction in added p99 and at least 90% of FIFO's
+bulk goodput. Both CAKE variants fell below the goodput target in this pilot.
+Unsent requests and the small number of blocks still need investigation.
+
+![Policy comparisons with every matched latency run and two-block point estimates](analysis/plots/preliminary/policy_comparisons.png)
+
+### Exploratory run profiles
+
+K-means fits six standardized run metrics within each load/flow condition.
+PCA and t-SNE show those same metrics in two dimensions. Policy names are only
+plot labels, and separated groups do not establish causality or predictive accuracy.
+Shape identifies policy and color identifies the fitted cluster. Keys sit below
+the data panels. Click an image to inspect the full figure.
+
+![The fitted clusters shown in measured TCP goodput and on-time p99 latency](analysis/plots/preliminary/run_clusters_metrics.png)
+
+![Standardized cluster centroids and actual policy membership counts](analysis/plots/preliminary/cluster_profiles.png)
+
+| PCA | t-SNE |
+|---|---|
+| ![PCA view of the eight loaded diagnostic runs](analysis/plots/preliminary/run_clusters.png) | ![Seeded t-SNE view of the same eight loaded runs](analysis/plots/preliminary/run_clusters_tsne.png) |
+
+Ward agglomerative clustering gives the same two groups on these eight loaded
+runs. DBSCAN instead finds one dense group and marks four runs as noise at its
+fixed radius. The different partitions show how much the answer depends on the
+algorithm and its assumptions. All eight runs remain in the comparison.
+
+| Ward agglomerative | DBSCAN with noise retained |
+|---|---|
+| ![Ward assignments on the measured namespace pilot](analysis/plots/extended/run_clusters_agglomerative.png) | ![DBSCAN assignments and four noise runs on the measured namespace pilot](analysis/plots/extended/run_clusters_dbscan.png) |
+
+The [extended measured gallery](analysis/plots/extended) includes all twelve
+figure pairs, internal cluster metrics, source bindings and generated findings.
+The two-block reference leaves Ridge/Lasso unavailable.
+
+### Delivery and latency diagnostics
+
+The delivery chart includes unsent slots, so low reported RTT cannot hide
+generator omissions. The quantile chart compares means of per-run on-time RTT
+percentiles on a shared scale; it does not pool requests across runs.
+
+![Scheduled request outcomes by policy in unloaded and loaded runs](analysis/plots/preliminary/request_outcomes.png)
+
+![Mean per-run on-time RTT percentiles in unloaded and loaded runs](analysis/plots/preliminary/tail_quantiles.png)
+
+Browse the [comparison CSV](data/reference/namespace-pilot-2026-11-11/analysis/policy_comparisons.csv),
+[per-run statistics](data/reference/namespace-pilot-2026-11-11/analysis/run_statistics.csv),
+[readable summary](data/reference/namespace-pilot-2026-11-11/analysis/diagnostic_summary.txt),
+and [full provenance and model settings](data/reference/namespace-pilot-2026-11-11/analysis/report.json).
+The [reference directory](data/reference/namespace-pilot-2026-11-11/README.md)
+contains the exact export needed to rebuild these results.
+The [figure gallery](analysis/plots/README.md) includes vector copies and the
+source, input hashes, and layout checks for this revised presentation. The
+original reference export and its earlier analysis remain unchanged.
+
+## Insights
+
+FQ-CoDel is the most useful lead from this pilot: its mean added p99 was close
+to both CAKE variants while retaining 99.37% of FIFO goodput. The CAKE variants
+had slightly different point estimates of delay, but both retained less than
+90% of FIFO goodput. Delay alone would therefore give an incomplete picture
+of the proposed performance targets.
+
+The fitted clusters also need a careful reading. All four CAKE runs fall in
+one cluster; FIFO and FQ-CoDel share the other despite their very different
+latency. The model uses six standardized metrics, including goodput, jitter,
+and unsent rate. Cluster membership describes a combined run profile, not
+which policy is best. The physical-unit view and centroid heatmap make that
+distinction easier to see than a t-SNE projection alone.
+
+## Findings
+
+Across these 16 trials, 3,192 of 80,000 measurement slots were not sent. Zero
+timeout or late outcomes therefore does not mean every scheduled request
+received a reply. Unsent slots remain a measurement-quality concern, and
+on-time RTT describes only the requests represented in those quantiles.
+
+The loaded comparison has eight runs, with two paired blocks per policy.
+The analysis reports point estimates and leaves confidence intervals
+unavailable. The fixed two-cluster fit is exploratory; these data do not
+establish stable population structure, causal mechanisms, or predictive accuracy.
+
+## Conclusions and next experiment
+
+The diagnostic workflow has been exercised from Linux collection through
+checked export, statistical analysis, clustering, and figures. This gives us
+a reproducible starting point for the hardware campaign and the final report.
+It does not establish the result on the NucBox or its Ethernet adapters.
+
+Next, set up the NucBox, inspect its interfaces and queue support, investigate
+generator omissions, and resolve the collection-window and calibration checks
+in [the completion checklist](docs/project-completion.md). Freeze the reviewed
+protocol before primary collection, then repeat the paired comparisons with
+the planned independent blocks. The report and presentation should use that
+evidence, including any missed targets, rather than treating this preview as
+the final experiment.
+
+## Run the analysis on macOS or Linux
+
+### Software validation with more simulated rows
+
+The separate [simulation gallery](analysis/plots/simulation) uses six blocks,
+48 toy trials and 240,000 scheduled slots. Every figure carries its simulation
+label. The assumed policy factors make the regression problem deliberately
+simple, so small errors here validate the code path rather than a physical
+prediction claim. Whole blocks and their baselines stay outside training.
+
+![Ridge and Lasso predictions for held-out blocks of simulated data](analysis/plots/simulation/ridge_lasso_predictions.png)
+
+![Descriptive Ridge and Lasso coefficients from the simulated design](analysis/plots/simulation/ridge_lasso_coefficients.png)
+
+![Measured analysis stage wall and process CPU costs for the simulated example](analysis/plots/simulation/analysis_runtime.png)
+
+An alternating three-repeat collection check on this Mac had median wall times
+of 0.822 seconds with one worker and 0.273 seconds with four, about 3.01 times
+faster for this 240,000-slot software workload. The request tables were identical.
+The [timing record](analysis/plots/simulation/worker-benchmark.json) retains every
+repeat and source identity. This is not a network throughput benchmark.
+
+### Set up and rebuild the measured reference
+
+Prerequisites: Git and Python 3.12 or newer. Run the following from a terminal:
 
     git clone https://github.com/srgangaram-swe/networks_project.git
     cd networks_project
     git switch dev
-    python3 -m venv .venv
-    .venv/bin/python -m pip install -r requirements-dev.txt
-    sh scripts/check.sh
-    .venv/bin/python scripts/validate_config.py configs/primary.json
+    sh scripts/setup_environment.sh --plan
+    sh scripts/setup_environment.sh
+    mkdir -p runs
+    .venv/bin/python -m analysis.policy_comparison \
+      data/reference/namespace-pilot-2026-11-11/export \
+      --output runs/reference-analysis-01
 
-Install iperf3 before running the TCP integration tests. The operating guide has
-macOS and Linux commands, a short local trial, recovery steps, and the hardware
-handoff procedure. Optional plotting dependencies are pinned separately in
-requirements-plots.txt.
+The shell script creates .venv, installs the pinned development and analysis
+packages, and checks dependency consistency. It can reuse a valid environment
+without deleting it. An existing directory must identify itself as an isolated
+Python environment before packages are installed. The script does not install
+OS packages or change the system interpreter.
 
-The validator checks the planned experiment inputs. It does not configure
-interfaces or run traffic. Test fixtures are synthetic and are never evidence
-of network performance.
+If Python 3.12+ is installed under a different command, select it explicitly:
 
-## Pick up work
+    PYTHON=python3.12 sh scripts/setup_environment.sh
 
-Start with the [milestones](https://github.com/srgangaram-swe/networks_project/milestones)
-and [open issues](https://github.com/srgangaram-swe/networks_project/issues).
-Assign an unclaimed issue to yourself before starting, check its dependencies,
-and make a short work branch from the latest dev.
+Use the actual supported interpreter on your machine. The launcher tries an
+existing .venv, then python3.12, then python3. If the selected Python is too old,
+it stops with a message before creating an environment. The [Python downloads](https://www.python.org/downloads/)
+page has installers. A custom location or smaller analysis-only profile is optional:
 
-Open one pull request (MR) per work item back to dev. Include the issue
-number, tests, and anything the reviewer needs to reproduce. We can resolve
-merge conflicts in that MR. Do not branch from prod or main.
+    mkdir -p .local
+    sh scripts/setup_environment.sh --venv .local/analysis-env --profile analysis
 
-Once every required item in a milestone is complete, we promote dev to
-prod, validate the release candidate, and then promote prod to main.
-Neither promotion is part of the everyday feature workflow.
-[CONTRIBUTING.md](CONTRIBUTING.md) has the commands and review checklist.
+The analysis accepts ordinary CSV exports or the checked compressed request CSV
+in the reference example. For your own data, replace the input path with the
+export produced by the experiment runner. The output directory must be new;
+choose a new name for each rebuild. Input data is never overwritten.
 
-## Where things belong
+### What the output contains
 
-| Directory | Purpose |
+| File | Use |
 |---|---|
-| configs/ | Versioned experiment inputs |
-| src/ | Shared contracts and application code |
-| testbed/ | Linux topology and queue setup |
-| experiments/ | Trial scheduling and run collection |
-| analysis/ | Data checks, intervals, and plots |
-| tests/ | Unit, integration, and synthetic fixtures |
-| scripts/ | Development and validation commands |
-| docs/ | Protocol, architecture, safety, and decisions |
-| report/ | Methods, results, and final write-up |
-| presentation/ | Slides, demo instructions, and rehearsal notes |
-| data/reference/ | Reviewed evidence with provenance |
-| runs/ | Ignored local experiment output |
+| runs.csv and run_statistics.csv | Per-run metrics and grouped descriptive statistics |
+| matched_baselines.csv | Same-policy, same-block unloaded baseline for each loaded run |
+| policy_comparisons.csv | Added latency, relative effects, goodput retention, interval status, and point targets |
+| run_clusters.csv | Cluster assignments and PCA/t-SNE coordinates |
+| cluster_diagnostics.csv | Internal silhouette, Davies-Bouldin, Calinski-Harabasz, noise and partition agreement scores |
+| regression_predictions.csv | Ridge/Lasso predictions from held-out blocks, when at least six blocks exist |
+| plots/policy_comparisons.png and .svg | Policy means, all matched latency runs, and available uncertainty |
+| plots/request_outcomes.png and plots/tail_quantiles.png, plus .svg copies | Full delivery accounting and mean per-run RTT percentiles |
+| plots/run_clusters.png, plots/run_clusters_tsne.png, and plots/run_clusters_metrics.png, plus .svg copies | The same fitted assignments in PCA, t-SNE, and physical units |
+| plots/cluster_profiles.png and .svg | Standardized centroids and policy membership counts |
+| plots/run_clusters_agglomerative.png and plots/run_clusters_dbscan.png, plus .svg copies | Separate Ward and DBSCAN assignments in PCA coordinates |
+| plots/ridge_lasso_predictions.png and plots/ridge_lasso_coefficients.png, plus .svg copies | Held-out errors and descriptive regularized coefficients |
+| plots/analysis_runtime.png and analysis_timings.json | Completed analysis-stage wall and process CPU costs |
+| report.json | Input/output hashes, source identities, settings, counts, layout checks, and limitations |
+| diagnostic_summary.txt and writeup_table.tex | Readable results and a LaTeX table for drafting the report |
+| insights.txt | Generated findings, model diagnostics, uncertainty and remaining limits |
 
-Python, C++, Rust, and Bash are all reasonable choices. Use the language that
-fits the component, and discuss additional toolchains before adding them.
-We do not need four languages just because four are allowed.
+A completed report still has primary eligibility set to false. Read interval
+and comparison status fields before interpreting a percentage. See the
+[analysis guide](analysis/README.md) for definitions, pairing, bootstrap rules,
+censoring, and ML limits.
+
+## Collect on the NucBox
+
+First set up Ubuntu 24.04 LTS, Python 3.12+, and local access or SSH using the
+[NucBox guide](docs/nucbox-setup.md). The Mac is the development/control machine;
+collection runs on the isolated Linux host. This backend uses client, router,
+and server namespaces on that one host. It does not configure physical NICs.
+
+From the project checkout on the NucBox, run the installer as your ordinary
+Linux account:
+
+    sh scripts/setup_nucbox.sh --plan
+    sh scripts/setup_nucbox.sh --install
+    .venv/bin/python scripts/nucbox_experiment.py plan
+    mkdir -p runs
+    sudo .venv/bin/python scripts/nucbox_experiment.py run \
+      --output runs/nucbox-pilot-01 --authorized-isolated-host
+
+The installer prepares OS tools, the shared Python environment, and component
+checks. The run command inspects hardware, checks all four policies, executes
+the recorded 16-trial pilot, exports validated observations, and runs the full
+analysis. Expect roughly ten minutes, depending on the host.
+
+The result has hardware.json, setup/, campaign/, export/, analysis/, and
+status.json. Root owns this output; use sudo to inspect it. The last stage and
+any completed observations remain after a failure. Do not repeat a command into
+an existing output directory. The guide covers exact-resource cleanup, explicit
+replacement reasons, and recovery without losing earlier attempts.
+
+The larger diagnostic matrix is an explicit choice:
+
+    .venv/bin/python scripts/nucbox_experiment.py plan --diagnostic-matrix
+    sudo .venv/bin/python scripts/nucbox_experiment.py run --diagnostic-matrix \
+      --output runs/nucbox-matrix-01 --authorized-isolated-host
+
+That plans 280 cells: 40 unloaded and 240 loaded runs, ten paired blocks, and
+60 measured seconds per run. Allow more than 5.5 hours plus setup and analysis.
+The exporter makes 47 bounded batches, and analysis accepts the export root
+directly. All observations remain diagnostic. Actual device checks, calibration,
+exact foreground/bulk window alignment, and accepted protocol choices are still
+needed before primary collection. See the [completion checklist](docs/project-completion.md).
+
+## Run analysis with Docker Compose
+
+Docker with the Compose plugin is optional. The [compose.yaml](compose.yaml)
+service builds [Dockerfile](Dockerfile), creates its own Python environment,
+and runs the same analysis command. A Git checkout is required so the report
+can record the source identity. Run from the repository root:
+
+    mkdir -p runs/container-output-01
+    export LOCAL_UID="$(id -u)" LOCAL_GID="$(id -g)"
+    export INPUT_DIR="$PWD/data/reference/namespace-pilot-2026-11-11/export"
+    export OUTPUT_DIR="$PWD/runs/container-output-01"
+    docker compose config --quiet
+    docker compose run --build --rm analysis
+
+The result appears in runs/container-output-01/analysis on the host. Use an
+existing input directory and an existing writable output parent. Neither mount
+is created silently. For a later rebuild, choose a fresh output parent or override
+the destination explicitly:
+
+    docker compose run --rm analysis /inputs/export --output /outputs/analysis-02
+
+The container runs as your supplied user/group, with a read-only root filesystem,
+read-only source and input mounts, dropped capabilities, and no runtime network.
+Only the selected output directory and temporary cache are writable. Building
+the image downloads packages. It uses a digest-pinned Python base and the same
+analysis locks as the native setup. CI builds this image and compares its rebuilt
+point estimates and output integrity with the published diagnostic example.
+
+The container supports offline analysis. Use native Linux for privileged
+namespace collection and kernel/qdisc checks. See [container details](docs/containers.md)
+for mounts, permissions, source provenance, and troubleshooting.
+
+## Pipeline UML sequence diagram
+
+The diagram follows the collection driver, retained attempts, cleanup, export,
+and analysis. [The editable Mermaid source](docs/pipeline.mmd) is kept alongside
+the operating documentation.
+
+~~~mermaid
+sequenceDiagram
+    actor User
+    participant Pipeline
+    participant Campaign
+    participant Trial
+    participant Macs as macOS endpoints
+    participant Router as Linux router
+    participant RPC as RPC companion
+    participant Monitor as TCP observation and shadow model
+    participant Analysis as Export and analysis
+    participant Files as Artifacts
+    User->>Pipeline: Select topology, UDP or TCP, output, forecasts and optional RPC
+    alt Local software check
+        Pipeline->>Pipeline: Collect 48 seeded toy trials in bounded worker pool
+    else Measured traffic
+        alt Real loopback check
+            Pipeline->>Pipeline: Plan four real socket trials without shaping
+        else Namespace, Linux physical or macOS physical testbed
+            Pipeline->>Pipeline: Check source, tools and isolated resource ownership
+            opt macOS endpoints
+                Pipeline->>Macs: Check dedicated Ethernet, peer route and separate management
+                Macs-->>Pipeline: Read-only evidence and native tool versions
+            end
+        end
+    Pipeline->>Campaign: Save source, configuration, seed and schedule
+    loop Each unfinished scheduled cell
+        Campaign->>Trial: Run serially on loopback, namespaces or dedicated NIC roles
+        opt macOS endpoints
+            Trial->>Macs: Acquire endpoint leases and start bounded workloads
+            Trial->>Router: Apply queue policy and forward-path delay in owned namespace
+        end
+        opt Supported TCP telemetry or shadow forecasts
+            Trial->>Monitor: Start separate observers with bounded nonblocking events
+            Monitor->>Monitor: Count ACK candidates and forecast future cohorts
+        end
+        Trial->>Trial: Warmup, measure and drain
+        Trial->>Files: Observations, counters and manifest
+        Trial->>Monitor: Stop and join before topology cleanup
+        Monitor->>Files: Capture quality, socket counters and advisory forecasts
+        opt RPC diagnostics
+            Trial->>RPC: Fresh bounded RPC and background phase on retained topology
+            RPC->>Files: Call records, retry counts, responder and bulk evidence
+        end
+        Trial->>Trial: Validate and clean up exact owned resources
+        Trial-->>Campaign: Validated bundle or failure
+        Campaign->>Files: Retain attempt and manifest hash
+    end
+    Campaign-->>Pipeline: Completed schedule or stopped state
+    end
+    alt Collection completed
+        Pipeline->>Analysis: Export observations and full attempt ledger
+        Analysis->>Analysis: Check hashes, counts and recorded pairings
+        Analysis->>Analysis: Policy schedule: bootstrap, K-means, Ward, DBSCAN, PCA and t-SNE
+        Analysis->>Analysis: Policy schedule: Ridge and Lasso with held-out blocks
+        Analysis->>Analysis: Separate descriptive loopback and RPC reports when selected
+        Analysis->>Files: CSV tables, Seaborn plots, insights, timings and LaTeX table
+        Pipeline-->>User: Completed diagnostic results
+    else Failure or cancellation
+        Pipeline->>Files: Keep failed stage and partial evidence
+        Pipeline-->>User: Inspect retained evidence before another attempt
+    end
+    Note over Pipeline,Files: No overwritten runs or automatic retries. Primary eligibility remains false.
+~~~
+
+## Checks and project scope
+
+    sh scripts/check.sh
+    sh scripts/check_analysis.sh
+
+Install iperf3 before the TCP integration tests; the NucBox installer does this.
+The core and analysis suites each require at least 95% statement coverage and
+95% branch coverage, checked separately. The workflow checks Linux and macOS,
+C++ builds and sanitizers, real sockets, the Docker rebuild and report compilation.
+Privileged Linux checks are a separate explicit workflow input; a skipped
+hardware test is not a passed experiment.
+
+The [experiment protocol](docs/experiment-protocol.md) describes the planned
+100 Mb/s bottleneck, 20 ms base RTT, 512-byte foreground messages at 500 requests/s,
+three background demand targets, and one or eight TCP flows. The
+[measurement contract](docs/decisions/0001-measurement-contract.md) remains a
+candidate for team review. [Open issues](https://github.com/srgangaram-swe/networks_project/issues)
+and the [completion checklist](docs/project-completion.md) track the remaining
+scientific and course deliverables.
+
+Dev is the integration and default landing branch. Work branches merge into dev;
+validated milestone candidates progress from dev to prod to main. Follow
+[CONTRIBUTING.md](CONTRIBUTING.md) and preserve teammates' original histories.
 
 ## Team
 
 Saif Ryan Gangaram, Christopher Ong, Alejandro Magana Guillen, and Jonathan Lloyd.
-
-Saif is taking the architecture, foreground workload, trial runner, and release
-integration work. The remaining issues are open for the team to claim.
-Everyone should review another person's work and take part in an independent
-replication, the report, and the presentation.
+Jonathan's policy-comparison workflow, Chris's RPC workload and Chris's C++
+prototype are retained with their original histories. The
+[C++ guide](experiments/cpp_network_testing/README.md)
+explains its separate loopback TCP measurement.
 
 This is a course project using synthetic traffic on equipment we control.
 It contains no employer data and implies no employer endorsement.

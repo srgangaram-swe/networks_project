@@ -26,14 +26,15 @@ TRANSITIONS = {
 
 
 def source_identity(root: Path) -> dict:
-    commit = run_command(("git", "-C", str(root), "rev-parse", "HEAD")).stdout.decode().strip()
+    git = ("git", "-c", f"safe.directory={root.resolve()}", "-C", str(root))
+    commit = run_command((*git, "rev-parse", "HEAD")).stdout.decode().strip()
     if not re.fullmatch(r"[a-f0-9]{40}", commit):
         raise ValueError("source commit is not a Git SHA-1 identifier")
-    dirty = bool(run_command(("git", "-C", str(root), "status", "--porcelain")).stdout)
+    dirty = bool(run_command((*git, "status", "--porcelain")).stdout)
     paths = sorted(
         path
         for folder in ("src", "scripts", "configs")
-        for path in (root / folder).glob("*.py" if folder != "configs" else "*.json")
+        for path in (root / folder).rglob("*.py" if folder != "configs" else "*.json")
     )
     paths.extend(root / name for name in ("pyproject.toml", "requirements-dev.txt"))
     checksum = hashlib.sha256()
@@ -73,6 +74,10 @@ class RunBundle:
                 "python": sys.version.split()[0],
                 "measurement_kind": "loopback_diagnostic"
                 if configuration["mode"] == "loopback"
+                else "macos_testbed"
+                if configuration["mode"] == "macos"
+                else "physical_testbed"
+                if configuration["mode"] == "physical"
                 else "virtual_testbed",
             },
         )
