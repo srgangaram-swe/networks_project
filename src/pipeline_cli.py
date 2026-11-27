@@ -17,7 +17,7 @@ from src.simulation import ROOT, default_workers
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--topology", choices=("local", "namespace", "physical", "macos"), required=True
+        "--topology", choices=("local", "loopback", "namespace", "physical", "macos"), required=True
     )
     parser.add_argument(
         "--preflight", action="store_true", help="check hardware without collecting"
@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--plan", action="store_true")
     parser.add_argument("--transport", choices=("udp", "tcp"), default="udp")
     parser.add_argument("--shadow-forecast", action="store_true")
+    parser.add_argument("--rpc-diagnostics", action="store_true")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--profile", type=Path)
     parser.add_argument("--workers", type=int, default=default_workers())
@@ -50,6 +51,7 @@ def main():
                 args.diagnostic_matrix,
                 transport=args.transport,
                 shadow_forecast=args.shadow_forecast,
+                rpc_diagnostics=args.rpc_diagnostics,
             )
             if args.preflight:
                 if args.topology not in {"physical", "macos"}:
@@ -73,6 +75,7 @@ def main():
                 cancel=cancel,
                 transport=args.transport,
                 shadow_forecast=args.shadow_forecast,
+                rpc_diagnostics=args.rpc_diagnostics,
             )
         print(json.dumps(result, sort_keys=True, indent=2))
         return 0

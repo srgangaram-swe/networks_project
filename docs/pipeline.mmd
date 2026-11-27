@@ -5,12 +5,15 @@ sequenceDiagram
     participant Trial
     participant Macs as macOS endpoints
     participant Router as Linux router
+    participant RPC as RPC companion
     participant Monitor as TCP observation and shadow model
     participant Analysis as Export and analysis
     participant Files as Artifacts
-    User->>Pipeline: Select topology, UDP or TCP, output and optional forecasts
+    User->>Pipeline: Select topology, UDP or TCP, output, forecasts and optional RPC
     alt Local software check
         Pipeline->>Pipeline: Collect 48 seeded toy trials in bounded worker pool
+    else Real loopback check
+        Pipeline->>Campaign: Four real socket trials without shaping
     else Namespace, Linux physical or macOS physical testbed
         Pipeline->>Pipeline: Check source, tools and isolated resource ownership
         opt macOS endpoints
@@ -32,6 +35,10 @@ sequenceDiagram
         Trial->>Files: Observations, counters and manifest
         Trial->>Monitor: Stop and join before topology cleanup
         Monitor->>Files: Capture quality, socket counters and advisory forecasts
+        opt RPC diagnostics
+            Trial->>RPC: Fresh bounded RPC and background phase on retained topology
+            RPC->>Files: Call records, retry counts, responder and bulk evidence
+        end
         Trial->>Trial: Validate and clean up exact owned resources
         Trial-->>Campaign: Validated bundle or failure
         Campaign->>Files: Retain attempt and manifest hash
@@ -41,8 +48,9 @@ sequenceDiagram
     alt Collection completed
         Pipeline->>Analysis: Export observations and full attempt ledger
         Analysis->>Analysis: Check hashes, counts and recorded pairings
-        Analysis->>Analysis: Paired bootstrap, K-means, Ward, DBSCAN, PCA and t-SNE
-        Analysis->>Analysis: Ridge and Lasso with held-out blocks
+        Analysis->>Analysis: Policy schedule: bootstrap, K-means, Ward, DBSCAN, PCA and t-SNE
+        Analysis->>Analysis: Policy schedule: Ridge and Lasso with held-out blocks
+        Analysis->>Analysis: Separate descriptive loopback and RPC reports when selected
         Analysis->>Files: CSV tables, Seaborn plots, insights, timings and LaTeX table
         Pipeline-->>User: Completed diagnostic results
     else Failure or cancellation

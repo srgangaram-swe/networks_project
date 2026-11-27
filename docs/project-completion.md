@@ -1,14 +1,16 @@
 # Project completion checklist
 
-Repository review: November 21, 2026. The NucBox has not been set up yet.
+Repository review: November 26, 2026. The NucBox has not been set up yet.
 This checklist distinguishes a working initial software path from the evidence
 still needed to finish the experiment, report, and demonstration.
 
 ## Executable initial path
 
-The integration branch for this work preserves the pilot implementation and
-Jonathan Lloyd's original analysis commit. Neither teammate's branch is rewritten.
-Chris Ong's C++ TCP prototype is also retained with its original history. Its
+The integration preserves the pilot implementation and Jonathan Lloyd's
+original analysis commit. Teammate histories remain intact.
+Chris Ong's RPC workload now runs through an optional phase in the trial runner.
+Its call records and analysis stay separate from foreground RTT. His C++ TCP
+prototype is also retained with its original history. Its
 build, exact-frame validation, loopback binding, bounded harness, sanitizer
 checks, and real-socket regressions are documented in
 [the prototype guide](../experiments/cpp_network_testing/README.md).
@@ -18,6 +20,7 @@ checks, and real-socket regressions are documented in
 | Install | scripts/setup_nucbox.sh installs Ubuntu tools, the local environment, analysis dependencies, and runs checks |
 | Inspect | scripts/inspect_hardware.py reads versions, drivers, link state, and module evidence |
 | Isolate | src/topology_runtime.py journals owned client/router/server namespaces and cleans them up |
+| RPC diagnostics | src/basic_rpc_protocol/rpc_workload.py runs bounded calls through the main trial adapters; src/rpc_validation.py checks their retained records |
 | Generate traffic | src/foreground_io.py, src/foreground_tcp.py and src/bulk.py run paced UDP or framed TCP requests and reverse bulk TCP demand |
 | Collect | scripts/campaign.py executes the recorded diagnostic schedule with retained attempts and manifests |
 | Check and export | scripts/validate_bundle.py and scripts/export_pilot.py verify observations and export outcomes with hashes |
@@ -25,12 +28,11 @@ checks, and real-socket regressions are documented in
 | Explore ML | Standardized K-means, Ward and DBSCAN retain PCA/t-SNE views and geometry scores; Ridge/Lasso use nested held-out blocks when at least six blocks exist |
 | Observe TCP | src/tcp_observation.py and src/transport.py keep passive ACK candidates and Linux socket counters separate from application outcomes |
 | Forecast | Optional shadow ridge models predict future application RTT/timeout cohorts using past events and delayed labels, without changing policy |
-| Run together | scripts/run_pipeline.sh selects local simulation, namespaces, physical Linux roles or two MacBooks with a Linux router, then runs checked export and analysis |
+| Run together | scripts/run_pipeline.sh selects local simulation, real loopback, namespaces, physical Linux roles or two MacBooks with a Linux router, then runs checked export and analysis |
 
-Use the [NucBox guide](nucbox-setup.md) after first boot. Keep the Mac as the
-development and control machine. No physical NIC is selected or reconfigured
-by the namespace backend. This initial experiment is a virtual testbed on the
-NucBox; it does not measure the adapters or cables.
+Use the [NucBox guide](nucbox-setup.md) after first boot. The Mac or the NucBox can launch a configured physical campaign. No physical NIC is selected or reconfigured
+by the namespace backend. The namespace option runs a virtual testbed on the NucBox and does not measure
+the adapters or cables. The MacBook option needs the dedicated wired links.
 
 The [topology guide](topology-pipeline.md) describes the physical profile,
 dedicated-interface guards and rollback. Hosted SSH/veth checks exercise that

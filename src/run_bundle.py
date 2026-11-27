@@ -34,7 +34,7 @@ def source_identity(root: Path) -> dict:
     paths = sorted(
         path
         for folder in ("src", "scripts", "configs")
-        for path in (root / folder).glob("*.py" if folder != "configs" else "*.json")
+        for path in (root / folder).rglob("*.py" if folder != "configs" else "*.json")
     )
     paths.extend(root / name for name in ("pyproject.toml", "requirements-dev.txt"))
     checksum = hashlib.sha256()

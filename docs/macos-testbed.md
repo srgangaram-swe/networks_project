@@ -1,7 +1,8 @@
 # NucBox router with two MacBooks
 
-Use the first MacBook as controller and client, the NucBox as Linux router,
-and the second MacBook as server. Each experiment link needs a wired Ethernet
+Use the first MacBook as client, the NucBox as Linux router,
+and the second MacBook as server. Either the client Mac or the NucBox can launch
+the pipeline. Each experiment link needs a wired Ethernet
 adapter and cable. Keep Wi-Fi for management on all three machines. The NucBox
 needs two dedicated Ethernet ports plus a separate management connection.
 Adapter compatibility and actual interface names still need equipment checks.
@@ -34,8 +35,27 @@ not install credentials or weaken host-key checks.
 
 Copy configs/macos-profile.example.json to .local/macos-profile.json. Replace
 every repository path, alias, adapter name and iperf3 path with observed values.
-Do not publish that profile. Use the client Mac itself as controller so client
-is local and all request timestamps use that Mac's monotonic clock.
+Do not publish that profile. With this example, launch from the client Mac.
+The trial coordinator always runs on that client and uses its monotonic clock.
+
+To launch from the NucBox, use configs/macos-remote-profile.example.json instead.
+Set all three roles to SSH aliases, including experiment-router for the NucBox
+itself. The aliases, verified host keys and authentication must work from both
+the NucBox and the client Mac. Enable Remote Login on both Macs. Do not mark the
+router local: that profile also reaches the Mac client, where local means the
+Mac. Preflight rejects this ambiguous arrangement. If the profile selects an
+SSH configuration file, its absolute path must work on both coordinators.
+
+Once the machines are prepared, launch the following on the NucBox. The NucBox
+retains the retrieved bundles and runs analysis locally; the client also keeps
+its original bundles under .local/physical-runs.
+
+    sh scripts/run_pipeline.sh --topology macos --transport udp \
+      --profile .local/macos-remote-profile.json --rpc-diagnostics \
+      --authorized-isolated-host --output runs/macos-rpc-pilot-01
+
+Keep the terminal session alive during collection, or use a persistent terminal
+session on the NucBox. Keep both MacBooks awake and connected to power.
 
 ## Configure dedicated links
 

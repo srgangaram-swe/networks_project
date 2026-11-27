@@ -22,6 +22,16 @@ congestion control, sequence numbers, ACKs, or retransmissions. Unavailable TCP
 counters stay empty. Live shadow forecasting requires real namespace or physical
 traffic and is rejected in local mode.
 
+## Real traffic on this computer
+
+    sh scripts/run_pipeline.sh --topology loopback --transport udp \
+      --rpc-diagnostics --output runs/loopback-rpc-01
+
+This collects four real socket trials on 127.0.0.1, with unloaded and loaded
+controls. It retains raw bundles, exports foreground observations and writes
+separate foreground and RPC descriptive reports. It makes no queue-policy or
+physical NIC claim. See [the RPC guide](rpc-diagnostics.md).
+
 ## NucBox with one Linux host
 
 Set up Ubuntu and SSH using the [device guide](nucbox-setup.md). This route
@@ -116,6 +126,13 @@ cluster diagnostics, Ridge/Lasso held-out predictions and coefficients, stage
 timing plots, and insights.txt. DBSCAN noise stays in the results. Ridge/Lasso
 require at least six independent blocks; smaller inputs get an explicit
 unavailable result and explanatory figures.
+
+Add --rpc-diagnostics to any measured topology for a separate RPC phase in
+each trial and an automatic rpc-analysis directory. The extra phase uses the
+same topology but remains outside the foreground classifier. It records its
+own TCP background evidence and can nearly double measurement time. Loopback
+reports are descriptive; the policy and model workflow requires a real policy
+schedule or an explicitly labeled simulation.
 
 Ctrl-C or SIGTERM stops owned processes, joins workers and retains partial
 evidence. Local simulation has a 120-second deadline. A fresh destination is

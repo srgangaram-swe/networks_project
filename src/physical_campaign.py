@@ -43,6 +43,8 @@ def trial_command(profile: dict, action: str, request: dict) -> tuple[str, ...]:
 def preflight(profile: dict) -> dict:
     validate_profile(profile)
     expected = source_identity(ROOT)
+    if expected["dirty"]:
+        raise ValueError("commit the controller changes before physical collection")
     identities = {}
     inspections = []
     token = uuid.uuid4().hex[:12]
@@ -59,6 +61,8 @@ def preflight(profile: dict) -> dict:
             ),
         )
         actual = parse_json(run_command(command, timeout=30).stdout)
+        if actual["dirty"]:
+            raise ValueError(f"{role} has uncommitted changes; use a clean tested revision")
         if (actual["commit"], actual["tree_sha256"]) != (
             expected["commit"],
             expected["tree_sha256"],
@@ -75,10 +79,21 @@ def preflight(profile: dict) -> dict:
 
 
 def physical_plan(
-    raw: dict, source: dict, *, transport="udp", shadow_forecast=False, mode="physical"
+    raw: dict,
+    source: dict,
+    *,
+    transport="udp",
+    shadow_forecast=False,
+    rpc_diagnostics=False,
+    mode="physical",
 ) -> dict:
     schedule, _ = resolve_trials(
-        raw, 10, diagnostic_matrix=True, transport=transport, shadow_forecast=shadow_forecast
+        raw,
+        10,
+        diagnostic_matrix=True,
+        transport=transport,
+        shadow_forecast=shadow_forecast,
+        rpc_diagnostics=rpc_diagnostics,
     )
     if raw["measurement_seconds"] > 60:
         raise ValueError("physical diagnostics support at most 280 cells and 60 measured seconds")
@@ -89,6 +104,7 @@ def physical_plan(
         "source": source,
         "transport": transport,
         "shadow_forecast": shadow_forecast,
+        "rpc_diagnostics": rpc_diagnostics,
         "eligible_for_primary": False,
     }
 
@@ -111,6 +127,7 @@ def collect_physical(
             aggregate_bps=round(cell["load_fraction"] * 100_000_000),
             transport=plan.get("transport", "udp"),
             shadow_forecast=plan.get("shadow_forecast", False),
+            rpc_diagnostics=plan.get("rpc_diagnostics", False),
         )
         request = {"profile": profile, "token": token, "configuration": asdict(config)}
         notify("trial_started", trial=index, policy=cell["policy"], block=cell["block"])

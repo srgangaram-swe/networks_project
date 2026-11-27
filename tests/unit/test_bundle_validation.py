@@ -127,6 +127,7 @@ class BundleTests(unittest.TestCase):
         config = read_json(self.root / "configuration.json")
         del config["transport"]
         del config["shadow_forecast"]
+        del config["rpc_diagnostics"]
         self.replace_artifact("configuration.json", config)
         del self.bundle.manifest["artifacts"]["foreground-transport.json"]
         (self.root / "foreground-transport.json").unlink()

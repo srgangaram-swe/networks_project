@@ -45,3 +45,9 @@ configuration. Its portable checks use local loopback traffic. It also builds
 and checks the retained C++ prototype with sanitizer instrumentation.
 The manual Linux campaign job tests this installation path on a disposable
 host. Installing packages is not a vulnerability audit or device certification.
+
+RPC uses the same bounded subprocesses and isolated endpoint validation as
+the foreground workload. It has no authentication or encryption and must not
+be exposed to public networks. The physical helpers allow only the reviewed
+RPC script alongside the existing workloads. Neither RPC nor the loopback
+mode grants permission to modify a management interface.

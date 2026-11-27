@@ -12,6 +12,7 @@ from src.foreground import MAX_EVENTS, Workload
 from src.foreground_io import endpoint
 from src.measurement_contract import MAX_TIMESTAMP_NS, RequestRecord
 from src.queue_policy import check_queue_kinds
+from src.rpc_validation import RPC_ARTIFACTS, validate_rpc_artifacts
 from src.run_bundle import TRANSITIONS
 from src.topology import Topology, inspection_commands
 
@@ -39,7 +40,7 @@ ARTIFACTS = {
     "queues-before.json",
     "queues-after.json",
 }
-OPTIONAL_ARTIFACTS = {
+OPTIONAL_ARTIFACTS = RPC_ARTIFACTS | {
     "foreground-transport.json",
     "tcp-observer.json",
     "shadow-forecast.json",
@@ -270,10 +271,14 @@ def _cross_checks(artifacts: dict, manifest: dict) -> None:
 
     config = artifacts["configuration.json"]
     current_fields = {field.name for field in fields(TrialConfig)}
-    legacy_fields = current_fields - {"transport", "shadow_forecast"}
-    expected_fields = legacy_fields if config.keys() == legacy_fields else current_fields
+    legacy_fields = current_fields - {"transport", "shadow_forecast", "rpc_diagnostics"}
+    valid_fields = (legacy_fields, legacy_fields | {"transport", "shadow_forecast"}, current_fields)
+    expected_fields = next(
+        (known for known in valid_fields if config.keys() == known), current_fields
+    )
     exact_fields(config, expected_fields, "trial configuration")
     plan = TrialConfig(**config)
+    validate_rpc_artifacts(artifacts, plan)
     if config["mode"] != manifest["mode"] or config["policy"] != manifest["policy"]:
         raise ValueError("configuration and manifest select different treatments")
     foreground = artifacts["foreground.json"]

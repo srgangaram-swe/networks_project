@@ -12,4 +12,7 @@ the original proposal.
 Start with the [related-work comparison](../docs/related-work.md) and
 [published bibliography](references.bib). The
 [course requirements checklist](../docs/course-requirements.md) separates our
-planned evidence from the final rubric and deadlines, which are still pending.
+remaining evidence from the supplied final rubric and deadlines.
+
+The current compiled report, TeX sections and eight-source bibliography are in
+[deliverables](../deliverables/README.md). Use that directory for the course submission.

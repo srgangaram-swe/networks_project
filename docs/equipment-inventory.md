@@ -4,7 +4,8 @@ Related issue: #3. On November 7, 2026, Saif reported receipt of a GMKtec NucBox
 two Monoprice Cat6 outdoor patch cables, and two 2.5 Gb/s USB Ethernet adapters.
 The mini PC is believed to be the requested G9, but its model and delivered
 configuration have not been verified. Linux has not been installed or configured
-by the team. Two Linux endpoint computers are currently unavailable.
+by the team. The current plan uses two MacBooks as endpoints. Wired connectivity, adapter
+compatibility and separate management connections still need confirmation.
 
 Use the [NucBox setup guide](nucbox-setup.md) for the single-host namespace
 fallback, with the Mac handling development and control. A disposable hosted
@@ -36,11 +37,11 @@ Version values and capability evidence must be reviewed separately below.
 
 | Candidate | Owner and availability | Required evidence | Current status |
 |---|---|---|---|
-| Client endpoint | No Linux endpoint currently available | Approved isolated interface, NIC driver, MTU/offloads, Linux and tool versions | Requires a team machine or loaner |
+| Client endpoint | MacBook planned; dedicated wired connection pending | Approved isolated interface, NIC compatibility, MTU, macOS and tool versions | Confirm the selected MacBook, adapter and owner permission |
 | Router / namespace host | NucBox received by Saif; model believed to be G9 | Confirm model, installed Linux, traffic-control support, CPU capacity, permission and booking | Unboxed; configuration and physical checks pending |
-| Server endpoint | No Linux endpoint currently available | Approved isolated interface, NIC driver, MTU/offloads, Linux and tool versions | Requires a team machine or loaner |
-| Development / control | Saif's Mac, available | Portable checks; local console or a separately configured connection to the NucBox | Does not provide the missing Linux endpoints |
-| USB Ethernet adapters | Two 2.5 Gb/s adapters received by Saif | Exact delivered models, USB connection, Linux driver and negotiated link speed | Received, not yet tested |
+| Server endpoint | MacBook planned; dedicated wired connection pending | Approved isolated interface, NIC compatibility, MTU, macOS and tool versions | Confirm the selected MacBook, adapter and owner permission |
+| Development / control | Saif's Mac, available | Portable checks; local console or a separately configured connection to the NucBox | Available for development, client traffic and control |
+| USB Ethernet adapters | Two 2.5 Gb/s adapters received by Saif | Exact delivered models, USB connection, macOS compatibility and negotiated link speed | Received, not yet tested |
 | Cat6 cables | Two Monoprice outdoor patch cables received by Saif | Connector condition, length for intended placement and negotiated link speed | Two active links covered; third requested cable is only a spare |
 | Single-host namespace fallback | Disposable GitHub-hosted Ubuntu runner; available for bounded manual checks | Owner-authorized project namespaces, veth, IFB, and all four qdiscs | Executed in the linked Linux acceptance run; no primary-run booking |
 
@@ -92,7 +93,7 @@ The separate nucbox_smoke.py entry point plans four unloaded namespace trials
 on any development machine, and runs them only with explicit authorization on
 Linux as root. It retains failures, validates each bundle, and uses existing
 ownership-aware cleanup. It deliberately does not exercise bulk traffic or the
-known long-warmup defect. See the setup guide for exact commands and limits.
+loaded-workload timing checks. See the setup guide for exact commands and limits.
 
 ## Tests and limits
 

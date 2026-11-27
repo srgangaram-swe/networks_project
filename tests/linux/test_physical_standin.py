@@ -58,6 +58,7 @@ class PhysicalStandinTests(unittest.TestCase):
                         aggregate_bps=110_000_000,
                         transport=transport,
                         shadow_forecast=transport == "tcp",
+                        rpc_diagnostics=True,
                     )
                     request = {"profile": profile, "token": token, "configuration": asdict(config)}
                     run_command(trial_command(profile, "run", request), timeout=60)
@@ -66,6 +67,9 @@ class PhysicalStandinTests(unittest.TestCase):
                     _retrieve(destination, profile, token)
                     _check_treatment(destination, identities["client"], config)
                     self.assertTrue(validate_bundle(destination)["integrity_valid"])
+                    rpc = read_json(destination / "rpc.json")
+                    self.assertEqual(rpc["scheduled_calls"], 1000)
+                    self.assertGreater(rpc["summary"]["counts"]["completed"], 0)
                     foreground = read_json(destination / "foreground.json")
                     self.assertGreater(foreground["counts"]["measurement"]["on_time"], 0)
                     if transport == "tcp":
@@ -81,7 +85,14 @@ class PhysicalStandinTests(unittest.TestCase):
                         self.assertEqual(read_json(journal)["owned"], {})
                         self.assertIsNone(namespace_identity(f"np-{token}-{role}"))
                     self.assertEqual(self.interfaces(profile), before)
-                    rows.append({"policy": policy, "transport": transport, "state": "passed"})
+                    rows.append(
+                        {
+                            "policy": policy,
+                            "transport": transport,
+                            "state": "passed",
+                            "rpc_completed": rpc["summary"]["counts"]["completed"],
+                        }
+                    )
                     print(f"Physical SSH/veth check passed: {transport}, {policy}", flush=True)
             # Exercise the namespace backend with the new TCP observer as well.
             namespace = directory / "namespace-tcp"

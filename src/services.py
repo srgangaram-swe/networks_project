@@ -50,7 +50,13 @@ class Service:
                 raise CommandError("service did not report readiness within five seconds")
             if self.result.done():
                 result = self.result.result()
-                raise CommandError(f"service exited before use with status {result.returncode}")
+                detail = (
+                    (result.stderr or result.stdout).decode("utf-8", errors="replace").strip()[:500]
+                )
+                raise CommandError(
+                    f"service exited before use with status {result.returncode}: {detail}"
+                )
+
         except BaseException as error:
             try:
                 self.close()

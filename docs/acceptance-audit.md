@@ -1,5 +1,10 @@
 # Work-item acceptance audit
 
+Current software supports both MacBook endpoints, separate real loopback
+collection and the optional RPC workload. See [current completion status](project-completion.md)
+and [course requirements](course-requirements.md). Dated test counts below
+refer to the original acceptance audit, not the current suite.
+
 The batch covers ten work items, #2 through #11. Four components meet their
 implementation and verification criteria: topology (#5), foreground workload
 (#7), bulk workload (#8), and bundle validation (#10). Issue closure follows
@@ -75,10 +80,10 @@ eligibility remain separate; every current bundle is ineligible for primary use.
 | Item | Evidence already present | Missing criterion |
 |---|---|---|
 | #2 | Candidate protocol, metric definitions, request contract, worked examples, randomization, estimator choices, and recorded command plans checked before namespace setup | Team protocol review, acceptance of the remaining choices, calibrated tolerances and final tool pins |
-| #3 | Received mini PC, two adapters and two cables; updated inventory, bounded hardware inspection, first-boot instructions and unloaded namespace setup command | Linux setup and physical verification on the received unit, two endpoint computers, NIC compatibility, booking, and reviewed permission/inventory |
-| #4 | Four checked primary references, related-work comparison, workload rationale, deliverable checklist | Official rubric and dates, followed by the required second-reader check |
+| #3 | Received mini PC, two adapters and two cables; updated inventory, bounded hardware inspection, first-boot instructions and unloaded namespace setup command | Linux setup and physical verification on the received unit, two MacBook endpoints with verified wired connections, NIC compatibility, booking, and reviewed permission/inventory |
+| #4 | Four checked primary references, related-work comparison, workload rationale, deliverable checklist | Second-reader review of the supplied rubric, deadlines and sources |
 | #6 | Executable profiles, recorded queue snapshots, positive traffic counters, fresh-topology reset | Effective shaping equivalence, packet/counter cross-checks, and verification of the accepted bounded-priority rule |
-| #9 | Explicit lifecycle, source/configuration provenance, saved randomized schedule, bounded attempt/replacement ledger, and a completed 16-trial Linux diagnostic campaign | Exact window alignment, primary-matrix execution, and final primary-run evidence collection |
+| #9 | Explicit lifecycle, source/configuration provenance, saved randomized schedule, bounded attempt/replacement ledger, and a completed 16-trial Linux diagnostic campaign | Exact window alignment, accepted primary-run collection and its final evidence |
 | #11 | Six preserved local diagnostics, completed cross-policy Linux mechanics pilot, checked export and figure, Linux lifecycle tests, documented no-go | Calibrated full-duration measurements, generator overhead assessment, independent packet/data review, and a team readiness decision |
 
 ## Verification evidence
