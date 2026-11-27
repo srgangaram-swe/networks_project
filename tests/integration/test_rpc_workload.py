@@ -88,6 +88,8 @@ class RpcWorkloadIntegrationTests(unittest.TestCase):
                 rpc = read_json(root / "rpc.json")
                 self.assertEqual(rpc["scheduled_calls"], 1000)
                 self.assertEqual(read_json(root / "rpc-bulk.json")["actual_flows"], flows)
-                self.assertEqual(read_json(root / "rpc-server.json")["status"], "cancelled")
+                server = read_json(root / "rpc-server.json")
+                self.assertEqual(server["status"], "completed")
+                self.assertGreater(server["counts"]["replies_sent"], 0)
         with self.assertRaises(ValueError):
             replace(config, rpc_diagnostics=1)

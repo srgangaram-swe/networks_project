@@ -44,8 +44,6 @@ def loopback_plan(transport="udp", rpc_diagnostics=False, seed=561):
 
 
 def collect_loopback(output, plan, cancel, trace):
-    from analysis.diagnostic_report import analyze_loopback, analyze_rpc
-
     directory = output / "collection"
     directory.mkdir(mode=0o700)
     runs, attempts = [], []
@@ -62,6 +60,8 @@ def collect_loopback(output, plan, cancel, trace):
         atomic_json(directory / "progress.json", {"attempts": attempts})
         runs.append(target)
     with trace.stage("loopback_export_and_analysis"):
+        from analysis.diagnostic_report import analyze_loopback, analyze_rpc
+
         export_diagnostics(runs, output / "export")
         analyze_loopback(runs, output / "analysis")
         if plan["rpc_diagnostics"]:

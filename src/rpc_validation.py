@@ -81,7 +81,10 @@ def validate_rpc_artifacts(artifacts, plan):
         raise ValueError("RPC workload differs from its planned phase")
     server = artifacts["rpc-server.json"]
     if server.get("status") not in {"completed", "cancelled"} or server.get("socket_error_errno"):
-        raise ValueError("RPC server failed")
+        raise ValueError(
+            f"RPC server failed: status={server.get('status')!r}, "
+            f"errno={server.get('socket_error_errno')!r}"
+        )
     from src.bulk import summarize_bulk
     from src.trial import unloaded_summary
 

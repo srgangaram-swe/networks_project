@@ -98,6 +98,9 @@ def collect_rpc(bundle, config, backend, cancel):
             )
             if result:
                 bundle.artifact("rpc-bulk-raw.json", parse_json(result.stdout))
+            # Let the bounded server finish while SSH still forwards its output.
+            # Closing the transport first can discard the final counters.
+            responder.result.result(timeout=seconds + 12)
         finally:
             if bulk is not None and not bulk.done():
                 cancel.set()
