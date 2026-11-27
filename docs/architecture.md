@@ -1,8 +1,8 @@
 # Architecture
 
-The proposal calls for separate client, router, and server roles. The first
-implementation should keep their responsibilities explicit even when all three
-run in Linux namespaces on one machine.
+The system separates client, router and server roles even when all three run
+in Linux namespaces on one machine. Physical endpoints can run Linux or macOS;
+the queue-management router runs Linux.
 
     client endpoint <-> controlled Linux router <-> server endpoint
     foreground RTT       shaping and queues        foreground responder
@@ -13,6 +13,11 @@ requests from client to server and responses and bulk TCP data from server to
 client. The Linux adapter shapes router egress toward the client and places
 receive delay at both endpoints. The command plan is executable but still
 requires Linux calibration before scientific acceptance.
+
+With macOS endpoints, the router applies the full 20 ms base delay on forward
+egress, while the return queue treatment stays in place. Loopback collection
+has no shaping or queue treatment. The local simulation is a separate software
+check with assumed policy effects.
 
 ## Component boundaries
 
@@ -26,6 +31,9 @@ requires Linux calibration before scientific acceptance.
 - Analysis: consume immutable run bundles, validate units and schema, calculate
   per-run summaries and uncertainty, and generate figures.
 - Report and demo: reference frozen evidence and distinguish measurements from fixtures.
+- RPC companion: run Chris's concurrent UDP call workload after the foreground
+  phase, keep its retry and application-duration records separate, and validate
+  its own background transfer before descriptive analysis.
 
 Shared configuration validation is implemented in src/experiment_config.py.
 The provisional [foreground workload](foreground-workload.md) separates wire
@@ -57,3 +65,9 @@ commit, configuration, tool versions, and hashes of approved evidence.
 No analysis function should configure interfaces. No privileged setup command
 should parse arbitrary unvalidated measurement files. Keep these boundaries
 testable without elevated privileges.
+
+The launcher can run on the client Mac or the NucBox. Physical trials still
+execute on the client so request timestamps share one monotonic clock. Remote
+controller profiles use SSH aliases for every role, with source checks before
+traffic. See [the UML source](pipeline.mmd), [MacBook setup](macos-testbed.md)
+and [RPC integration decision](decisions/0004-rpc-companion.md).

@@ -58,7 +58,7 @@ class Collector:
     separates admission control from the evidence needed for late replies.
     """
 
-    def __init__(self, plan: Workload, start_ns: int) -> None:
+    def __init__(self, plan: Workload, start_ns: int, *, observe: Callable | None = None) -> None:
         duration_ns = (plan.warmup_ms + plan.measurement_ms + plan.drain_ms) * 1_000_000
         bounded_integer(start_ns, "start_ns", 0, MAX_TIMESTAMP_NS - duration_ns - TIMEOUT_NS)
         self.plan = plan
@@ -69,6 +69,11 @@ class Collector:
         self.deadlines: list[tuple[int, int]] = []
         self.events: list[dict] = []
         self.event_counts: Counter[str] = Counter()
+        self.observe = observe
+
+    def notify(self, kind: str, now_ns: int, **details) -> None:
+        if self.observe is not None:
+            self.observe({"kind": kind, "observed_ns": now_ns, **details})
 
     @property
     def next_due_ns(self) -> int:
@@ -86,6 +91,8 @@ class Collector:
         while self.deadlines and self.deadlines[0][0] < now_ns:
             _, request_id = heapq.heappop(self.deadlines)
             self.active.discard(request_id)
+            if self.records[request_id].received_ns is None:
+                self.notify("deadline", now_ns, request_id=request_id)
         while len(self.records) < self.plan.total_count and self.next_due_ns <= now_ns:
             request_id = len(self.records)
             scheduled = self.next_due_ns
@@ -109,6 +116,7 @@ class Collector:
             self.records[request_id] = replace(record, sent_ns=sent_ns)
             self.active.add(request_id)
             heapq.heappush(self.deadlines, (sent_ns + TIMEOUT_NS, request_id))
+            self.notify("send", sent_ns, request_id=request_id, scheduled_ns=scheduled)
             # Recheck the clock in the driver before another send. Missed slots
             # never become a queued burst, even after the process is suspended.
             return
@@ -135,6 +143,13 @@ class Collector:
         else:
             self.records[request_id] = replace(record, received_ns=now_ns)
             self.active.discard(request_id)
+            self.notify(
+                "reply",
+                now_ns,
+                request_id=request_id,
+                sent_ns=record.sent_ns,
+                rtt_ns=now_ns - record.sent_ns,
+            )
 
     def finish(self, status: str, now_ns: int) -> dict:
         """Keep every planned slot, including those left after cancellation."""

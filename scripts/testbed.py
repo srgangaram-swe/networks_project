@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.artifacts import parse_json  # noqa: E402
 from src.processes import run_command  # noqa: E402
 from src.queue_policy import policy_commands  # noqa: E402
+from src.testbed_contract import verify_contract  # noqa: E402
 from src.topology import ROLES, Topology, inspection_commands, setup_commands  # noqa: E402
 from src.topology_runtime import OwnedTopology, require_linux  # noqa: E402
 
@@ -30,6 +31,7 @@ def operate(args) -> dict:
         raise PermissionError("provide --state and --authorized-isolated-host")
     require_linux()
     if args.action == "setup":
+        verify_contract()
         topology = Topology(args.token or uuid.uuid4().hex[:12])
         commands = policy_commands(topology, args.policy)
         with OwnedTopology.create(args.state, topology) as lease:

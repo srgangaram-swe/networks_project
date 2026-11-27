@@ -1,0 +1,50 @@
+{
+  "eligible_for_primary": false,
+  "inputs": [
+    {
+      "manifest_sha256": "528286743dc5ecfd8ad81f0df61b170fe6b749726f463b963466693e0471c33f",
+      "rpc_sha256": "3530b4fe8adb18923a308edf30999cde6554a540aced0f3d22717c41beae6739",
+      "trial": 1
+    },
+    {
+      "manifest_sha256": "82754a237b27a8c8b9e3acf6192dfb7f2757a07ad44c9181d7f5a096cdb9e0ac",
+      "rpc_sha256": "d7931ddc9be3089e7289bed7e1b0a9a11cdc59a728adc9b283075b1d308fb9e7",
+      "trial": 2
+    },
+    {
+      "manifest_sha256": "f0435282900c3e925a10901444961f5e58a85f873be4ff77d6906cdd17de4948",
+      "rpc_sha256": "884a96d48decf2941ba0c59907c082498e4dc1a6e44363f4919ca597adde80ea",
+      "trial": 3
+    },
+    {
+      "manifest_sha256": "8401421c3c6aea5ea9db5eb50b5f2f7be3ba6b3f3902424d590b9baa6311df94",
+      "rpc_sha256": "379ee12eb8fc0dcbaba2bd3b2cf70917ddd71e05e19d7555a7731291d70b0fa0",
+      "trial": 4
+    }
+  ],
+  "layout": {
+    "data_panels": 2,
+    "height_px": 525,
+    "legend_overlap_count": 0,
+    "legends": 1,
+    "text_overflow_count": 0,
+    "width_px": 1200
+  },
+  "outputs": {
+    "findings.txt": "e2c781062d89aee73ee1cb8ff1116d46837531a97a981daa840a217361f034e3",
+    "rpc-diagnostics.png": "3cabe6397e79abe0cf723fff54aadf158eb5262232802027e2ffd70e5e6f59d6",
+    "rpc-diagnostics.svg": "5f29cfc301398b73e608bd8145af0a46f556268bc470e2ec03b109b61891fd5e",
+    "rpc-summary.csv": "3319170d8005bf0d9bb31d09496e2ce470035dd39294a57bd0f16c3c42931534"
+  },
+  "schema_version": 1,
+  "totals": {
+    "admitted_calls": 20000,
+    "cancelled": 0,
+    "completed": 20000,
+    "io_error": 0,
+    "retransmissions": 0,
+    "scheduled_calls": 20000,
+    "skipped_capacity": 0,
+    "timeout": 0
+  }
+}

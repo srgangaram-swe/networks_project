@@ -1,0 +1,12 @@
+**
+!Dockerfile
+!requirements-dev.txt
+!requirements-analysis.txt
+!requirements-plots.txt
+!src/
+!src/**
+!scripts/
+!scripts/setup_environment.py
+!scripts/setup_environment.sh
+**/__pycache__/**
+**/*.pyc

@@ -54,20 +54,40 @@ scheduling and cleanup, so they are not real-time guarantees.
 | Command output | O(B) for B output bytes | O(B), with a 1 MiB default combined-output cap and 32 MiB absolute cap; every command has a deadline |
 | Topology and policy planning | O(1) for the fixed three-role topology | Fixed commands and resources; no arbitrary host-interface input |
 | Trial schedule | O(C) for C cells | O(C), at most 10,000 configured cells |
+| Candidate command verification | O(C + B) for C fixed planned command bytes and B recorded bytes | O(C + B), with a 64 KiB contract file limit; runs before namespace mutation |
+| Hardware inspection | O(N log N) for deterministic ordering of N interfaces, with O(N) reads and 13 bounded command probes | At most 32 interfaces, 256 bytes per sysfs attribute, and 16 KiB per command; each command has a three-second deadline |
+| Unloaded hardware setup check | Four sequential bounded namespace trials | Four summary entries; existing workload and subprocess limits apply; no automatic retries |
+| Bulk receiver parsing | O(F + I) for F streams and I receiver intervals | At most eight streams and 400 intervals; timestamps, declared durations, and end totals must agree |
 | Bundle validation | O(N + E + B) for records, events, and artifact bytes | O(N + E + B); each JSON artifact is at most 32 MiB, with smaller manifest and configuration limits |
 | Per-run diagnostic statistics | O(N log N) | O(N); each metric is sorted once within a run |
 | Diagnostic export | Sum of per-run validation and summary costs | At most 20 runs and 200,000 exported request rows |
+| Diagnostic campaign | O(C + A N) validation and O(C A) scheduling/ledger writes for C cells, A attempts, and N records per attempt | Default 40-cell bound; explicit matrix at most 280 cells and three attempts per cell; 256 KiB plan and 32 MiB progress limits, including escaped diagnostic notes |
+| Paired analysis | O(N log N + B R C) for requests N, bootstrap draws B, run rows R, and conditions C | One export's requests at a time; 128 export batches, 400 run rows, 10,000 resamples; missing blocks and invalid ratios never silently removed |
+| Exploratory ML | Bounded K-means iterations plus PCA, t-SNE, and O(R^2) silhouette distances | Six features, at most 400 runs, two clusters, ten starts, 100 K-means iterations, 1,000 t-SNE iterations, one numerical thread |
+| RPC diagnostics | O(N log N) for bounded call accounting and quantiles | At most 100,000 scheduled library calls, 256 workers, 4,096 server activities and 200,000 received packets; the runner uses 32 workers, 1,024 activities and at most 30,000 calls per phase |
+| Local simulation | O(N + R log R) for N generated request slots and bounded per-run sorting | At most eight spawned workers, 160 trials, 120-second collection deadline; default 48 trials and 240,000 slots |
+| Passive TCP observation | O(P) for observed packets P | Two million packets, 64 bidirectional flows, 191 aggregate windows; only 160 header bytes read per packet |
+| Shadow forecasting | O(W^2 D^2 + N log N) with W bounded windows, D fixed features and bounded cohort RTT sorting | 191 windows, nine features, 1,024 pending requests, 500 RTT values per cohort, 300,000 events; separate process and nonblocking 512-byte FIFO records |
+| Physical collection | Serial trials with bounded per-command deadlines and O(A) artifact retrieval | At most 280 trial cells, 256 retained workers per role lease, five-second lock deadline, exact interface and namespace ownership checks |
+| Extended offline models | O(R^2) distances for Ward/DBSCAN; bounded grouped Ridge/Lasso fits | At most 400 rows, fixed alpha grid, at most five outer and three inner folds, one numerical thread |
 
 Do not substitute offered demand for achieved throughput or an asymptotic bound
 for a measurement. Profile before optimizing, state the input size and workload,
 and preserve correctness and failure behavior in the comparison.
 
+macOS endpoint checks scan at most 16 KiB per command in O(B) time and auxiliary
+space for B output bytes. Each probe has a five-second deadline. Trial and
+worker locks wait at most five seconds; workloads have a 180-second deadline,
+one MiB output cap, 64 arguments and 8,192 argument bytes. Parallel simulation
+does not parallelize traffic on the shared physical bottleneck.
+
 ## Verification
 
 The baseline check runs formatting, lint, unit tests, CLI integration tests,
 branch coverage, and repository hygiene. Branch coverage must remain at least
-90% for the Python core. A separate check enforces that floor on branch coverage
-itself, so a high statement count cannot hide untested decisions. Coverage is a
+95% for both Python core and analysis. A separate check enforces that floor
+independently on statements and branches, so a high statement count cannot hide
+untested decisions. Coverage is a
 floor, not evidence that every case is correct.
 
 Add corruption, timeout, malformed-input, cleanup, and partial-output cases where

@@ -6,12 +6,13 @@ from dataclasses import fields
 from datetime import datetime
 from pathlib import Path
 
-from src.artifacts import digest, read_json
+from src.artifacts import digest, json_bytes, read_json
 from src.experiment_config import POLICIES, bounded_integer, bounded_number
 from src.foreground import MAX_EVENTS, Workload
 from src.foreground_io import endpoint
 from src.measurement_contract import MAX_TIMESTAMP_NS, RequestRecord
 from src.queue_policy import check_queue_kinds
+from src.rpc_validation import RPC_ARTIFACTS, validate_rpc_artifacts
 from src.run_bundle import TRANSITIONS
 from src.topology import Topology, inspection_commands
 
@@ -38,6 +39,12 @@ ARTIFACTS = {
     "cpu.json",
     "queues-before.json",
     "queues-after.json",
+}
+OPTIONAL_ARTIFACTS = RPC_ARTIFACTS | {
+    "foreground-transport.json",
+    "tcp-observer.json",
+    "shadow-forecast.json",
+    "bulk-raw.json",
 }
 CAPTURE_FIELDS = {
     "schema_version",
@@ -210,7 +217,12 @@ def _manifest_identity(manifest: dict) -> None:
         raise ValueError("source dirty flag must be boolean")
     if manifest["units"] != {"timestamps": "ns", "goodput": "Mb/s", "cpu": "percent"}:
         raise ValueError("unsupported measurement units")
-    if not isinstance(manifest["mode"], str) or manifest["mode"] not in {"loopback", "namespace"}:
+    if not isinstance(manifest["mode"], str) or manifest["mode"] not in {
+        "loopback",
+        "namespace",
+        "physical",
+        "macos",
+    }:
         raise ValueError("unsupported topology mode")
     expected = {"none"} if manifest["mode"] == "loopback" else POLICIES
     if not isinstance(manifest["policy"], str) or manifest["policy"] not in expected:
@@ -237,7 +249,13 @@ def _history(manifest: dict) -> None:
 
 
 def _load_artifacts(directory: Path, manifest: dict) -> dict:
-    artifacts = exact_fields(manifest["artifacts"], ARTIFACTS, "artifact hashes")
+    artifacts = manifest["artifacts"]
+    if (
+        not isinstance(artifacts, dict)
+        or not ARTIFACTS <= artifacts.keys()
+        or not artifacts.keys() <= ARTIFACTS | OPTIONAL_ARTIFACTS
+    ):
+        raise ValueError("artifact hashes must contain the required and documented optional fields")
     loaded = {}
     for name, checksum in artifacts.items():
         if not isinstance(checksum, str) or not re.fullmatch(r"[a-f0-9]{64}", checksum):
@@ -249,11 +267,18 @@ def _load_artifacts(directory: Path, manifest: dict) -> dict:
 
 
 def _cross_checks(artifacts: dict, manifest: dict) -> None:
-    from src.trial import TrialConfig
+    from src.trial import TrialConfig, unloaded_summary
 
     config = artifacts["configuration.json"]
-    exact_fields(config, {field.name for field in fields(TrialConfig)}, "trial configuration")
+    current_fields = {field.name for field in fields(TrialConfig)}
+    legacy_fields = current_fields - {"transport", "shadow_forecast", "rpc_diagnostics"}
+    valid_fields = (legacy_fields, legacy_fields | {"transport", "shadow_forecast"}, current_fields)
+    expected_fields = next(
+        (known for known in valid_fields if config.keys() == known), current_fields
+    )
+    exact_fields(config, expected_fields, "trial configuration")
     plan = TrialConfig(**config)
+    validate_rpc_artifacts(artifacts, plan)
     if config["mode"] != manifest["mode"] or config["policy"] != manifest["policy"]:
         raise ValueError("configuration and manifest select different treatments")
     foreground = artifacts["foreground.json"]
@@ -267,8 +292,16 @@ def _cross_checks(artifacts: dict, manifest: dict) -> None:
     phases["end_ns"] = foreground["planned_end_ns"]
     if manifest["phases"] != phases:
         raise ValueError("manifest phase boundaries differ from the capture")
+    if not plan.flows:
+        if json_bytes(artifacts["bulk.json"]) != json_bytes(unloaded_summary(plan)):
+            raise ValueError("unloaded trial must explicitly record no bulk workload")
+        return
+    _check_bulk(artifacts["bulk.json"], plan)
+
+
+def _check_bulk(raw: dict, plan) -> None:
     bulk = exact_fields(
-        artifacts["bulk.json"],
+        raw,
         {
             "requested",
             "per_flow_bps",
@@ -363,7 +396,12 @@ def _supporting_artifacts(artifacts: dict, manifest: dict) -> None:
         not isinstance(value, str) or not 1 <= len(value) <= 256 for value in environment.values()
     ):
         raise ValueError("environment values must be bounded strings")
-    kind = "loopback_diagnostic" if manifest["mode"] == "loopback" else "virtual_testbed"
+    kind = {
+        "loopback": "loopback_diagnostic",
+        "namespace": "virtual_testbed",
+        "physical": "physical_testbed",
+        "macos": "macos_testbed",
+    }[manifest["mode"]]
     if environment["measurement_kind"] not in {kind, "synthetic_fixture"}:
         raise ValueError("environment does not describe the selected testbed")
     _queues(artifacts, manifest["mode"], manifest["policy"])
@@ -380,7 +418,12 @@ def _queues(artifacts: dict, mode: str, policy: str) -> None:
                 raw, {"kind", "attachment_checked", "calibrated", "snapshots"}, "queue evidence"
             )
             if (
-                raw["kind"] != "virtual_testbed"
+                raw["kind"]
+                != (
+                    {"physical": "physical_testbed", "macos": "macos_testbed"}.get(
+                        mode, "virtual_testbed"
+                    )
+                )
                 or raw["attachment_checked"] is not True
                 or raw["calibrated"] is not False
             ):
@@ -401,6 +444,9 @@ def validate_contents(directory: Path, manifest: dict) -> dict:
     records = validate_capture(artifacts["foreground.json"])
     _cross_checks(artifacts, manifest)
     _supporting_artifacts(artifacts, manifest)
+    from src.transport_validation import validate_transport_artifacts
+
+    validate_transport_artifacts(artifacts)
     validity = exact_fields(manifest["validity"], {"eligible_for_primary", "reasons"}, "validity")
     if validity["eligible_for_primary"] is not False:
         raise ValueError("primary collection requires a separately accepted pilot decision")

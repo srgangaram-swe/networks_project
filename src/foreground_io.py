@@ -84,6 +84,7 @@ def run_client(
     allow_isolated: bool = False,
     stop: Event | None = None,
     start_ns: int | None = None,
+    observe: Callable | None = None,
 ) -> dict:
     bind = endpoint(*bind, allow_isolated)
     peer = endpoint(*peer, allow_isolated)
@@ -100,7 +101,7 @@ def run_client(
         sock.setblocking(False)
         poll.register(sock, selectors.EVENT_READ)
         start = time.monotonic_ns() + 20_000_000 if start_ns is None else start_ns
-        collector = Collector(plan, start)
+        collector = Collector(plan, start, observe=observe)
         cpu_start = time.process_time_ns()
 
         def send(payload: bytes) -> int:

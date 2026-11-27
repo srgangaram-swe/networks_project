@@ -108,6 +108,12 @@ def setup_commands(topology: Topology) -> list[tuple[str, ...]]:
             router,
         ),
     ]
+    return commands + configuration_commands(topology)
+
+
+def configuration_commands(topology: Topology) -> list[tuple[str, ...]]:
+    """Configure already attached interfaces inside the three owned namespaces."""
+    commands = []
     for role, devices in (
         ("client", ("eth0",)),
         ("router", ("to-client", "to-server")),

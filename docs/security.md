@@ -28,3 +28,26 @@ disposable GitHub-hosted Ubuntu runner. Dispatch it only for a trusted source
 revision. It has read-only repository access and no deployment credentials.
 Its privileged commands create project-owned namespaces and leave host NICs,
 routes, and firewall rules alone. Pull-request events cannot enable this job.
+
+The separate nucbox_setup manual input runs the four unloaded namespace setup
+checks on another disposable hosted Linux job. It has no hardware credentials,
+does not deploy to the NucBox, and does not run the randomized loaded pilot.
+Its source/configuration checks and ownership rules match the local setup path.
+The hardware inspection command only reads local tool and sysfs evidence.
+Default-route discovery is informational; no reported interface becomes
+authorized for mutation, including when route discovery fails.
+
+The NucBox installer is a separate, explicit --install action for Ubuntu 24.04.
+It uses sudo only for distribution packages, then prepares the local Python
+environment and runs checks as the calling account. It requires a non-root
+caller and never launches a privileged experiment or modifies physical network
+configuration. Its portable checks use local loopback traffic. It also builds
+and checks the retained C++ prototype with sanitizer instrumentation.
+The manual Linux campaign job tests this installation path on a disposable
+host. Installing packages is not a vulnerability audit or device certification.
+
+RPC uses the same bounded subprocesses and isolated endpoint validation as
+the foreground workload. It has no authentication or encryption and must not
+be exposed to public networks. The physical helpers allow only the reviewed
+RPC script alongside the existing workloads. Neither RPC nor the loopback
+mode grants permission to modify a management interface.

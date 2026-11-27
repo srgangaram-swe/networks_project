@@ -1,0 +1,39 @@
+{
+  "eligible_for_primary": false,
+  "inputs": [
+    {
+      "manifest_sha256": "528286743dc5ecfd8ad81f0df61b170fe6b749726f463b963466693e0471c33f"
+    },
+    {
+      "manifest_sha256": "82754a237b27a8c8b9e3acf6192dfb7f2757a07ad44c9181d7f5a096cdb9e0ac"
+    },
+    {
+      "manifest_sha256": "f0435282900c3e925a10901444961f5e58a85f873be4ff77d6906cdd17de4948"
+    },
+    {
+      "manifest_sha256": "8401421c3c6aea5ea9db5eb50b5f2f7be3ba6b3f3902424d590b9baa6311df94"
+    }
+  ],
+  "layout": {
+    "data_panels": 2,
+    "height_px": 525,
+    "legend_overlap_count": 0,
+    "legends": 1,
+    "text_overflow_count": 0,
+    "width_px": 1200
+  },
+  "outputs": {
+    "findings.txt": "f57c27278ca258772deeca2af6d94ebb61fbe8cd3e8cd4d601f75155561e94f3",
+    "loopback-diagnostics.png": "8d86c3f39b78524e1ab5134e180622ebdbbd6ee175bc3eac814f3c680b945f10",
+    "loopback-diagnostics.svg": "611d68e626df49b73581ca556f92427c7a346e8b896f86a13eb01b2b413a49ff",
+    "runs.csv": "ee99406af8a00fd6a0f76f2257b9ebaca7aa92029a9f5dacf658e406c13023bc"
+  },
+  "schema_version": 1,
+  "totals": {
+    "not_sent": 53,
+    "on_time": 19947,
+    "scheduled": 20000,
+    "sent": 19947,
+    "timeout_count": 0
+  }
+}

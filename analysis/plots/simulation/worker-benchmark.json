@@ -1,0 +1,56 @@
+{
+  "environment": "Darwin arm64, Python 3.14.3",
+  "median_wall_seconds": {
+    "1": 0.82218533300329,
+    "4": 0.27303295803721994
+  },
+  "observed_median_speedup": 3.011304345503994,
+  "order": "alternating_one_and_four_workers",
+  "repetitions": 3,
+  "request_tables_identical": true,
+  "scheduled_slots": 240000,
+  "source": {
+    "commit": "eb908dcabc43fa90cdeb36b513c7abb2dbcd6c37",
+    "dirty": false,
+    "tree_sha256": "81202f8c5af65f002c641b0f1432720867f35f8c8260ead6bed5a84c04988ac6"
+  },
+  "timings": [
+    {
+      "repeat": 0,
+      "wall_seconds": 0.8278507080394775,
+      "worker_cpu_seconds": 0.673159,
+      "workers": 1
+    },
+    {
+      "repeat": 0,
+      "wall_seconds": 0.27303295803721994,
+      "worker_cpu_seconds": 0.74348,
+      "workers": 4
+    },
+    {
+      "repeat": 1,
+      "wall_seconds": 0.2776024999911897,
+      "worker_cpu_seconds": 0.7397800000000001,
+      "workers": 4
+    },
+    {
+      "repeat": 1,
+      "wall_seconds": 0.82218533300329,
+      "worker_cpu_seconds": 0.6963200000000002,
+      "workers": 1
+    },
+    {
+      "repeat": 2,
+      "wall_seconds": 0.8156652090256102,
+      "worker_cpu_seconds": 0.6873529999999999,
+      "workers": 1
+    },
+    {
+      "repeat": 2,
+      "wall_seconds": 0.2724784999736585,
+      "worker_cpu_seconds": 0.733958,
+      "workers": 4
+    }
+  ],
+  "trials": 48
+}

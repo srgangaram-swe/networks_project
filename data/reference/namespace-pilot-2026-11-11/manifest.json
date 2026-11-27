@@ -1,0 +1,28 @@
+{
+  "collection_source": "e3ddafff30add309df4d75fc5fde8f4e99bbe34a",
+  "eligible_for_primary": false,
+  "files": {
+    "analysis/diagnostic_summary.txt": "1339141b05f0d4a6c4b784e9445e3a017fdb9943d225b0c920c1bf10b0000948",
+    "analysis/matched_baselines.csv": "6a5985437ebbfe74f120ce0be859defc6fbb277d3079a4079be21530d57abe04",
+    "analysis/policy_comparisons.csv": "8310a9ff16ff7b091be683d37e038cb94ef32b93ebe76157839d6cd25140b298",
+    "analysis/policy_comparisons.png": "ef5463cb8fef0e136b07fb0e0f2886e38b1535e4663693559d16645a96511696",
+    "analysis/report.json": "61ffc4c9ec702ea4c294917b22a4de3a39d2bfea533ea20b1d9a82a2cb9599d3",
+    "analysis/run_clusters.csv": "b4303008fa7e0450906f14dca17e905903acece666189f0af79c1c7af4308047",
+    "analysis/run_clusters.png": "3385ad031f5390026a98dd27b753b501ae705831aae48c0d00e1e4f464830bc7",
+    "analysis/run_clusters_tsne.png": "6b0b09dd1157f357a05fec8252244bda0db2f22d9c0d5643474ad7e901524eff",
+    "analysis/run_statistics.csv": "282ea4b0eb912d7564f516ccdea028bf813a256f7aeab82246d75602e73d9cbe",
+    "analysis/runs.csv": "32750d9d0dae2e00cfff531618e2345925a44678674b9d648ea47def5aa03f29",
+    "analysis/writeup_table.tex": "5fb368cc86a6b62bddedba59b44355fc8d3a97d3c2da9ae28144951ee522c0ed",
+    "export/attempts.json": "8cc512fad72ad01bf42d673850924ab5e3a8e2ec1c39abe2a3861afe24741ad2",
+    "export/provenance.json": "9700231a1caa09be3188780050c762d9153d65c2f0aa7532618246dda37d6555",
+    "export/requests.csv.gz": "245389c5f2dc5a615b97576c36696395fd88e2fe4a3a2da0bdec99079b28b2b0",
+    "export/summary.csv": "9a06e9fead7f75bd66550cf5c926d9f1067cef929cc9d3f5257703f9f6f43475",
+    "export/versions.json": "5cb7295720d308d2a57d4c07a7e1e3d2de3504aa68dff678aa6e2cbc3e0840b6"
+  },
+  "kind": "published_virtual_testbed_diagnostic",
+  "scheduled": 80000,
+  "schema_version": 1,
+  "timeout_late": 0,
+  "unsent": 3192,
+  "workflow_url": "https://github.com/srgangaram-swe/networks_project/actions/runs/43111991762"
+}
