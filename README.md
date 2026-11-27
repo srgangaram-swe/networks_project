@@ -29,6 +29,12 @@ The [RPC and loopback guide](docs/rpc-diagnostics.md) explains the commands and
 measurement limits. The NucBox can also launch the two-MacBook experiment once
 the dedicated links and SSH aliases in the MacBook guide are configured.
 
+The [November 26 Mac loopback reference](data/reference/mac-loopback-2026-11-26/README.md)
+retains 20,000 foreground slots and 20,000 separate RPC calls. The foreground
+generator omitted 53 slots; every sent request returned on time. All RPC calls
+completed without retries. These local checks do not establish physical
+queue-policy performance.
+
 The [MacBook setup guide](docs/macos-testbed.md) covers wired links, SSH,
 read-only preflight and the exact run command. The
 [course deliverables](deliverables/README.md) contain the preliminary report,
@@ -340,22 +346,24 @@ sequenceDiagram
     User->>Pipeline: Select topology, UDP or TCP, output, forecasts and optional RPC
     alt Local software check
         Pipeline->>Pipeline: Collect 48 seeded toy trials in bounded worker pool
-    else Real loopback check
-        Pipeline->>Campaign: Four real socket trials without shaping
-    else Namespace, Linux physical or macOS physical testbed
-        Pipeline->>Pipeline: Check source, tools and isolated resource ownership
-        opt macOS endpoints
-            Pipeline->>Macs: Check dedicated Ethernet, peer route and separate management
-            Macs-->>Pipeline: Read-only evidence and native tool versions
+    else Measured traffic
+        alt Real loopback check
+            Pipeline->>Pipeline: Plan four real socket trials without shaping
+        else Namespace, Linux physical or macOS physical testbed
+            Pipeline->>Pipeline: Check source, tools and isolated resource ownership
+            opt macOS endpoints
+                Pipeline->>Macs: Check dedicated Ethernet, peer route and separate management
+                Macs-->>Pipeline: Read-only evidence and native tool versions
+            end
         end
     Pipeline->>Campaign: Save source, configuration, seed and schedule
     loop Each unfinished scheduled cell
-        Campaign->>Trial: Run serially in owned namespaces or dedicated NIC roles
+        Campaign->>Trial: Run serially on loopback, namespaces or dedicated NIC roles
         opt macOS endpoints
             Trial->>Macs: Acquire endpoint leases and start bounded workloads
             Trial->>Router: Apply queue policy and forward-path delay in owned namespace
         end
-        opt TCP telemetry or shadow forecasts
+        opt Supported TCP telemetry or shadow forecasts
             Trial->>Monitor: Start separate observers with bounded nonblocking events
             Monitor->>Monitor: Count ACK candidates and forecast future cohorts
         end
@@ -383,7 +391,7 @@ sequenceDiagram
         Pipeline-->>User: Completed diagnostic results
     else Failure or cancellation
         Pipeline->>Files: Keep failed stage and partial evidence
-        Pipeline-->>User: Inspect and resume with an explicit reason
+        Pipeline-->>User: Inspect retained evidence before another attempt
     end
     Note over Pipeline,Files: No overwritten runs or automatic retries. Primary eligibility remains false.
 ~~~

@@ -24,7 +24,9 @@ Each RPC phase follows the ordinary foreground measurement on the same
 retained topology. Its TCP background transfer starts afresh, with the same
 flow count and requested rate and no warmup. RPC lasts as long as the trial's
 measurement, capped at 60 seconds. Enabling it adds that duration and setup
-time to every trial, including unloaded baselines. It can roughly double the
+time to every trial, including unloaded baselines. The server has an additional
+eight-second lifetime allowance and finishes before its SSH connection closes,
+so the final counters reach the bundle. It can roughly double the
 measurement time of the full matrix.
 
 The default workload schedules 500 calls per second with 32 worker threads.
@@ -86,3 +88,12 @@ at 256 in the library and set to 32 in the runner. The library caps scheduled
 calls at 100,000; a runner phase schedules at most 30,000. A server processes
 at most 200,000 packets and retains at most 1,024 activity entries in the runner.
 Full output, subprocess and artifact limits still apply.
+
+## November 26 Mac check
+
+The [reviewed loopback reference](../data/reference/mac-loopback-2026-11-26/README.md)
+contains four clean-source trials. Of 20,000 foreground slots, 19,947 returned
+on time and 53 were not sent; no timeout or late outcome occurred. All 20,000
+separate RPC calls completed without retries or worker-capacity omissions.
+RPC start lag still reached 12.855 ms. These are local execution checks, and
+they do not settle pacing accuracy or physical queue performance.

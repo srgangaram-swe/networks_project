@@ -58,11 +58,16 @@ class DiagnosticReportTests(unittest.TestCase):
         with (
             patch.object(report, "read_json", side_effect=read),
             patch.object(report, "validate_bundle"),
-            patch.object(report, "digest", return_value="a" * 64),
+            patch.object(
+                report,
+                "digest",
+                side_effect=lambda path: "a" * 64 if path.parent == self.root else digest(path),
+            ),
         ):
             totals = report.analyze_rpc([self.root], self.root / "rpc")
         self.assertEqual(totals["completed"], 1)
         self.assertEqual(totals["skipped_capacity"], 1)
+        self.check_files(self.root / "rpc")
         self.assertIn(
             "percentiles exclude failed calls", (self.root / "rpc/findings.txt").read_text()
         )

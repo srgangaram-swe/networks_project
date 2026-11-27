@@ -19,3 +19,9 @@ FQ-CoDel and both CAKE configurations had much lower observed added p99 than
 FIFO. Both CAKE variants also retained less than 90\% of FIFO goodput. With only
 two paired blocks, generator omissions and unresolved timing checks, we treat
 this as a diagnostic result that guides the next experiment.
+
+On November 26 we also ran the workload on this Mac through loopback and
+integrated Chris's RPC implementation into the trial runner. The foreground
+phase retained 20,000 scheduled slots, including 53 that were not sent. All
+20,000 calls in the separate RPC phases completed. This checks the local
+collection path while leaving the physical queue-policy question open.

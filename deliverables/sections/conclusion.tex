@@ -6,6 +6,12 @@ namespace pilot suggests a substantial latency difference under contention,
 but it also shows why our conclusion needs both latency and goodput: both
 CAKE variants missed the proposed throughput-retention target.
 
+The new Mac loopback run completed collection and analysis with real sockets.
+It also exercised Chris's RPC workload, which completed 20,000 calls without
+retries. The foreground path still omitted 53 scheduled slots. We therefore
+need to check generator behavior on the physical setup even if every sent
+request returns successfully.
+
 Our strongest current lesson concerns measurement. A low on-time percentile
 can coexist with unsent requests, and a favorable latency result can coexist
 with an unfavorable goodput result. We need those quantities together before

@@ -1,7 +1,8 @@
 # Course deliverables
 
 The report and presentation are working drafts for CS 585. They contain a
-clearly labeled toy simulation and the earlier Linux namespace pilot. The
+clearly labeled toy simulation, the earlier Linux namespace pilot and the
+November 26 real Mac loopback and RPC measurements. The
 NucBox and MacBook experiment has not yet been collected. A successful pipeline
 run does not by itself settle calibration, workload timing or the study's targets.
 
@@ -10,7 +11,9 @@ run does not by itself settle calibration, workload timing or the study's target
 - project-presentation-reviewed.pptx has 12 main slides and five hidden analysis slides.
   Charts, tables and the topology diagram are editable. The appendix includes
   K-means, t-SNE, Ward, DBSCAN, Ridge and Lasso views.
-  Chart workbooks store values to six decimal places; the reference CSV files
+  Slide 9 shows measured loopback foreground RTT and separate RPC call duration.
+  Eight native charts retain embedded editable workbooks. The original seven
+  workbooks are preserved. Chart workbooks store values to six decimal places; the reference CSV files
   retain the original precision.
 - The presentation's build files are local and are not tracked.
 
@@ -20,11 +23,14 @@ Follow [the MacBook and NucBox guide](../docs/macos-testbed.md). Confirm wired
 adapters, the separate management connection, interface names and SSH access.
 Use the same tested commit on all three computers. The example profile contains
 placeholders; keep the completed profile under .local and out of Git.
+For a NucBox controller, start with configs/macos-remote-profile.example.json.
+Every role must have an SSH alias that resolves from both the controller and
+the client Mac. The trial clock remains on the client.
 
     sh scripts/run_pipeline.sh --topology macos --transport udp \
       --profile .local/macos-profile.json --preflight
     sh scripts/run_pipeline.sh --topology macos --transport udp \
-      --profile .local/macos-profile.json --authorized-isolated-host \
+      --profile .local/macos-profile.json --authorized-isolated-host --rpc-diagnostics \
       --output runs/macos-udp-pilot-01
 
 The second command collects, validates, exports, analyzes and plots the pilot.
@@ -34,6 +40,16 @@ are too few independent blocks. The larger diagnostic matrix has ten blocks
 and can support grouped regression if its evidence is valid. Add
 --diagnostic-matrix only after reviewing the pilot, its runtime and its limits.
 Keep UDP and TCP experiments separate.
+
+For a real local socket check before connecting the hardware:
+
+    sh scripts/run_pipeline.sh --topology loopback --transport udp \
+      --rpc-diagnostics --output runs/loopback-rpc-01
+
+This collects four trials and automatically writes separate foreground and
+RPC tables and figures. Keep the complete output directory, including raw
+bundles, manifests and failed attempts. The November 26 reference is in
+[the loopback evidence directory](../data/reference/mac-loopback-2026-11-26/README.md).
 
 For the reproducible toy example, run:
 
@@ -54,7 +70,8 @@ Inspect every plot at full size before choosing figures for the report.
 |---|---|---|
 | Policy effects and block counts | analysis/policy_comparisons.csv | Report findings; presentation slides 5 and 6 |
 | Scheduled, unsent, timed-out and late requests | analysis/diagnostic_summary.txt and run summaries | Report findings; slide 7 |
-| Cluster labels and coordinates | analysis/run_clusters.csv and cluster_diagnostics.csv | Slide 9 and hidden slides 13 through 16 |
+| Cluster labels and coordinates | analysis/run_clusters.csv and cluster_diagnostics.csv | Hidden slides 13 through 16 |
+| Loopback and RPC outcomes | analysis/runs.csv and rpc-analysis/rpc-summary.csv | Report loopback subsection; slide 9 |
 | Held-out predictions and errors | analysis/regression_predictions.csv and report.json | Hidden slide 17; report findings |
 | Environment, versions and source | plan.json, collection bundles and report.json | Report technical section and figure captions |
 | Costs and equipment | Actual receipts and recorded setup details | Report cost section |
